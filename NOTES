@@ -1,0 +1,10 @@
+
+* fits_iterate_data() unimplemented
+* fits_open_memfile() unimplemented
+
+*   fits_calc_col() and ffccol() documented, unavailable
+*   fits_url_type() and ffurlt() documented, unavailable
+
+* fits_write_col_null() undocumented, but in testprog.c
+* fits_read_col_bit() undocumented
+

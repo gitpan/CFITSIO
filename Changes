@@ -1,0 +1,8 @@
+Revision history for Perl extension CFITSIO.
+
+0.10  Wed Nov 17 1998
+    - initial release
+
+0.01  Wed Nov  4 23:50:39 1998
+	- original version; created by h2xs 1.18
+
