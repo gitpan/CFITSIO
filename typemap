@@ -18,6 +18,7 @@ char *           T_STRING
 byte             T_BYTE
 logical          T_LOGICAL
 float            T_FLOAT
+OFF_T            T_OFF_T
 
 INPUT
 T_STRINGP
@@ -48,6 +49,8 @@ T_DOUBLEP
 	$var = ($type)packND($arg,TDOUBLE)
 T_BYTE
 	$var = ($type)SvIV($arg)
+T_OFF_T
+	$var = ($type)SvUV($arg)
 T_LOGICAL
 	$var = ($type)SvIV($arg)
 T_FLOAT
@@ -63,6 +66,8 @@ T_STRING
 OUTPUT
 T_BYTE
 	sv_setiv($arg, (IV) $var);
+T_OFF_T
+	sv_setuv($arg, (UV) $var);
 T_LOGICAL
 	sv_setiv($arg, (IV) $var);
 T_FLOAT

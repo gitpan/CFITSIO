@@ -1,5 +1,5 @@
 package CFITSIO;
-$VERSION = '0.94';
+$VERSION = '0.95';
 
 use strict;
 use Carp;
@@ -11,11 +11,18 @@ require AutoLoader;
 
 @ISA = qw(Exporter DynaLoader);
 
+my %__names = (
+	       'ffgtam' => 'fits_add_group_member',
+	       'ffasfm' => 'fits_ascii_tform',
+	       'ffbnfm' => 'fits_binary_tform',
+	       'ffcrow' => 'fits_calc_rows',
+	       );
+
 my @__shortnames = qw(
-	ffgtam
-	ffasfm
-	ffbnfm
-	ffcrow
+		      ffgtam
+		      ffasfm
+		      ffbnfm
+		      ffcrow
         ffgcdw
 	ffgtch
 	ffcmsg
@@ -62,7 +69,9 @@ my @__shortnames = qw(
 	ffghsp
 	ffghdn
 	ffghdt
+	ffghof
 	ffghad
+	ffgknm
 	ffdtyp
 	ffgncl
 	ffgmng
@@ -234,6 +243,7 @@ my @__shortnames = qw(
 	ffgknd
 	ffgkey
 	ffgrec
+        ffgsv
 	ffgsvb
 	ffgsvi
 	ffgsvui
@@ -426,13 +436,17 @@ my @__shortnames = qw(
         ffukls
         ffgipr
         ffgkcl
+        ffgpxv
+        ffgpxf
+	ffppx
+	ffppxn
 );  ### @__shortnames
 
 my @__longnames = qw(
-	fits_add_group_member
-	fits_ascii_tform
-	fits_binary_tform
-	fits_calc_rows
+		     fits_add_group_member
+		     fits_ascii_tform
+		     fits_binary_tform
+		     fits_calc_rows
 	fits_change_group
 	fits_clear_errmsg
 	fits_close_file
@@ -479,10 +493,12 @@ my @__longnames = qw(
 	fits_get_hdrspace
 	fits_get_hdu_num
 	fits_get_hdu_type
+	fits_get_hduoff
 	fits_get_hduaddr
 	fits_get_img_type
 	fits_get_img_dim
 	fits_get_img_size
+	fits_get_keyname
 	fits_get_keytype
 	fits_get_num_cols
 	fits_get_num_groups
@@ -651,6 +667,7 @@ my @__longnames = qw(
 	fits_read_keys_dbl
 	fits_read_keyword
 	fits_read_record
+	fits_read_subset
 	fits_read_subset_byt
 	fits_read_subset_sht
 	fits_read_subset_usht
@@ -845,6 +862,10 @@ my @__longnames = qw(
         fits_get_img_par
         fits_get_keyclass
 	sizeof_datatype
+        fits_read_pix
+        fits_read_pixnull
+        fits_write_pix
+        fits_write_pixnull
 );  ### @__longnames
 
 my @__constants = qw(
@@ -1353,7 +1374,7 @@ is unnecessary.
 Currently the routines
 for which this is the case are C<fits_read_atblhdr()>, C<fits_read_btblhdr()>,
 C<fits_read_imghdr()>, C<fits_decode_tdim()>, C<fits_read_tdim()>
-C<fits_test_expr()> and C<fits_get_img_parm()>.
+C<fits_test_expr()>, C<fits_get_img_parm()> and C<fits_get_img_size()>.
 
 =item Output arrays remain as undisturbed as possible
 
@@ -1388,7 +1409,8 @@ simplify some standard tasks:
 
 =item fits_read_header(filename)
 
-This command reads in a primary fits header from the specified filename
+This command reads in a primary fits header (unless one is using the extended
+filename sytax to move to a different HDU on open) from the specified filename
 and returns the header as a hash reference and a status (when called
 in an array context) or simply a hash reference (when called in a scalar
 context):
@@ -1397,7 +1419,8 @@ context):
   $hash_ref = fits_read_header($file);
 
 An object-oriented interface is also provided for reading headers from
-FITS files that have already been opened.
+FITS files that have already been opened. In this case, the header
+read is from the current HDU.
 
   $fitsfile = CFITSIO::open_file($file);
   $hash_ref = $fitsfile->read_header;
@@ -1405,7 +1428,7 @@ FITS files that have already been opened.
 
 =item sizeof_datatype(datatype)
 
-Returns the size of the given CFITSIO datatype constant (e.g., CFITSIO::TSHORT()).
+Returns the size of the given CFITSIO datatype constant (e.g., C<CFITSIO::TSHORT()>).
 
 =back
 
@@ -1425,6 +1448,10 @@ Contributors include:
 =item Tim Jenness <t.jenness@jach.hawaii.edu>
 
 convenience routines
+
+=item Tim Conrow <tim@ipac.caltech.edu>
+
+function implementations, bug fixes
 
 =back
 

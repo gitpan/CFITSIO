@@ -34,8 +34,8 @@ my ($naxis1,$naxis2) = @$naxes;
 # read image into $array, close file
 #
 print "Reading ${naxis2}x${naxis1} image...";
-my ($array,$anynul);
-$fptr->read_2d_lng(1,0,$naxis1,$naxis1,$naxis2,$array,$anynul,$status);
+my ($array, $nullarray, $anynull);
+$fptr->read_pixnull(CFITSIO::TLONG(), [1,1], $naxis1*$naxis2, $array, $nullarray, $anynull ,$status);
 print "done\n";
 
 $fptr->close_file($status);

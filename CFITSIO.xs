@@ -1348,7 +1348,7 @@ ffcrow(fptr,datatype,expr,firstrow,nelements,nulval,array,anynul,status)
 	char * expr
 	long firstrow
 	long nelements
-	SV * nulval = NO_INIT
+	SV * nulval
 	void * array = NO_INIT
 	int anynul = NO_INIT
 	int status
@@ -1359,7 +1359,7 @@ ffcrow(fptr,datatype,expr,firstrow,nelements,nulval,array,anynul,status)
 		array = get_mortalspace(nelements,datatype);
 		RETVAL=ffcrow(
 			fptr,datatype,expr,firstrow,nelements,
-			(ST(5)!=&PL_sv_undef) ? pack1D(ST(5),datatype) : NULL,
+			(nulval!=&PL_sv_undef) ? pack1D(nulval,datatype):NULL,
 			array,&anynul,&status
 		);
 		FIXME("ffcrow: I should be calling fftexp (no harm done, however)");
@@ -2069,9 +2069,47 @@ ffghad(fptr,headstart,datastart,dataend,status)
 	CODE:
 		RETVAL = ffghad(fptr,&headstart,&datastart,&dataend,&status);
 		if (ST(1) != &PL_sv_undef) sv_setiv(ST(1),headstart);
-		if (ST(2) != &PL_sv_undef) sv_setiv(ST(1),datastart);
-		if (ST(3) != &PL_sv_undef) sv_setiv(ST(1),dataend);
+		if (ST(2) != &PL_sv_undef) sv_setiv(ST(2),datastart);
+		if (ST(3) != &PL_sv_undef) sv_setiv(ST(3),dataend);
 	OUTPUT:
+		status
+		RETVAL
+
+int
+ffghof(fptr, headstart, datastart, dataend, status)
+	fitsfile * fptr
+	OFF_T headstart = NO_INIT	
+	OFF_T datastart = NO_INIT	
+	OFF_T dataend = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_get_hduoff = 1
+		fitsfilePtr::get_hduoff = 2
+	CODE:
+		RETVAL = ffghof(fptr,&headstart,&datastart,&dataend,&status);
+		if (ST(1) != &PL_sv_undef) sv_setuv(ST(1),headstart);
+		if (ST(2) != &PL_sv_undef) sv_setuv(ST(2),datastart);
+		if (ST(3) != &PL_sv_undef) sv_setuv(ST(3),dataend);
+	OUTPUT:
+		status
+		RETVAL
+
+
+int
+ffgknm(card,name,len,status)
+	char * card
+	char * name = NO_INIT
+	int len = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_get_keyname = 1
+	CODE:
+		name = get_mortalspace(FLEN_VALUE,TBYTE);
+		RETVAL = ffgknm(card,name,&len,&status);
+		if (ST(2) != &PL_sv_undef)
+			sv_setiv(ST(2), len);
+	OUTPUT:
+		name
 		status
 		RETVAL
 
@@ -2111,20 +2149,28 @@ ffgidm(fptr,naxis,status)
 		status
 
 int
-ffgisz(fptr,nlen,naxes,status)
+ffgisz(fptr,naxes,status)
 	fitsfile * fptr
-	int nlen
 	long *naxes = NO_INIT
 	int status
 	ALIAS:
 		CFITSIO::fits_get_img_size = 1
 		fitsfilePtr::get_img_size = 2
+	PREINIT:
+		int nlen, old_packing;
 	CODE:
-		if (nlen < 0)
-			nlen = 0;
-		naxes = (long *)get_mortalspace(nlen,TLONG);
-		RETVAL = ffgisz(fptr,nlen,naxes,&status);
-		unpack1D(ST(2),naxes,nlen,TLONG);
+		/* temporarily disable native array unpacking */
+		old_packing = PerlyUnpacking(-1);
+		if (!old_packing)
+			PerlyUnpacking(1);
+
+		RETVAL = ffgidm(fptr,&nlen,&status);
+		if (RETVAL <= 0) {
+			naxes = (long *)get_mortalspace(nlen,TLONG);
+			RETVAL = ffgisz(fptr,nlen,naxes,&status);
+			unpack1D(ST(1),naxes,nlen,TLONG);
+		}
+		PerlyUnpacking(old_packing);
 	OUTPUT:
 		status
 		RETVAL
@@ -2843,24 +2889,27 @@ ffnchk(fptr,status)
 	OUTPUT:
 		status
 
-SV *
+void
 open_file(filename,iomode,status)
 	char * filename
 	int iomode
 	int status
 	PREINIT:
 		fitsfile * fptr;
-	CODE:
+		SV *retval;
+	PPCODE:
 		if (!filename) /* undef passed */
 			filename = "";
 		ffopen(&fptr,filename,iomode,&status);
-		ST(0) = sv_newmortal();
+		sv_setiv(ST(2), status);
+		EXTEND(SP, 1);
 		if (status > 0)
-			ST(0) = &PL_sv_undef;
-		else
-			sv_setref_pv(ST(0),"fitsfilePtr",fptr);
-	OUTPUT:
-		status
+			PUSHs(&PL_sv_undef);
+		else {
+			retval = sv_newmortal();
+			sv_setref_pv(retval,"fitsfilePtr",fptr);
+			PUSHs(retval);
+		}
 
 int
 ffopen(fptr,filename,iomode,status)
@@ -2874,13 +2923,15 @@ ffopen(fptr,filename,iomode,status)
 		if (!filename) /* undef passed */
 			filename = "";
 		RETVAL = ffopen(&fptr,filename,iomode,&status);
-		if (status > 0)
-			ST(0) = &PL_sv_undef;
-		else
+		if (status==0) {
 			sv_setref_pv(ST(0),"fitsfilePtr",fptr);
+		}
+		else
+			sv_setsv(ST(0), &PL_sv_undef);
 	OUTPUT:
-		status
 		RETVAL
+		status
+
 
 int
 ffgtop(mfptr,group,gfptr,status)
@@ -2894,7 +2945,7 @@ ffgtop(mfptr,group,gfptr,status)
 	CODE:
 		RETVAL = ffgtop(mfptr,group,&gfptr,&status);
 		if (status > 0)
-			ST(2) = &PL_sv_undef;
+			sv_setsv(ST(2), &PL_sv_undef);
 		else
 			sv_setref_pv(ST(2),"fitsfilePtr",gfptr);
 	OUTPUT:
@@ -2913,7 +2964,7 @@ ffgmop(gfptr,member,mfptr,status)
 	CODE:
 		RETVAL = ffgmop(gfptr,member,&mfptr,&status);
 		if (status > 0)
-			ST(2) = &PL_sv_undef;
+			sv_setsv(ST(2), &PL_sv_undef);
 		else
 			sv_setref_pv(ST(2),"fitsfilePtr",mfptr);
 	OUTPUT:
@@ -3774,20 +3825,24 @@ ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,anynul,stat
 		fitsfilePtr::read_col = 2
 	PREINIT:
 		long col_width, i;
+		int storage_datatype;
 	CODE:
+		storage_datatype = datatype;
+		if (datatype == TBIT)
+			storage_datatype = TLOGICAL;
 		if (!PerlyUnpacking(-1) && datatype != TSTRING) {
-			SvGROW(ST(7),nelements*sizeof_datatype(datatype));
-			RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),(void*)(SvPV(ST(7),PL_na)),&anynul,&status);
+			SvGROW(ST(7),nelements*sizeof_datatype(storage_datatype));
+			RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,storage_datatype),(void*)(SvPV(ST(7),PL_na)),&anynul,&status);
 		}
 		else {
-			array = get_mortalspace(nelements,datatype);
+			array = get_mortalspace(nelements,storage_datatype);
 			if (datatype == TSTRING) {
 				col_width = column_width(fptr,colnum);
 				for (i=0;i<nelements;i++)
 					*((char**)array+i)=(char *)get_mortalspace(col_width+1,TBYTE);
 			}
-			RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),array,&anynul,&status);
-			unpack1D(ST(7),array,nelements,datatype);
+			RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,storage_datatype),array,&anynul,&status);
+			unpack1D(ST(7),array,nelements,storage_datatype);
 		}
 		if (ST(8) != &PL_sv_undef) sv_setiv(ST(8),anynul);
 	OUTPUT:
@@ -4266,14 +4321,19 @@ ffgcf(fptr,datatype,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	ALIAS:
 		CFITSIO::fits_read_colnull = 1
 		fitsfilePtr::read_colnull = 2
+	PREINIT:
+		int storage_datatype;
 	CODE:
-		if (!PerlyUnpacking(-1)) {
+		storage_datatype = datatype;
+		if (datatype == TBIT)
+			storage_datatype = TLOGICAL;
+		if (!PerlyUnpacking(-1) && datatype != TSTRING) {
 			if (ST(6)!=&PL_sv_undef) {
-				SvGROW(ST(6),nelem*sizeof_datatype(datatype));
+				SvGROW(ST(6),nelem*sizeof_datatype(storage_datatype));
 				array = (void*)(SvPV(ST(6),PL_na));
 			}
 			else
-				array = get_mortalspace(nelem,datatype);
+				array = get_mortalspace(nelem,storage_datatype);
 			if (ST(7) != &PL_sv_undef) {
 				SvGROW(ST(7),nelem*sizeof_datatype(TLOGICAL));
 				nularray = (logical*)(SvPV(ST(7),PL_na));
@@ -4283,11 +4343,11 @@ ffgcf(fptr,datatype,colnum,frow,felem,nelem,array,nularray,anynul,status)
 			RETVAL=ffgcf(fptr,datatype,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		}
 		else {
-			array = get_mortalspace(nelem,TBYTE);
+			array = get_mortalspace(nelem,storage_datatype);
 			nularray = get_mortalspace(nelem,TLOGICAL);
 			RETVAL=ffgcf(fptr,datatype,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 			if (ST(6)!=&PL_sv_undef)
-				unpack1D(ST(6),array,nelem,datatype);
+				unpack1D(ST(6),array,nelem,storage_datatype);
 			if (ST(7)!=&PL_sv_undef)
 				unpack1D(ST(7),nularray,nelem,TLOGICAL);
 		}
@@ -6182,8 +6242,6 @@ ffgknl(fptr,keyname,nstart,nkeys,value,nfound,status)
 	ALIAS:
 		CFITSIO::fits_read_keys_log = 1
 		fitsfilePtr::read_keys_log = 2
-	PREINIT:
-		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TINT);
 		RETVAL=ffgknl(fptr,keyname,nstart,nkeys,value,&nfound,&status);
@@ -6205,8 +6263,6 @@ ffgknj(fptr,keyname,nstart,nkeys,value,nfound,status)
 	ALIAS:
 		CFITSIO::fits_read_keys_lng = 1
 		fitsfilePtr::read_keys_lng = 2
-	PREINIT:
-		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TLONG);
 		RETVAL=ffgknj(fptr,keyname,nstart,nkeys,value,&nfound,&status);
@@ -6228,8 +6284,6 @@ ffgkne(fptr,keyname,nstart,nkeys,value,nfound,status)
 	ALIAS:
 		CFITSIO::fits_read_keys_flt = 1
 		fitsfilePtr::read_keys_flt = 2
-	PREINIT:
-		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TFLOAT);
 		RETVAL=ffgkne(fptr,keyname,nstart,nkeys,value,&nfound,&status);
@@ -6251,8 +6305,6 @@ ffgknd(fptr,keyname,nstart,nkeys,value,nfound,status)
 	ALIAS:
 		CFITSIO::fits_read_keys_dbl = 1
 		fitsfilePtr::read_keys_dbl = 2
-	PREINIT:
-		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TDOUBLE);
 		RETVAL=ffgknd(fptr,keyname,nstart,nkeys,value,&nfound,&status);
@@ -6298,6 +6350,54 @@ ffgrec(fptr,keynum,card,status)
 		card
 		status
 		RETVAL
+
+int
+ffgsv(fptr, dtype, blc, trc, inc, nulval, array, anynul, status)
+	fitsfile * fptr
+	int dtype
+	long * blc
+	long * trc
+	long * inc
+	SV * nulval
+	void * array = NO_INIT
+	int anynul = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_read_subset = 1
+		fitsfilePtr::read_subset = 2
+	PREINIT:
+		long ndata, *naxes;
+		int i, naxis, storage_dtype;
+	CODE:
+		storage_dtype = dtype;
+		if (dtype == TBIT)
+			storage_dtype = TLOGICAL;
+
+		/* get the size of the image */
+		RETVAL = ffgidm(fptr, &naxis, &status);
+		naxes = get_mortalspace(naxis, TLONG);
+		RETVAL = ffgisz(fptr, naxis, naxes, &status);
+
+		/* determine the number of pixels to be read */
+		ndata = 1;
+		for (i=0; i<naxis; i++)
+		ndata *= (trc[i]-blc[i]+1)/inc[i] +
+			(((trc[i]-blc[i]+1) % inc[i]) ? 1 : 0);
+
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),ndata*sizeof_datatype(storage_dtype));
+			RETVAL=ffgsv(fptr,dtype,blc,trc,inc,(nulval!=&PL_sv_undef ? pack1D(nulval,storage_dtype) : NULL),SvPV(ST(6),PL_na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,storage_dtype);
+			RETVAL=ffgsv(fptr,dtype,blc,trc,inc,(nulval != &PL_sv_undef ? pack1D(nulval,storage_dtype) : NULL),array,&anynul,&status);
+			unpack1D(ST(6),array,ndata,storage_dtype);
+		}
+		if (ST(7) != &PL_sv_undef)
+			sv_setiv(ST(7),anynul);
+	OUTPUT:
+		RETVAL
+		status
 
 int
 ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
@@ -7217,7 +7317,7 @@ ffreopen(openfptr,newfptr,status)
 	CODE:
 		RETVAL = ffreopen(openfptr,&newfptr,&status);
 		if (status > 0)
-			ST(1) = &PL_sv_undef;
+			sv_setsv(ST(1), &PL_sv_undef);
 		else
 			sv_setref_pv(ST(1),"fitsfilePtr",newfptr);
 	OUTPUT:
@@ -7401,9 +7501,9 @@ fftexp(fptr,expr,datatype,nelem,naxis,naxes,status)
 			naxis = 0;
 		}
 		RETVAL=fftexp(fptr,expr,naxis,&datatype,&nelem,&naxis,naxes,&status);
-		if (ST(2)!=&PL_sv_undef) sv_setiv(ST(3),datatype);
-		if (ST(3)!=&PL_sv_undef) sv_setiv(ST(4),nelem);
-		if (ST(4)!=&PL_sv_undef) sv_setiv(ST(5),naxis);
+		if (ST(2)!=&PL_sv_undef) sv_setiv(ST(2),datatype);
+		if (ST(3)!=&PL_sv_undef) sv_setiv(ST(3),nelem);
+		if (ST(4)!=&PL_sv_undef) sv_setiv(ST(4),naxis);
 		if (ST(5)!=&PL_sv_undef) unpack1D(ST(5),naxes,naxis,TLONG);
 	OUTPUT:
 		status
@@ -8103,8 +8203,13 @@ ffpcl(fptr,datatype,colnum,frow,felem,nelem,array,status)
 	ALIAS:
 		CFITSIO::fits_write_col = 1
 		fitsfilePtr::write_col = 2
+	PREINIT:
+		int storage_datatype;
 	CODE:
-		RETVAL=ffpcl(fptr,datatype,colnum,frow,felem,nelem,packND(array,datatype),&status);
+		storage_datatype = datatype;
+		if (datatype == TBIT)
+			storage_datatype = TLOGICAL;
+		RETVAL=ffpcl(fptr,datatype,colnum,frow,felem,nelem,packND(array,storage_datatype),&status);
 	OUTPUT:
 		status
 		RETVAL
@@ -9679,3 +9784,159 @@ ffgkcl(card)
 	char * card
 	ALIAS:
 		CFITSIO::fits_get_keyclass = 1
+
+int
+ffgpxv(fptr, dtype, fpix, nelem, nulval, array, anynul, status)
+	fitsfile * fptr
+	int dtype
+	long * fpix
+	long nelem
+	SV * nulval
+	void * array = NO_INIT
+	int anynul = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_read_pix = 1
+		fitsfilePtr::read_pix = 2
+	PREINIT:
+		int naxis;
+		long *naxes;
+		OFF_T nelem_all;
+		int i;
+	CODE:
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(dtype));
+			RETVAL = ffgpxv(fptr, dtype, fpix, nelem, (nulval!=&PL_sv_undef ? pack1D(nulval, dtype) : NULL), (void*)(SvPV(ST(5),PL_na)), &anynul, &status);
+		}
+		else {
+			/* find out how many elements are in the image,
+			 * allocate space, read, unpack
+			 */
+			RETVAL = ffgidm(fptr, &naxis, &status);
+			if (status == 0) {
+				naxes = get_mortalspace(naxis, TLONG);
+				RETVAL = ffgisz(fptr, naxis, naxes, &status);
+				nelem_all = 1;
+				for (i=0; i<naxis; i++)
+					nelem_all *= naxes[i];
+				array=get_mortalspace(nelem_all,dtype);
+				RETVAL=ffgpxv(fptr, dtype, fpix, nelem, (nulval!=&PL_sv_undef ?  pack1D(nulval, dtype) : NULL), array, &anynul, &status);
+				if (status == 0) {
+					order_reverse(naxis, naxes);
+					unpackND(ST(5), array, naxis, naxes, dtype);
+				}
+			}
+		}
+		if (ST(6) != &PL_sv_undef)
+			sv_setiv(ST(6), anynul);
+	OUTPUT:
+		status
+		RETVAL
+
+int
+ffgpxf(fptr, dtype, fpix, nelem, array, nullarray, anynul, status)
+	fitsfile * fptr
+	int dtype
+	long * fpix
+	long nelem
+	void * array = NO_INIT
+	logical * nullarray = NO_INIT
+	int anynul = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_read_pixnull = 1
+		fitsfilePtr::read_pixnull = 2
+	PREINIT:
+		int naxis;
+		long *naxes;
+		OFF_T nelem_all;
+		int i;
+	CODE:
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &PL_sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(dtype));
+				array = (void*)(SvPV(ST(4),PL_na));
+			}
+			else
+				array = get_mortalspace(nelem, dtype);
+			if (ST(5) != &PL_sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nullarray = (logical*)(SvPV(ST(5),PL_na));
+			}
+			else
+				nullarray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL = ffgpxf(fptr,dtype,fpix,nelem,array,nullarray, &anynul,&status);
+		}
+		else {
+			/* find out how many elements are in the image,
+			 * allocate space, read, unpack
+			 */
+			RETVAL = ffgidm(fptr, &naxis, &status);
+			if (status == 0) {
+				naxes = get_mortalspace(naxis, TLONG);
+				RETVAL = ffgisz(fptr, naxis, naxes, &status);
+				nelem_all = 1;
+				for (i=0; i<naxis; i++)
+					nelem_all *= naxes[i];
+				array=get_mortalspace(nelem_all,dtype);
+				nullarray=get_mortalspace(nelem_all,TLOGICAL);
+				RETVAL=ffgpxf(fptr,dtype,fpix,nelem,array,nullarray,&anynul,&status);
+				if (status == 0) {
+					order_reverse(naxis, naxes);
+					if (ST(4)!=&PL_sv_undef)
+						unpackND(ST(4),array,naxis,naxes,dtype);
+					if (ST(5)!=&PL_sv_undef)
+						unpackND(ST(5),nullarray,naxis,naxes,TLOGICAL);
+				}
+			}
+		}
+		if (ST(6) != &PL_sv_undef)
+			sv_setiv(ST(6), anynul);
+	OUTPUT:
+		status
+		RETVAL
+
+int
+ffppx(fptr, dtype, fpix, nelem, array, status)
+	fitsfile * fptr
+	int dtype
+	long * fpix
+	long nelem
+	SV * array
+	int status
+	ALIAS:
+		CFITSIO::fits_write_pix = 1
+		fitsfilePtr::write_pix = 2
+	PREINIT:
+		int storage_dtype;
+	CODE:
+		storage_dtype = dtype;
+		if (dtype == TBIT)
+			storage_dtype = TLOGICAL;
+		RETVAL = ffppx(fptr,dtype,fpix,nelem,packND(array,storage_dtype),&status);
+	OUTPUT:
+		RETVAL
+		status
+
+int
+ffppxn(fptr, dtype, fpix, nelem, array, nulval, status)
+	fitsfile * fptr
+	int dtype
+	long * fpix
+	long nelem
+	SV * array
+	SV * nulval
+	int status
+	ALIAS:
+		CFITSIO::fits_write_pixnull = 1
+		fitsfilePtr::write_pixnull = 2
+	PREINIT:
+		int storage_dtype;
+	CODE:
+		storage_dtype = dtype;
+		if (dtype == TBIT)
+			storage_dtype = TLOGICAL;
+		RETVAL = ffppxn(fptr,dtype,fpix,nelem,packND(array,storage_dtype),(nulval!=&PL_sv_undef ? pack1D(nulval,storage_dtype) : NULL), &status);
+	OUTPUT:
+		RETVAL
+		status

@@ -75,13 +75,21 @@ sub cmp_str_arrays {
 	return 1;
 }
 
-# CFITSIO version 2.024 or better?
+my $status = 0;
+
+# fits_get_keyname
+my $name;
+pre_test('ffgknm');
+ffgknm("TESTING  'This is a test'",$name,undef,$status);
+post_test($name eq 'TESTING');
+
+# CFITSIO version 2.100 or better?
 pre_test('ffvers');
-post_test(ffvers(undef) > 2.023);
+post_test(ffvers(undef) > 2.09);
 
 # try to open non-existant file
 pre_test('ffopen');
-my $status = 0;
+$status = 0;
 my $fptr;
 ffopen($fptr,'tq123x.kjl',READWRITE,$status);
 post_test(104 == $status);
@@ -657,7 +665,7 @@ post_test(
 	cmp_str_arrays(
 		\@tmp,
 		[
-			q!COMMENT   This keyword was written by fxpcom.!,
+			q!COMMENT This keyword was written by fxpcom.!,
 			q!KY_PKNS1= 'first string'       / fxpkns comment!
 		]
 	) and $status == 0
@@ -682,7 +690,7 @@ post_test(
 	cmp_str_arrays(
 		\@tmp,
 		[
-			q!COMMENT   This keyword was written by fxpcom.!,
+			q!COMMENT This keyword was written by fxpcom.!,
 			q!KY_IREC = 'This keyword inserted by fxirec'!,
 			q!KY_IKYS = 'insert_value_string' / ikys comment!,
 			q!KY_IKYJ =                   49 / ikyj comment!,

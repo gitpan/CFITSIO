@@ -7,6 +7,11 @@
 #include "fitsio.h"
 #include "util.h"
 
+/* newSVuv seems to be perl 5.6.0-ism */
+#ifndef newSVuv
+#define newSVuv newSViv
+#endif
+
 static int perly_unpacking = 1; /* state variable */
 
 /*
@@ -166,11 +171,11 @@ void* pack1D ( SV* arg, int datatype ) {
       sv_setpvn(work, (char *) &logscalar, size);
       break;
     case TBYTE:
-      bscalar = SvIV(arg);
+      bscalar = SvUV(arg);
       sv_setpvn(work, (char *) &bscalar, size);
       break;
     case TUSHORT:
-      usscalar = SvIV(arg);
+      usscalar = SvUV(arg);
       sv_setpvn(work, (char *) &usscalar, size);
       break;
     case TSHORT:
@@ -178,7 +183,7 @@ void* pack1D ( SV* arg, int datatype ) {
       sv_setpvn(work, (char *) &sscalar, size);
       break;
     case TUINT:
-      uiscalar = SvIV(arg);
+      uiscalar = SvUV(arg);
       sv_setpvn(work, (char *) &uiscalar, size);
       break;
     case TINT:
@@ -186,7 +191,7 @@ void* pack1D ( SV* arg, int datatype ) {
       sv_setpvn(work, (char *) &iscalar, size);
       break;
     case TULONG:
-      ulscalar = SvIV(arg);
+      ulscalar = SvUV(arg);
       sv_setpvn(work, (char *) &ulscalar, size);
       break;
     case TLONG:
@@ -264,7 +269,7 @@ void* pack1D ( SV* arg, int datatype ) {
 	else {
 	  if (SvROK(*work2))
 	    goto errexit;
-	  bscalar = (byte) SvIV(*work2);
+	  bscalar = (byte) SvUV(*work2);
 	}
 	sv_catpvn(work, (char *) &bscalar, size);
       }
@@ -277,7 +282,7 @@ void* pack1D ( SV* arg, int datatype ) {
 	else {
 	  if (SvROK(*work2))
 	    goto errexit;
-	  usscalar = SvIV(*work2);
+	  usscalar = SvUV(*work2);
 	}
 	sv_catpvn(work, (char *) &usscalar, size);
       }
@@ -303,7 +308,7 @@ void* pack1D ( SV* arg, int datatype ) {
 	else {
 	  if (SvROK(*work2))
 	    goto errexit;
-	  uiscalar = SvIV(*work2);
+	  uiscalar = SvUV(*work2);
 	}
 	sv_catpvn(work, (char *) &uiscalar, size);
       }
@@ -329,7 +334,7 @@ void* pack1D ( SV* arg, int datatype ) {
 	else {
 	  if (SvROK(*work2))
 	    goto errexit;
-	  ulscalar = SvIV(*work2);
+	  ulscalar = SvUV(*work2);
 	}
 	sv_catpvn(work, (char *) &ulscalar, size);
       }
@@ -440,11 +445,11 @@ void pack_element(SV* work, SV** arg, int datatype) {
       sv_catpvn(work, (char *) &logscalar, size);
       break;
     case TBYTE:
-      bscalar = arg ? SvIV(*arg) : 0;
+      bscalar = arg ? SvUV(*arg) : 0;
       sv_catpvn(work, (char *) &bscalar, size);
       break;
     case TUSHORT:
-      usscalar = arg ? SvIV(*arg) : 0;
+      usscalar = arg ? SvUV(*arg) : 0;
       sv_catpvn(work, (char *) &usscalar, size);
       break;
     case TSHORT:
@@ -452,7 +457,7 @@ void pack_element(SV* work, SV** arg, int datatype) {
       sv_catpvn(work, (char *) &sscalar, size);
       break;
     case TUINT:
-      uiscalar = arg ? SvIV(*arg) : 0;
+      uiscalar = arg ? SvUV(*arg) : 0;
       sv_catpvn(work, (char *) &uiscalar, size);
       break;
     case TINT:
@@ -460,7 +465,7 @@ void pack_element(SV* work, SV** arg, int datatype) {
       sv_catpvn(work, (char *) &iscalar,size);
       break;
     case TULONG:
-      ulscalar = arg ? SvIV(*arg) : 0;
+      ulscalar = arg ? SvUV(*arg) : 0;
       sv_catpvn(work, (char *) &ulscalar, size);
       break;
     case TLONG:
@@ -551,14 +556,15 @@ void unpack3D( SV * arg, void * var, long *dims, int datatype) {
 }
 
 /*
- * This routine was causing problems, but it isn't used anywhere now
+ * This routine is known to have problems
  */
 void unpackND ( SV * arg, void * var, int ndims, long *dims, int datatype ) {
   int i;
-  long *places, skip, ndata, nbytes, written;
+  OFF_T ndata, nbytes, written, *places, skip;
   AV **avs;
   char *tmp_var = (char *)var;
 
+  /* number of pixels to read, number of bytes therein */
   ndata = 1;
   for (i=0;i<ndims;i++)
     ndata *= dims[i];
@@ -569,9 +575,7 @@ void unpackND ( SV * arg, void * var, int ndims, long *dims, int datatype ) {
     return;
   }
 
-  places = malloc((ndims-1) * sizeof(long));
-  for (i=0;i<ndims-1;i++)
-    places[i] = 0;
+  places = calloc(ndims-1, sizeof(OFF_T));
   avs = malloc((ndims-1) * sizeof(AV*));
 
   coerceND(arg,ndims,dims);
@@ -581,6 +585,7 @@ void unpackND ( SV * arg, void * var, int ndims, long *dims, int datatype ) {
 
   written = 0;
   while (written < nbytes) {
+
     for (i=1;i<ndims-1;i++)
       avs[i] = (AV*)SvRV(*av_fetch(avs[i-1],places[i-1],0));
 
@@ -639,17 +644,17 @@ void unpackScalar(SV * arg, void * var, int datatype) {
   case TLOGICAL:
     sv_setiv(arg,(IV)(*(logical *)var)); break;
   case TBYTE:
-    sv_setiv(arg,(IV)(*(byte *)var)); break;
+    sv_setuv(arg,(UV)(*(byte *)var)); break;
   case TUSHORT:
-    sv_setiv(arg,(IV)(*(unsigned short *)var)); break;
+    sv_setuv(arg,(UV)(*(unsigned short *)var)); break;
   case TSHORT:
     sv_setiv(arg,(IV)(*(short *)var)); break;
   case TUINT:
-    sv_setiv(arg,(IV)(*(unsigned int *)var)); break;
+    sv_setuv(arg,(UV)(*(unsigned int *)var)); break;
   case TINT:
     sv_setiv(arg,(IV)(*(int *)var)); break;
   case TULONG:
-    sv_setiv(arg,(IV)(*(unsigned long *)var)); break;
+    sv_setuv(arg,(UV)(*(unsigned long *)var)); break;
   case TLONG:
     sv_setiv(arg,(IV)(*(long *)var)); break;
   case TFLOAT:
@@ -721,12 +726,12 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
   case TBYTE:
     bvar = (byte *) var;
     for(i=0; i<m; i++)
-      av_store(array, i, newSViv( (IV)bvar[i] ));
+      av_store(array, i, newSVuv( (UV)bvar[i] ));
     break;
   case TUSHORT:
     usvar = (unsigned short *) var;
     for(i=0; i<m; i++)
-      av_store(array, i, newSViv( (IV)usvar[i] ));
+      av_store(array, i, newSVuv( (UV)usvar[i] ));
     break;
   case TSHORT:
     svar = (short *) var;
@@ -736,7 +741,7 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
   case TUINT:
     uivar = (unsigned int *) var;
     for(i=0; i<m; i++)
-      av_store(array, i, newSViv( (IV)uivar[i] ));
+      av_store(array, i, newSVuv( (UV)uivar[i] ));
     break;
   case TINT:
     ivar = (int *) var;
@@ -746,7 +751,7 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
   case TULONG:
     ulvar = (unsigned long *) var;
     for(i=0; i<m; i++)
-      av_store(array, i, newSViv( (IV)ulvar[i] ));
+      av_store(array, i, newSVuv( (UV)ulvar[i] ));
     break;
   case TLONG:
     lvar = (long *) var;
@@ -799,12 +804,12 @@ AV* coerce1D ( SV* arg, long n) {
   else if (SvROK(arg) && SvTYPE(SvRV(arg))==SVt_PVAV)
     array = (AV *) SvRV(arg);
   else {
-    array = newAV();
-    sv_setsv(arg, newRV((SV*) array));
+    array = (AV*)sv_2mortal((SV*)newAV());
+    sv_setsv(arg, sv_2mortal(newRV((SV*) array)));
   }
 
   for (i=av_len(array)+1; i<n; i++)
-    av_store( array, i, newSViv( (IV) 0 ) );
+    av_store( array, i, newSViv((IV) 0));
 
   return array;
 }
@@ -880,5 +885,19 @@ int sizeof_datatype(int datatype) {
     return 2*sizeof(double);
   default:
     croak("sizeof_datatype() - invalid datatype (%d) given",datatype);
+  }
+}
+
+
+/* takes an array of longs, reversing their order inplace
+ * useful for reversing the order of naxes before passing them
+ * off to unpack?D() */
+void order_reverse (int nelem, long *vals) {
+  long tmp;
+  int i;
+  for (i=0; i<nelem/2; i++) {
+    tmp = vals[i];
+    vals[i] = vals[nelem-i-1];
+    vals[nelem-i-1] = tmp;
   }
 }

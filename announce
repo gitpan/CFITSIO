@@ -1,0 +1,56 @@
+Hello again,
+
+A new version of the Perl interface to William Pence's cfitsio
+subroutine library is available. For more information on the cfitsio
+subroutine library, see http://heasarc.gsfc.nasa.gov/fitsio
+
+New features in CFITSIO.pm 0.95 include:
+
+* Added cfitsio 2.100 routines:
+  fits_get_hduoff
+  fits_read_pix
+  fits_read_pixnull
+  fits_write_pix
+  fits_write_pixnull
+  fits_read_subset
+
+* Added old cfitsio routine:
+  fits_get_keyname
+
+Bugfixes in this release include:
+
+* Reading TBIT columns with fits_read_col()/fits_read_colnull() now works.
+
+* fits_get_hduaddr() (made obsolete with fits_get_hduoff() in cfitsio v2.100)
+  now sets the output variables correctly.
+
+* fits_test_expr() now sets the output variables correctly.
+
+* fits_get_img_size() was causing a sigsegv and/or out-of-memory condition
+  when called on a non-image HDU. The function now also automatically
+  determines the number of axes in the image, accordingly the nlen argument
+  has been removed from the Perl CFITSIO.pm API. This function also now
+  always returns a Perl array, no matter what the current setting of
+  PerlyUnpacking() happens to be.
+
+* Fixed large memory leak reading into perl arrays.
+
+Thanks go to Tim Conrow <tim@ipac.caltech.edu> for bug fixes and
+implementations of some functions.
+
+You will need version 2.100 of the cfitsio library in order to build
+this module.
+
+This module has been tested on Linux (2.2.x, ix86, glibc 2.1) and
+Solaris 2.6 with perl 5.6.0 and perl 5.005, respectively.
+
+This version of CFITSIO.pm can be obtained at:
+  http://hea-www.harvard.edu/~rpete/cfitsio/CFITSIO-0.95.tar.gz
+
+And also on your local CPAN mirror under:
+  authors/id/P/PR/PRATZLAFF/CFITSIO-0.95.tar.gz
+
+As always, you can find the latest version of CFITSIO.pm at
+  http://hea-www.harvard.edu/~rpete/cfitsio
+
+-Pete Ratzlaff <pratzlaff@cfa.harvard.edu>

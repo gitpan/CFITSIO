@@ -162,7 +162,7 @@ $fptr->write_key_longwarn($status)
 	and print "ffplsw status = $status\n";
 $fptr->write_key_triple('key_pkyt',$otint,$otfrac,'fxpkyt comment',$status)
 	and print "ffpkyt status = $status\n";
-$fptr->write_comment('This keyword was written by fxpcom.',$status)
+$fptr->write_comment('  This keyword was written by fxpcom.',$status)
 	and print "ffpcom status = $status\n";
 $fptr->write_history("  This keyword written by fxphis (w/ 2 leading spaces).",$status)
 	and print "ffphis status = $status\n";

@@ -28,5 +28,6 @@ int PerlyUnpacking(int value);
 int sizeof_datatype(int datatype);
 long column_width(fitsfile * fptr, int colnum);
 void check_status(int status);
+void order_reverse (int nelem, long *vals);
 
 #endif /* _H_UTIL_CFITSIO_PERL */

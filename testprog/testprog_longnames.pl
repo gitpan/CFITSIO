@@ -163,7 +163,7 @@ fits_write_key_longwarn($fptr,$status)
 	and print "ffplsw status = $status\n";
 fits_write_key_triple($fptr,'key_pkyt',$otint,$otfrac,'fxpkyt comment',$status)
 	and print "ffpkyt status = $status\n";
-fits_write_comment($fptr,'This keyword was written by fxpcom.',$status)
+fits_write_comment($fptr,'  This keyword was written by fxpcom.',$status)
 	and print "ffpcom status = $status\n";
 fits_write_history($fptr,"  This keyword written by fxphis (w/ 2 leading spaces).",$status)
 	and print "ffphis status = $status\n";

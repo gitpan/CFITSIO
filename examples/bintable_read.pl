@@ -5,6 +5,7 @@ use blib;
 
 use CFITSIO qw( :constants );
 use PDL;
+use PDL::Graphics::PGPLOT;
 use Carp;
 
 require "check_status.pl";

@@ -163,7 +163,7 @@ ffplsw($fptr,$status)
 	and print "ffplsw status = $status\n";
 ffpkyt($fptr,'key_pkyt',$otint,$otfrac,'fxpkyt comment',$status)
 	and print "ffpkyt status = $status\n";
-ffpcom($fptr,'This keyword was written by fxpcom.',$status)
+ffpcom($fptr,'  This keyword was written by fxpcom.',$status)
 	and print "ffpcom status = $status\n";
 ffphis($fptr,"  This keyword written by fxphis (w/ 2 leading spaces).",$status)
 	and print "ffphis status = $status\n";

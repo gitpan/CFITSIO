@@ -12,8 +12,7 @@ Where can (did) I get it?
 
 What version of CFITSIO does this module need?
 ----------------------------------------------
-  CFITSIO.pm version 0.94 requires CFITSIO v2.036. Earlier versions will
-  not work due to recent changes in the API.
+  CFITSIO.pm version 0.95 requires cfitsio v2.100.
 
 Installation
 ------------

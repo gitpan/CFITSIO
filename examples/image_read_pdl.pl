@@ -10,6 +10,7 @@ use blib;
 
 use CFITSIO;
 use PDL;
+use PDL::Graphics::PGPLOT;
 use Carp;
 
 require "check_status.pl";
@@ -65,9 +66,9 @@ exists $read_funcs{$cfitsio_datatype} or
 print STDERR "Reading ${naxis2}x${naxis1} image...";
 
 CFITSIO::PerlyUnpacking(0);
-my $pdl = &{$pdl_funcs{$bitpix}{'pdl'}} (zeroes($naxis1,$naxis2));
-&{$read_funcs{$cfitsio_datatype}}
-  ($fptr,1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},undef,$status);
+my $pdl = $pdl_funcs{$bitpix}{'pdl'}->(zeroes($naxis1,$naxis2));
+my $nullarray = byte(zeroes($naxis1,$naxis2));
+$fptr->read_pixnull($cfitsio_datatype, [1,1], $pdl->nelem, ${$pdl->get_dataref},${$nullarray->get_dataref},undef,$status);
 CFITSIO::PerlyUnpacking(1);
 
 print STDERR "done\n";

@@ -40,8 +40,8 @@ do
 		exit
 	fi
 
-	echo diff testprog.lis $cfitsio/testprog.out
-	diff testprog.lis $cfitsio/testprog.out
+	echo diff -u testprog.lis $cfitsio/testprog.out
+	diff -u testprog.lis $cfitsio/testprog.out
 	if [ $? -ne 0 ];
 	then
 		echo 1>&2 \*\*\* failed diffing testprog.lis and $cfitsio/testprog.out

@@ -1,3 +1,51 @@
+2000-11-17  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* $VERSION = '0.95';
+
+	* fits_read_pix/fits_read_pixnull should now unpack correctly.
+	Tested on both 2d and 3d datasets.
+
+2000-11-15  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Fixed large memory leak reading into perl arrays.
+
+2000-11-14  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* unsigned type cleanups in util.c
+
+	* Added, tested fits_read_subset()/ffgsv().
+
+	* Added fits_write_pix()/ffppx() and fits_write_pixnull()/ffppxn().
+	The latter does not have a longname alias in cfitsio 2.100, but it
+	is listed in the user manual.
+
+2000-11-12  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* added fits_get_keyname()/ffgknm(), thanks to Tim Conrow.
+
+	* fits_get_img_size() bug causing sigsegv and/or out of memory
+	condition fixed when called on a non-image HDU - thanks to Tim Conrow
+	Function now determines the output array size needed, and always
+	unpacks to a perl array.
+
+	* bug fixed in fits_test_expr(), output variables setting
+	
+	* Updated testprogs and test.pl
+
+	* fits_get_hduoff() added.
+
+	* Fixed bug in fits_get_hduaddr(), causing all output fields to be
+	set to value of headstart.
+
+2000-08-23  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Fixed TBIT column write in fits_write_col(), when PerlyUnpacking(1).
+	Minor documentation updates.
+
+2000-07-24  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Fixed TBIT column reads in fits_read_col() and fits_read_colnull().
+
 2000-02-25  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
 
 	* $VERSION = '0.94';
