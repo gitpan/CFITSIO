@@ -1100,8 +1100,13 @@ ffgcfi($fptr,5,1,1,$nrows,$iinarray,$larray2,$anynull,$status);
 ffgcfk($fptr,6,1,1,$nrows,$kinarray,$larray2,$anynull,$status);
 ffgcfe($fptr,7,1,1,$nrows,$einarray,$larray2,$anynull,$status);
 ffgcfd($fptr,8,1,1,$nrows,$dinarray,$larray2,$anynull,$status);
-ffgcfc($fptr,9,1,1,$nrows,$cinarray,$larray2,$anynull,$status);
-ffgcfm($fptr,10,1,1,$nrows,$minarray,$larray2,$anynull,$status);
+   ####################################
+   # PROBLEM: sporadic SEGVs on Linux #
+   ####################################
+ffgcfc($fptr,9,1,1,$nrows,$cinarray,$larray2,undef,$status);
+ffgcfm($fptr,10,1,1,$nrows,$minarray,$larray2,undef,$status);
+#ffgcvc($fptr,9,1,1,$nrows,98.,$cinarray,$anynull,$status);
+#ffgcvm($fptr,10,1,1,$nrows,98.,$minarray,$anynull,$status);
 
 print "\nRead columns with ffgcf_:\n";
 for ($ii=0;$ii<10;$ii++) {

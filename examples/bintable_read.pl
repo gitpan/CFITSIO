@@ -21,9 +21,11 @@ $fptr->movnam_hdu(ANY_HDU,'EVENTS',0,$status);
 	check_status($status);
 
 #
-# get number of rows in table
+# get number of rows in table, this needs to be fixed so we can give it
+# undef's instead of creating a bunch of unwanted variables
 #
-$fptr->get_num_rows($nrows,$status);
+#$fptr->read_btblhdr(0,$nrows,$tfields,$ttype,$tform,$tunit,$extname,$pcount,$status);
+$fptr->read_btblhdr(0,$nrows,undef,undef,undef,undef,undef,undef,$status);
 	check_status($status);
 
 #

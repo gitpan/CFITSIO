@@ -1128,8 +1128,13 @@ $fptr->read_colnull_sht(5,1,1,$nrows,${$iinarray->get_dataref},${$larray2->get_d
 $fptr->read_colnull_int(6,1,1,$nrows,${$kinarray->get_dataref},${$larray2->get_dataref},$anynull,$status);
 $fptr->read_colnull_flt(7,1,1,$nrows,${$einarray->get_dataref},${$larray2->get_dataref},$anynull,$status);
 $fptr->read_colnull_dbl(8,1,1,$nrows,${$dinarray->get_dataref},${$larray2->get_dataref},$anynull,$status);
+   ####################################
+   # PROBLEM: sporadic SEGVs on Linux #
+   ####################################
 $fptr->read_colnull_cmp(9,1,1,$nrows,${$cinarray->get_dataref},${$larray2->get_dataref},$anynull,$status);
 $fptr->read_colnull_dblcmp(10,1,1,$nrows,${$minarray->get_dataref},${$larray2->get_dataref},$anynull,$status);
+#$fptr->read_col_cmp(9,1,1,$nrows,98.,${$cinarray->get_dataref},$anynull,$status);
+#$fptr->read_col_dblcmp(10,1,1,$nrows,98.,${$minarray->get_dataref},$anynull,$status);
 
 print "\nRead columns with ffgcf_:\n";
 for ($ii=0;$ii<10;$ii++) {

@@ -1,5 +1,5 @@
 package CFITSIO;
-$VERSION = '0.91';
+$VERSION = '0.90';
 
 use strict;
 use Carp;
@@ -16,7 +16,6 @@ my @__shortnames = qw(
 	ffasfm
 	ffbnfm
 	ffcrow
-        ffgcdw
 	ffgtch
 	ffcmsg
 	ffclos
@@ -148,8 +147,6 @@ my @__shortnames = qw(
 	ffgcrd
 	ffgcv
 	ffgcx
-	ffgcxui
-	ffgcxuk
 	ffgcvs
 	ffgcvl
 	ffgcvb
@@ -285,7 +282,6 @@ my @__shortnames = qw(
 	ffukym
 	ffukfm
 	ffupch
-	ffurlt
 	ffvcks
 	ffgtvf
 	ffxypx
@@ -457,7 +453,6 @@ my @__longnames = qw(
 	fits_get_acolparms
 	fits_get_bcolparms
 	fits_get_chksum
-	fits_get_col_display_width
 	fits_get_colnum
 	fits_get_colname
 	fits_get_coltype
@@ -552,8 +547,6 @@ my @__longnames = qw(
 	fits_read_card
 	fits_read_col
 	fits_read_col_bit
-	fits_read_col_bit_usht
-	fits_read_col_bit_uint
 	fits_read_col_str
 	fits_read_col_log
 	fits_read_col_byt
@@ -689,7 +682,6 @@ my @__longnames = qw(
 	fits_update_key_dblcmp
 	fits_update_key_fixdblcmp
 	fits_uppercase
-	fits_url_type
 	fits_verify_chksum
 	fits_verify_group
 	fits_world_to_pix
@@ -1072,15 +1064,16 @@ sub fits_read_header {
   # Read the argument
   my $file = shift;
 
-  my $obj_passed = 0; # were we passed a fitsfilePtr?
+  # Check to see whether we have a reference (eg a fitsfilePtr)
+  # or a simple string. Maybe should do an explicit check for
+  # a fitsfilePtr object rather than simply a reference
 
-  $status = 0;
-  if (UNIVERSAL::isa($file,'fitsfilePtr')) {
+  if (ref($file)) {
     $fitsfile = $file;
-    $obj_passed = 1;
+    $status = 0;  # assume good status if we have a reference
   } else {
     # Open the file.
-    fits_open_file($fitsfile, $file, READONLY(), $status);
+    fits_open_file($fitsfile, $file, READONLY(), $status) 
   }
 
   # Now we have an open file -- check that status is good before
@@ -1104,8 +1097,8 @@ sub fits_read_header {
 
     }
 
-    # Close the file if we opened it
-    $fitsfile->close_file($status) unless $obj_passed;
+    # Close the file
+    $fitsfile->close_file($status);
   }
 
   # Report an error - may not always want to write to STDERR...

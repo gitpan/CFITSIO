@@ -1853,17 +1853,14 @@ ffgcno(fptr,casesen,templt,colnum,status)
 	fitsfile * fptr
 	int casesen
 	char * templt
-	int colnum = NO_INIT
-	int status
+	int &colnum = NO_INIT
+	int &status
 	ALIAS:
 		CFITSIO::fits_get_colnum = 1
 		fitsfilePtr::get_colnum = 2
-	CODE:
-		RETVAL = fits_get_colnum(fptr,casesen,templt,&colnum,&status);
-		if (ST(3) != &sv_undef) sv_setiv(ST(3),colnum);
 	OUTPUT:
+		colnum
 		status
-		RETVAL
 
 int
 ffgtcl(fptr,colnum,typecode,repeat,width,status)
@@ -2696,8 +2693,6 @@ open_file(filename,iomode,status)
 	PREINIT:
 		fitsfile * fptr;
 	CODE:
-		if (!filename) /* undef passed */
-			filename = "";
 		ffopen(&fptr,filename,iomode,&status);
 		ST(0) = sv_newmortal();
 		if (status > 0)
@@ -2716,8 +2711,6 @@ ffopen(fptr,filename,iomode,status)
 	ALIAS:
 		CFITSIO::fits_open_file = 1
 	CODE:
-		if (!filename) /* undef passed */
-			filename = "";
 		RETVAL = ffopen(&fptr,filename,iomode,&status);
 		if (status > 0)
 			ST(0) = &sv_undef;
@@ -3368,19 +3361,6 @@ ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 		RETVAL
 
 int
-ffgcdw(fptr, colnum, dispwidth, status)
-	fitsfile *fptr
-	int colnum
-	int &dispwidth = NO_INIT
-	int &status
-	ALIAS:
-		CFITSIO::fits_get_col_display_width = 1
-		fitsfilePtr::get_col_display_width = 2
-	OUTPUT:
-		dispwidth
-		status
-
-int
 ffghtb(fptr,maxdim,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
 	fitsfile * fptr
 	int maxdim
@@ -3547,48 +3527,6 @@ ffgcx(fptr,colnum,frow,fbit,nbit,larray,status)
 	OUTPUT:
 		status
 		RETVAL
-
-int
-ffgcxui(fptr,colnum,frow,nrows,fbit,nbits,array,status)
-	fitsfile *fptr
-	int colnum
-	long frow
-	long nrows
-	long fbit
-	long nbits
-	unsigned short *array = NO_INIT
-	int status
-	ALIAS:
-		CFITSIO::fits_read_col_bit_usht = 1
-		fitsfilePtr::read_col_bit_usht = 2
-	CODE:
-		array = get_mortalspace(nrows,TUSHORT);
-		RETVAL = ffgcxui(fptr,colnum,frow,nrows,fbit,nbits,array,&status);
-		unpack1D((SV*)ST(6),array,nrows,TUSHORT);
-	OUTPUT:
-		RETVAL
-		status
-
-int
-ffgcxuk(fptr,colnum,frow,nrows,fbit,nbits,array,status)
-	fitsfile *fptr
-	int colnum
-	long frow
-	long nrows
-	long fbit
-	long nbits
-	unsigned int *array = NO_INIT
-	int status
-	ALIAS:
-		CFITSIO::fits_read_col_bit_uint = 1
-		fitsfilePtr::read_col_bit_uint = 2
-	CODE:
-		array = get_mortalspace(nrows,TUINT);
-		RETVAL = ffgcxuk(fptr,colnum,frow,nrows,fbit,nbits,array,&status);
-		unpack1D((SV*)ST(6),array,nrows,TUINT);
-	OUTPUT:
-		RETVAL
-		status
 
 int
 ffgcvs(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,status)
@@ -4191,10 +4129,10 @@ ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		fitsfilePtr::read_colnull_cmp = 2
 	CODE:
 		array = get_mortalspace(nelem,TCOMPLEX);
-		nularray = get_mortalspace(nelem*2,TLOGICAL);
+		nularray = get_mortalspace(nelem,TLOGICAL);
 		RETVAL=ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TCOMPLEX);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem*2,TLOGICAL);
+		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4216,10 +4154,10 @@ ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		fitsfilePtr::read_colnull_dblcmp = 2
 	CODE:
 		array = get_mortalspace(nelem,TDBLCOMPLEX);
-		nularray = get_mortalspace(nelem*2,TLOGICAL);
+		nularray = get_mortalspace(nelem,TLOGICAL);
 		RETVAL=ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TDBLCOMPLEX);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem*2,TLOGICAL);
+		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -6518,23 +6456,6 @@ ffupch(string)
 	OUTPUT:
 		string
 
-int
-ffurlt(fptr,urlType,status)
-	fitsfile *fptr
-	char *urlType = NO_INIT
-	int status
-	ALIAS:
-		CFITSIO::fits_url_type = 1
-		fitsfilePtr::url_type = 2
-	CODE:
-		urlType = get_mortalspace(FLEN_FILENAME,TBYTE);
-		RETVAL = ffurlt(fptr,urlType,&status);
-	OUTPUT:
-		urlType
-		status
-		RETVAL
-		
-	
 int
 ffvcks(fptr,dataok,hduok,status)
 	fitsfile * fptr

@@ -1111,8 +1111,13 @@ $fptr->read_colnull_sht(5,1,1,$nrows,$iinarray,$larray2,$anynull,$status);
 $fptr->read_colnull_int(6,1,1,$nrows,$kinarray,$larray2,$anynull,$status);
 $fptr->read_colnull_flt(7,1,1,$nrows,$einarray,$larray2,$anynull,$status);
 $fptr->read_colnull_dbl(8,1,1,$nrows,$dinarray,$larray2,$anynull,$status);
+   ####################################
+   # PROBLEM: sporadic SEGVs on Linux #
+   ####################################
 $fptr->read_colnull_cmp(9,1,1,$nrows,$cinarray,$larray2,$anynull,$status);
 $fptr->read_colnull_dblcmp(10,1,1,$nrows,$minarray,$larray2,$anynull,$status);
+#$fptr->read_col_cmp(9,1,1,$nrows,98.,$cinarray,$anynull,$status);
+#$fptr->read_col_dblcmp(10,1,1,$nrows,98.,$minarray,$anynull,$status);
 
 print "\nRead columns with ffgcf_:\n";
 for ($ii=0;$ii<10;$ii++) {
