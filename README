@@ -10,6 +10,11 @@ Where can (did) I get it?
    http://hea-www.harvard.edu/~rpete/cfitsio
    http://www.perl.com/CPAN/authors/id/P/PR/PRATZLAFF
 
+What version of CFITSIO does this module need?
+----------------------------------------------
+  CFITSIO.pm version 0.93 requires CFITSIO v2.034. Earlier versions will
+  not work due to recent changes in the API.
+
 Installation
 ------------
    For installation instructions, see the 'INSTALL' file in the base

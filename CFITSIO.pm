@@ -1,5 +1,5 @@
 package CFITSIO;
-$VERSION = '0.92';
+$VERSION = '0.93';
 
 use strict;
 use Carp;
@@ -116,6 +116,7 @@ my @__shortnames = qw(
 	ffmahd
 	ffmnhd
 	ffmrhd
+	ffnchk
 	ffopen
 	ffgtop
 	ffgmop
@@ -190,6 +191,9 @@ my @__shortnames = qw(
 	ffggpd
 	ffgpv
 	ffgics
+	ffgidt
+	ffgidm
+	ffgisz
 	ffgpvb
 	ffgpvi
 	ffgpvui
@@ -413,6 +417,8 @@ my @__shortnames = qw(
 	ffptbb
 	ffptdm
 	ffpthp
+	ffgiwcs
+	ffgtwcs
 );  ### @__shortnames
 
 my @__longnames = qw(
@@ -467,6 +473,9 @@ my @__longnames = qw(
 	fits_get_hdu_num
 	fits_get_hdu_type
 	fits_get_hduaddr
+	fits_get_img_type
+	fits_get_img_dim
+	fits_get_img_size
 	fits_get_keytype
 	fits_get_num_cols
 	fits_get_num_groups
@@ -520,6 +529,7 @@ my @__longnames = qw(
 	fits_movabs_hdu
 	fits_movnam_hdu
 	fits_movrel_hdu
+	fits_null_check
 	fits_open_file
 	fits_open_group
 	fits_open_member
@@ -818,6 +828,8 @@ my @__longnames = qw(
 	fits_write_tdim
 	fits_write_theap
 	fits_read_header
+	fits_get_image_wcs_keys
+	fits_get_table_wcs_keys
 );  ### @__longnames
 
 my @__constants = qw(
@@ -1363,7 +1375,7 @@ FIXME
 
 =head1 AUTHOR
 
-Pete Ratzlaff <pratzlaff@cfa.harvard.edu>, with a great deal of code recycled
+Pete Ratzlaff <pratzlaff@cfa.harvard.edu>, with a great deal of code taken
 from Karl Glazebrook's PGPLOT module.
 
 Contributors include:

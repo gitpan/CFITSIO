@@ -1,3 +1,46 @@
+1999-12-02  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* $VERSION = '0.93';
+
+	* Added cfitsio version section to README.
+
+	* Some common problems and solutions explained in INSTALL.
+
+	* Explicitly enabled prototypes in CFITSIO.xs.
+
+1999-11-26  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Updated fits_get_img_size/ffgisz() for new prototype
+	in CFITSIO 2.034.
+
+1999-11-12  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Added WCS routines fits_get_image_wcs_keys()/ffgiwcs() and
+	fits_get_table_wcs_keys()/ffgtwcs(). Another routine -
+	fits_get_imagecell_wcs_keys() - is documented in the manual
+	but not found in the cfitsio library.
+
+1999-11-01  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* unpack3D() - fixed bug in inner loop.
+
+1999-10-06  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* read_tblbytes(): Fixed compiler warning of incompatible pointers.
+
+1999-09-28  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* fits_get_hdu_num() now accepts undef argument. Useful since
+	its return value is the current HDU number, and setting the variable
+	inplace was redundant.
+
+1999-09-21  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Added fits_null_check/ffnchk(), fits_get_img_type/ffgidt(),
+	fits_get_img_dim/ffgidm() and fits_get_img_size/ffgisz().
+
+	These are all new in CFITSIO v2.033
+
 1999-09-14  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
 
 	* $VERSION = '0.92';

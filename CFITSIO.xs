@@ -1174,7 +1174,9 @@ not_there:
 }
 
 
-MODULE = CFITSIO		PACKAGE = CFITSIO		
+MODULE = CFITSIO		PACKAGE = CFITSIO
+
+PROTOTYPES: ENABLE
 
 double
 constant(name,arg)
@@ -1940,12 +1942,15 @@ ffghsp(fptr,keysexist,morekeys,status)
 int 
 ffghdn(fptr,hdunum)
 	fitsfile * fptr
-	int &hdunum = NO_INIT
+	int hdunum = NO_INIT
 	ALIAS:
 		CFITSIO::fits_get_hdu_num = 1
 		fitsfilePtr::get_hdu_num = 2
+	CODE:
+		RETVAL = ffghdn(fptr,&hdunum);
+		if (ST(1) != &sv_undef) sv_setiv(ST(1),hdunum);
 	OUTPUT:
-		hdunum
+		RETVAL
 
 int
 ffghdt(fptr,hdutype,status)
@@ -1988,6 +1993,49 @@ ffdtyp(value,dtype,status)
 	OUTPUT:
 		dtype
 		status
+
+int
+ffgidt(fptr,bitpix,status)
+	fitsfile * fptr
+	int &bitpix = NO_INIT
+	int &status
+	ALIAS:
+		CFITSIO::fits_get_img_type = 1
+		fitsfilePtr::get_img_type = 2
+	OUTPUT:
+		bitpix
+		status
+
+int
+ffgidm(fptr,naxis,status)
+	fitsfile * fptr
+	int &naxis = NO_INIT
+	int &status
+	ALIAS:
+		CFITSIO::fits_get_img_dim = 1
+		fitsfilePtr::get_img_dim = 2
+	OUTPUT:
+		naxis
+		status
+
+int
+ffgisz(fptr,nlen,naxes,status)
+	fitsfile * fptr
+	int nlen
+	long *naxes = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_get_img_size = 1
+		fitsfilePtr::get_img_size = 2
+	CODE:
+		if (nlen < 0)
+			nlen = 0;
+		naxes = (long *)get_mortalspace(nlen,TLONG);
+		RETVAL = ffgisz(fptr,nlen,naxes,&status);
+		unpack1D(ST(2),naxes,nlen,TLONG);
+	OUTPUT:
+		status
+		RETVAL
 
 int
 ffgncl(fptr,ncols,status)
@@ -2693,6 +2741,15 @@ ffmrhd(fptr,nmove,hdutype,status)
 		status
 		RETVAL
 
+int
+ffnchk(fptr,status)
+	fitsfile * fptr
+	int &status
+	ALIAS:
+		CFITSIO::fits_null_check = 1
+		fitsfilePtr::null_check = 2
+	OUTPUT:
+		status
 
 SV *
 open_file(filename,iomode,status)
@@ -6911,7 +6968,7 @@ ffgtbb(fptr,frow,fchar,nchars,values,status)
 	CODE:
 		if (!PerlyUnpacking(-1)) {
 			SvGROW(ST(4),nchars*sizeof_datatype(TBYTE));
-			RETVAL=ffgtbb(fptr,frow,fchar,nchars,SvPV(ST(4),na),&status);
+			RETVAL=ffgtbb(fptr,frow,fchar,nchars,(byte*)SvPV(ST(4),na),&status);
 		}
 		else {
 			values = get_mortalspace(nchars,TBYTE);
@@ -9332,4 +9389,46 @@ ffpthp(fptr,theap,status)
 		CFITSIO::fits_write_theap = 1
 		fitsfilePtr::write_theap = 2
 	OUTPUT:
+		status
+
+int
+ffgiwcs(fptr,header,status)
+	fitsfile * fptr
+	char * header = NO_INIT
+	int status
+
+	ALIAS:
+		CFITSIO::fits_get_image_wcs_keys = 1
+		fitsfilePtr::get_image_wcs_keys = 2
+	CODE:
+		RETVAL = ffgiwcs(fptr,&header,&status);
+		if (status == 0) {
+			if (ST(1) != &sv_undef)
+				unpackScalar(ST(1),header,TSTRING);
+			free(header);
+		}
+	OUTPUT:
+		RETVAL
+		status
+
+int
+ffgtwcs(fptr,xcol,ycol,header,status)
+	fitsfile * fptr
+	int xcol
+	int ycol
+	char * header = NO_INIT
+	int status
+
+	ALIAS:
+		CFITSIO::fits_get_table_wcs_keys = 1
+		fitsfilePtr::get_table_wcs_keys = 2
+	CODE:
+		RETVAL = ffgtwcs(fptr,xcol,ycol,&header,&status);
+		if (status == 0) {
+			if (ST(3) != &sv_undef)
+				unpackScalar(ST(3),header,TSTRING);
+			free(header);
+		}
+	OUTPUT:
+		RETVAL
 		status

@@ -13,3 +13,14 @@
    runtests - included to make this easier.
 
 6. make install
+
+If compilation fails, please make sure the version of cfitsio you're using
+matches that listed in README as a requirement for this version of the
+module.
+
+If compilaton succeeds but 'make test' fails due to unresolved symbols, you
+should try explicity setting the libcfitsio.a to link to. In Makefile.PL, add
+the following key to the WriteMakefile() argument list:
+
+      'MYEXTLIB' => '/path/to/libcfitsio.a',
+

@@ -7,6 +7,6 @@ WriteMakefile(
     'LIBS'	=> ['-L/home/rpete/local/cfitsio -lcfitsio -lm'],
     'INC'	=> '-I/home/rpete/local/cfitsio',
     'DEFINE'	=> '',
-	'OBJECT' => 'CFITSIO.o util.o',
-	'clean' => { FILES => "testprog.fit testprog/testprog.fit testprog/testprog.lis" },
+    'OBJECT' => 'CFITSIO.o util.o',
+    'clean' => { FILES => "testprog.fit testprog/testprog.fit testprog/testprog.lis" },
 );

@@ -555,7 +555,7 @@ void unpack3D( SV * arg, void * var, long *dims, int datatype) {
 		tmp_sv = *av_fetch(array1,i,0);
 		coerce1D(tmp_sv,dims[1]);
 		array2 = (AV*)SvRV(tmp_sv);
-		for (j=0;j<dims[1];i++) {
+		for (j=0;j<dims[1];j++) {
 			unpack1D(*av_fetch(array2,j,0),tmp_var,dims[2],datatype);
 			tmp_var += skip;
 		}

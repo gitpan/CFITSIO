@@ -5,6 +5,7 @@ Unimplemented:
 
 Documented, but unavailable:
     * fits_calc_col
+    * fits_get_imagecell_wcs_keys
 
 Undocumented, but implemented:
     * fits_write_col_null
