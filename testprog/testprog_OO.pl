@@ -2,7 +2,7 @@
 use strict;
 
 use blib;
-use CFITSIO;
+use CFITSIO qw( :longnames :constants );
 
 my $oskey='value_string';
 my $olkey=1;
@@ -60,20 +60,22 @@ printf "CFITSIO TESTPROG, v%.3f\n\n",$version;
 
 print "Try opening then closing a nonexistent file:\n";
 $status=0;
-fits_open_file($fptr,'tq123x.kjl',READWRITE,$status);
+$fptr=CFITSIO::open_file('tq123x.kjl',READWRITE,$status);
 printf "  ffopen fptr, status  = %d %d (expect an error)\n",$fptr,$status;
-fits_close_file($fptr,$status);
+eval {
+	$fptr->close_file($status);
+};
 printf "  ffclos status = %d\n\n", $status;
 fits_clear_errmsg();
 
 $status=0;
-fits_create_file($fptr,'!testprog.fit',$status);
+$fptr=CFITSIO::create_file('!testprog.fit',$status);
 print "ffinit create new file status = $status\n";
 $status and goto ERRSTATUS;
 
 $filemode;
-fits_file_name($fptr,$filename,$status);
-fits_file_mode($fptr,$filemode,$status);
+$fptr->file_name($filename,$status);
+$fptr->file_mode($filemode,$status);
 print "Name of file = $filename, I/O mode = $filemode\n";
 $simple=1;
 $bitpix=32;
@@ -88,11 +90,10 @@ $extend=1;
 #  write single keywords   #
 ############################
 
-fits_write_imghdr($fptr,$bitpix,$naxis,$naxes,$status) and
+$fptr->write_imghdr($bitpix,$naxis,$naxes,$status) and
 	print "ffphps status = $status";
 
-fits_write_record(
-	$fptr,
+$fptr->write_record(
 	"key_prec= 'This keyword was written by fxprec' / comment goes here",
 	$status
 ) and printf"ffprec status = $status\n";
@@ -101,123 +102,122 @@ print "\ntest writing of long string keywords:\n";
 $card =
 	"1234567890123456789012345678901234567890" .
 	"12345678901234567890123456789012345";
-fits_write_key_str($fptr,"card1",$card,"",$status);
-fits_read_keyword($fptr,'card1',$card2,$comment,$status);
+$fptr->write_key_str("card1",$card,"",$status);
+$fptr->read_keyword('card1',$card2,$comment,$status);
 print " $card\n$card2\n";
 
 $card =
 	"1234567890123456789012345678901234567890" .
 	"123456789012345678901234'6789012345";
-fits_write_key_str($fptr,'card2',$card,"",$status);
-fits_read_keyword($fptr,'card2',$card2,$comment,$status);
+$fptr->write_key_str('card2',$card,"",$status);
+$fptr->read_keyword('card2',$card2,$comment,$status);
 print " $card\n$card2\n";
 
 $card =
 	"1234567890123456789012345678901234567890" .
 	"123456789012345678901234''789012345";
-fits_write_key_str($fptr,'card3',$card,"",$status);
-fits_read_keyword($fptr,'card3',$card2,$comment,$status);
+$fptr->write_key_str('card3',$card,"",$status);
+$fptr->read_keyword('card3',$card2,$comment,$status);
 print " $card\n$card2\n";
 
 $card =
 	"1234567890123456789012345678901234567890" .
 	"123456789012345678901234567'9012345";
-fits_write_key_str($fptr,'card4',$card,"",$status);
-fits_read_keyword($fptr,'card4',$card2,$comment,$status);
+$fptr->write_key_str('card4',$card,"",$status);
+$fptr->read_keyword('card4',$card2,$comment,$status);
 print " $card\n$card2\n";
 
 
-fits_write_key_str($fptr,'key_pkys',$oskey,'fxpkys comment',$status)
+$fptr->write_key_str('key_pkys',$oskey,'fxpkys comment',$status)
 	and print "ffpkys status = $status\n";
-fits_write_key_log($fptr,'key_pkyl',$olkey,'fxpkyl comment',$status)
+$fptr->write_key_log('key_pkyl',$olkey,'fxpkyl comment',$status)
 	and print "ffpkyl status = $status\n";
-fits_write_key_lng($fptr,'key_pkyj',$ojkey,'fxpkyj comment',$status)
+$fptr->write_key_lng('key_pkyj',$ojkey,'fxpkyj comment',$status)
 	and print "ffpkyj status = $status\n";
-fits_write_key_fixflt($fptr,'key_pkyf',$ofkey,5,'fxpkyf comment',$status)
+$fptr->write_key_fixflt('key_pkyf',$ofkey,5,'fxpkyf comment',$status)
 	and print "ffpkyf status = $status\n";
-fits_write_key_flt($fptr,'key_pkye',$oekey,6,'fxpkye comment',$status)
+$fptr->write_key_flt('key_pkye',$oekey,6,'fxpkye comment',$status)
 	and print "ffpkye status = $status\n";
-fits_write_key_fixdbl($fptr,'key_pkyg',$ogkey,14,'fxpkyg comment',$status)
+$fptr->write_key_fixdbl('key_pkyg',$ogkey,14,'fxpkyg comment',$status)
 	and print "ffpkyg status = $status\n";
-fits_write_key_dbl($fptr,'key_pkyd',$odkey,14,'fxpkyd comment',$status)
+$fptr->write_key_dbl('key_pkyd',$odkey,14,'fxpkyd comment',$status)
 	and print "ffpkyd status = $status\n";
-fits_write_key_cmp($fptr,'key_pkyc',$onekey,6,'fxpkyc comment',$status)
+$fptr->write_key_cmp('key_pkyc',$onekey,6,'fxpkyc comment',$status)
 	and print "ffpkyc status = $status\n";
-fits_write_key_dblcmp($fptr,'key_pkym',$ondkey,14,'fxpkym comment',$status)
+$fptr->write_key_dblcmp('key_pkym',$ondkey,14,'fxpkym comment',$status)
 	and print "ffpkym status = $status\n";
-fits_write_key_fixcmp($fptr,'key_pkfc',$onekey,6,'fxpkfc comment',$status)
+$fptr->write_key_fixcmp('key_pkfc',$onekey,6,'fxpkfc comment',$status)
 	and print "ffpkfc status = $status\n";
-fits_write_key_fixdblcmp($fptr,'key_pkfm',$ondkey,14,'fxpkfm comment',$status)
+$fptr->write_key_fixdblcmp('key_pkfm',$ondkey,14,'fxpkfm comment',$status)
 	and print "ffpkfm status = $status\n";
 
 ##############################################
 # PROBLEM: erratic Bus Errors on Solaris 2.5 #
 ##############################################
 $comment='key_pkls';
-fits_write_key_longstr(
-	$fptr,
+$fptr->write_key_longstr(
 	$comment,
 	#'key_pkls',
 	'This is a very long string value that is continued over more than one keyword.',
 	'fxpkls comment',
 	$status,
 ) and print "ffpkls status = $status\n";
-fits_write_key_longwarn($fptr,$status)
+$fptr->write_key_longwarn($status)
 	and print "ffplsw status = $status\n";
-fits_write_key_triple($fptr,'key_pkyt',$otint,$otfrac,'fxpkyt comment',$status)
+$fptr->write_key_triple('key_pkyt',$otint,$otfrac,'fxpkyt comment',$status)
 	and print "ffpkyt status = $status\n";
-fits_write_comment($fptr,'This keyword was written by fxpcom.',$status)
+$fptr->write_comment('This keyword was written by fxpcom.',$status)
 	and print "ffpcom status = $status\n";
-fits_write_history($fptr,"  This keyword written by fxphis (w/ 2 leading spaces).",$status)
+$fptr->write_history("  This keyword written by fxphis (w/ 2 leading spaces).",$status)
 	and print "ffphis status = $status\n";
-fits_write_date($fptr,$status) and print "ffpdat status = $status\n, goto ERRSTATUS";
+$fptr->write_date($status) and print "ffpdat status = $status\n, goto ERRSTATUS";
 
 ############################
 # write arrays of keywords #
 ############################
 $nkeys = 3;
 
-fits_write_keys_str($fptr,'ky_pkns',1,$nkeys,$onskey,'fxpkns comment&',$status)
+$fptr->write_keys_str('ky_pkns',1,$nkeys,$onskey,'fxpkns comment&',$status)
 	and print "ffpkns status = $status\n";
-fits_write_keys_log($fptr,'ky_pknl',1,$nkeys,$onlkey,'fxpknl comment&',$status)
+$fptr->write_keys_log('ky_pknl',1,$nkeys,$onlkey,'fxpknl comment&',$status)
 	and print "ffpknl status = $status\n";
-fits_write_keys_lng($fptr,'ky_pknj',1,$nkeys,$onjkey,'fxpknj comment&',$status)
+$fptr->write_keys_lng('ky_pknj',1,$nkeys,$onjkey,'fxpknj comment&',$status)
 	and print "ffpknj status = $status\n";
-fits_write_keys_fixflt($fptr,'ky_pknf',1,$nkeys,$onfkey,5,'fxpknf comment&',$status)
+$fptr->write_keys_fixflt('ky_pknf',1,$nkeys,$onfkey,5,'fxpknf comment&',$status)
 	and print "ffpknf status = $status\n";
-fits_write_keys_flt($fptr,'ky_pkne',1,$nkeys,$onekey,6,'fxpkne comment&',$status)
+$fptr->write_keys_flt('ky_pkne',1,$nkeys,$onekey,6,'fxpkne comment&',$status)
 	and print "ffpkne status = $status\n";
-fits_write_keys_fixdbl($fptr,'ky_pkng',1,$nkeys,$ongkey,13,'fxpkng comment&',$status)
+$fptr->write_keys_fixdbl('ky_pkng',1,$nkeys,$ongkey,13,'fxpkng comment&',$status)
 	and print "ffpkng status = $status\n";
-fits_write_keys_dbl($fptr,'ky_pknd',1,$nkeys,$ondkey,14,'fxpknd comment&',$status)
+$fptr->write_keys_dbl('ky_pknd',1,$nkeys,$ondkey,14,'fxpknd comment&',$status)
 	and print "ffpknd status = $status\n",goto ERRSTATUS;
 
 ############################
 #  write generic keywords  #
 ############################
 $oskey = 1;
-fits_write_key($fptr,TSTRING,'tstring',$oskey,'tstring comment',$status)
+$fptr->write_key(TSTRING,'tstring',$oskey,'tstring comment',$status)
 	and print "ffpky status = $status\n";
 $olkey = TLOGICAL;
-fits_write_key($fptr,TLOGICAL,'tlogical',$olkey,'tlogical comment',$status)
+$fptr->write_key(TLOGICAL,'tlogical',$olkey,'tlogical comment',$status)
 	and print "ffpky status = $status\n";
 $cval = TBYTE;
-fits_write_key($fptr,TBYTE,'tbyte',$cval,'tbyte comment',$status)
+$fptr->write_key(TBYTE,'tbyte',$cval,'tbyte comment',$status)
 	and print "ffpky status = $status\n";
 $oshtkey = TSHORT;
-fits_write_key($fptr,TSHORT,'tshort',$oshtkey,'tshort comment',$status)
+$fptr->write_key(TSHORT,'tshort',$oshtkey,'tshort comment',$status)
 	and print "ffpky status = $status\n";
 $olkey = TINT;
-fits_write_key($fptr,TINT,'tint',$olkey,'tint comment',$status)
+$fptr->write_key(TINT,'tint',$olkey,'tint comment',$status)
 	and print "ffpky status = $status\n";
 $ojkey = TLONG;
-fits_write_key($fptr,TLONG,'tlong',$ojkey,'tlong comment',$status)
+$fptr->write_key(TLONG,'tlong',$ojkey,'tlong comment',$status)
 	and print "ffpky status = $status\n";
 $oekey = TFLOAT;
-fits_write_key($fptr,TFLOAT,'tfloat',$oekey,'tfloat comment',$status)
+$fptr->write_key(TFLOAT,'tfloat',$oekey,'tfloat comment',$status)
 	and print "ffpky status = $status\n";
 $odkey = TDOUBLE;
-fits_write_key($fptr,TDOUBLE,'tdouble',$odkey,'tdouble comment',$status)
+$fptr->write_key(TDOUBLE,'tdouble',$odkey,'tdouble comment',$status)
 	and print "ffpky status = $status\n";
 
 
@@ -225,7 +225,7 @@ fits_write_key($fptr,TDOUBLE,'tdouble',$odkey,'tdouble comment',$status)
 #  write data              #
 ############################
 
-fits_write_key_lng($fptr,'BLANK',-99,'value to use for undefined pixels',$status)
+$fptr->write_key_lng('BLANK',-99,'value to use for undefined pixels',$status)
 	and print "BLANK keyword status = $status\n";
 
 $boutarray = [1..$npixels];
@@ -234,22 +234,22 @@ $joutarray = [1..$npixels];
 $eoutarray = [1..$npixels];
 $doutarray = [1..$npixels];
 
-fits_write_img_byt($fptr,1,1,2,[@{$boutarray}[0..1]],$status);
-fits_write_img_sht($fptr,1,5,2,[@{$ioutarray}[4..5]],$status);
-fits_write_img_lng($fptr,1,9,2,[@{$joutarray}[8..9]],$status);
-fits_write_img_flt($fptr,1,13,2,[@{$eoutarray}[12..13]],$status);
-fits_write_img_dbl($fptr,1,17,2,[@{$doutarray}[16..17]],$status);
-fits_write_imgnull_byt($fptr,1,3,2,[@{$boutarray}[2..3]],4,$status);
-fits_write_imgnull_sht($fptr,1,7,2,[@{$ioutarray}[6..7]],8,$status);
-fits_write_imgnull_lng($fptr,1,11,2,[@{$joutarray}[10..11]],12,$status);
-fits_write_imgnull_flt($fptr,1,15,2,[@{$eoutarray}[14..15]],16,$status);
-fits_write_imgnull_dbl($fptr,1,19,2,[@{$doutarray}[18..19]],20,$status);
-fits_write_img_null($fptr,1,1,1,$status);
+$fptr->write_img_byt(1,1,2,[@{$boutarray}[0..1]],$status);
+$fptr->write_img_sht(1,5,2,[@{$ioutarray}[4..5]],$status);
+$fptr->write_img_lng(1,9,2,[@{$joutarray}[8..9]],$status);
+$fptr->write_img_flt(1,13,2,[@{$eoutarray}[12..13]],$status);
+$fptr->write_img_dbl(1,17,2,[@{$doutarray}[16..17]],$status);
+$fptr->write_imgnull_byt(1,3,2,[@{$boutarray}[2..3]],4,$status);
+$fptr->write_imgnull_sht(1,7,2,[@{$ioutarray}[6..7]],8,$status);
+$fptr->write_imgnull_lng(1,11,2,[@{$joutarray}[10..11]],12,$status);
+$fptr->write_imgnull_flt(1,15,2,[@{$eoutarray}[14..15]],16,$status);
+$fptr->write_imgnull_dbl(1,19,2,[@{$doutarray}[18..19]],20,$status);
+$fptr->write_img_null(1,1,1,$status);
 $status and  print "ffppnx status = $status\n", goto ERRSTATUS;
 
-fits_flush_file($fptr,$status);
+$fptr->flush_file($status);
 print "ffflus status = $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
 ############################
 #  read data               #
@@ -258,26 +258,26 @@ print "\nValues read back from primary array (99 = null pixel)\n";
 print "The 1st, and every 4th pixel should be undefined:\n";
 
 $anynull = 0;
-fits_read_img_byt($fptr,1,1,10,99,$binarray,$anynull,$status);
-fits_read_img_byt($fptr,1,11,10,99,$tmp,$anynull,$status);
+$fptr->read_img_byt(1,1,10,99,$binarray,$anynull,$status);
+$fptr->read_img_byt(1,11,10,99,$tmp,$anynull,$status);
 @{$binarray}[10..$npixels-1] = @{$tmp};
 map printf(" %2d",$binarray->[$_]),(0..$npixels-1);
 print "  $anynull (ffgpvb)\n";
 
-fits_read_img_sht($fptr,1,1,$npixels,99,$iinarray,$anynull,$status);
+$fptr->read_img_sht(1,1,$npixels,99,$iinarray,$anynull,$status);
 map printf(" %2d",$iinarray->[$_]),(0..$npixels-1);
 print "  $anynull (ffgpvi)\n";
 
-fits_read_img_lng($fptr,1,1,$npixels,99,$jinarray,$anynull,$status);
+$fptr->read_img_lng(1,1,$npixels,99,$jinarray,$anynull,$status);
 map printf(" %2d",$jinarray->[$_]),(0..$npixels-1);
 print "  $anynull (ffgpvj)\n";
 
-fits_read_img_flt($fptr,1,1,$npixels,99,$einarray,$anynull,$status);
+$fptr->read_img_flt(1,1,$npixels,99,$einarray,$anynull,$status);
 map printf(" %2.0f",$einarray->[$_]),(0..$npixels-1);
 print "  $anynull (ffgpve)\n";
 
-fits_read_img_dbl($fptr,1,1,10,99,$dinarray,$anynull,$status);
-fits_read_img_dbl($fptr,1,11,10,99,$tmp,$anynull,$status);
+$fptr->read_img_dbl(1,1,10,99,$dinarray,$anynull,$status);
+$fptr->read_img_dbl(1,11,10,99,$tmp,$anynull,$status);
 @{$dinarray}[10..$npixels-1] = @{$tmp};
 map printf(" %2.0d",$dinarray->[$_]),(0..$npixels-1);
 print "  $anynull (ffgpvd)\n";
@@ -321,8 +321,8 @@ for ($ii=0; $ii<$npixels;$ii++) {
 
 $anynull = 0;
 $larray;
-fits_read_imgnull_byt($fptr,1,1,10,$binarray,$larray,$anynull,$status);
-fits_read_imgnull_byt($fptr,1,11,10,$tmp1,$tmp2,$anynull,$status);
+$fptr->read_imgnull_byt(1,1,10,$binarray,$larray,$anynull,$status);
+$fptr->read_imgnull_byt(1,11,10,$tmp1,$tmp2,$anynull,$status);
 @{$binarray}[10..$npixels-1] = @{$tmp1};
 @{$larray}[10..$npixels-1] = @{$tmp2};
 for ($ii=0;$ii<$npixels;$ii++) {
@@ -331,29 +331,29 @@ for ($ii=0;$ii<$npixels;$ii++) {
 }
 print "  $anynull (ffgpfb)\n";
 
-fits_read_imgnull_sht($fptr,1,1,$npixels,$iinarray,$larray,$anynull,$status);
+$fptr->read_imgnull_sht(1,1,$npixels,$iinarray,$larray,$anynull,$status);
 for ($ii=0;$ii<$npixels;$ii++) {
 	if ($larray->[$ii]) { print "  *" }
 	else { printf " %2d",$iinarray->[$ii] }
 }
 print "  $anynull (ffgpfi)\n";
 
-fits_read_imgnull_lng($fptr,1,1,$npixels,$jinarray,$larray,$anynull,$status);
+$fptr->read_imgnull_lng(1,1,$npixels,$jinarray,$larray,$anynull,$status);
 for ($ii=0;$ii<$npixels;$ii++) {
 	if ($larray->[$ii]) { print "  *" }
 	else { printf " %2d",$jinarray->[$ii] }
 }
 print "  $anynull (ffgpfj)\n";
 
-fits_read_imgnull_flt($fptr,1,1,$npixels,$einarray,$larray,$anynull,$status);
+$fptr->read_imgnull_flt(1,1,$npixels,$einarray,$larray,$anynull,$status);
 for ($ii=0;$ii<$npixels;$ii++) {
 	if ($larray->[$ii]) { print "  *" }
 	else { printf " %2.0f",$einarray->[$ii] }
 }
 print "  $anynull (ffgpfe)\n";
 
-fits_read_imgnull_dbl($fptr,1,1,10,$dinarray,$larray,$anynull,$status);
-fits_read_imgnull_dbl($fptr,1,11,10,$tmp1,$tmp2,$anynull,$status);
+$fptr->read_imgnull_dbl(1,1,10,$dinarray,$larray,$anynull,$status);
+$fptr->read_imgnull_dbl(1,11,10,$tmp1,$tmp2,$anynull,$status);
 @{$dinarray}[10..$npixels-1] = @{$tmp1};
 @{$larray}[10..$npixels-1] = @{$tmp2};
 for ($ii=0;$ii<$npixels;$ii++) {
@@ -374,17 +374,18 @@ $anynull or print "ERROR: ffgpf_ did not detect null values\n";
    # PROBLEM: SEGV on Solaris 2.5, Perl 5.004 #
    ############################################
 for ($ii=0;$ii<10;$ii++) {
-	fits_close_file($fptr,$status) and
+	$fptr->close_file($status) and
 		print("ERROR in ftclos (1) = $status"), goto ERRSTATUS;
-	fits_open_file($fptr,$filename,READWRITE,$status) and
-		print("ERROR: ffopen open file status = $status\n"), goto ERRSTATUS;
+	$fptr=CFITSIO::open_file($filename,READWRITE,$status);
+		$status and
+			print("ERROR: ffopen open file status = $status\n"), goto ERRSTATUS;
 }
 print "\nClosed then reopened the FITS file 10 times.\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
 $filename = "";
-fits_file_name($fptr,$filename,$status);
-fits_file_mode($fptr,$filemode,$status);
+$fptr->file_name($filename,$status);
+$fptr->file_mode($filemode,$status);
 print "Name of file = $filename, I/O mode = $filemode\n";
 
 
@@ -400,158 +401,158 @@ $pcount = -99;
 $gcount = -99;
 $extend = -99;
 print "\nRead back keywords:\n";
-fits_read_imghdr($fptr,0,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
+$fptr->read_imghdr(0,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
 print "simple = $simple, bitpix = $bitpix, naxis = $naxis, naxes = ($naxes->[0], $naxes->[1])\n";
 print "  pcount = $pcount, gcount = $gcount, extend = $extend\n";
 
-fits_read_record($fptr,11,$card,$status);
+$fptr->read_record(11,$card,$status);
 print $card,"\n";
 (substr($card,0,15) eq "KEY_PREC= 'This") or print "ERROR in ffgrec\n";
 
-fits_read_keyn($fptr,11,$keyword,$value,$comment,$status);
+$fptr->read_keyn(11,$keyword,$value,$comment,$status);
 print "$keyword : $value : $comment :\n";
 ($keyword eq 'KEY_PREC') or print "ERROR in ffgkyn: $keyword\n";
 
-fits_read_card($fptr,$keyword,$card,$status);
+$fptr->read_card($keyword,$card,$status);
 print $card,"\n";
 ($keyword eq substr($card,0,8)) or print "ERROR in ffgcrd: $keyword\n";
 
-fits_read_keyword($fptr,'KY_PKNS1',$value,$comment,$status);
+$fptr->read_keyword('KY_PKNS1',$value,$comment,$status);
 print "KY_PKNS1 : $value : $comment :\n";
 (substr($value,0,14) eq "'first string'") or print "ERROR in ffgkey $value\n";
 
-fits_read_key_str($fptr,'key_pkys',$iskey,$comment,$status);
+$fptr->read_key_str('key_pkys',$iskey,$comment,$status);
 print "KEY_PKYS $iskey $comment $status\n";
 
-fits_read_key_log($fptr,'key_pkyl',$ilkey,$comment,$status);
+$fptr->read_key_log('key_pkyl',$ilkey,$comment,$status);
 print "KEY_PKYL $ilkey $comment $status\n";
 
-fits_read_key_lng($fptr,'KEY_PKYJ',$ijkey,$comment,$status);
+$fptr->read_key_lng('KEY_PKYJ',$ijkey,$comment,$status);
 print "KEY_PKYJ $ijkey $comment $status\n";
 
-fits_read_key_flt($fptr,'KEY_PKYJ',$iekey,$comment,$status);
+$fptr->read_key_flt('KEY_PKYJ',$iekey,$comment,$status);
 printf "KEY_PKYJ %f $comment $status\n",$iekey;
 
-fits_read_key_dbl($fptr,'KEY_PKYJ',$idkey,$comment,$status);
+$fptr->read_key_dbl('KEY_PKYJ',$idkey,$comment,$status);
 printf "KEY_PKYJ %f $comment $status\n",$idkey;
 
 ($ijkey == 11 and $iekey == 11.0 and $idkey == 11.0) or
 	printf "ERROR in ffgky[jed]: %d, %f, %f\n",$ijkey,$iekey,$idkey;
 
 $iskey = "";
-fits_read_key($fptr,TSTRING,'key_pkys',$iskey,$comment,$status);
+$fptr->read_key(TSTRING,'key_pkys',$iskey,$comment,$status);
 print "KEY_PKY S $iskey $comment $status\n";
 
 $ilkey = 0;
-fits_read_key($fptr,TLOGICAL,'key_pkyl',$ilkey,$comment,$status);
+$fptr->read_key(TLOGICAL,'key_pkyl',$ilkey,$comment,$status);
 print "KEY_PKY L $ilkey $comment $status\n";
 
-fits_read_key($fptr,TBYTE,'KEY_PKYJ',$cval,$comment,$status);
+$fptr->read_key(TBYTE,'KEY_PKYJ',$cval,$comment,$status);
 print "KEY_PKY BYTE $cval $comment $status\n";
 
-fits_read_key($fptr,TSHORT,'KEY_PKYJ',$ishtkey,$comment,$status);
+$fptr->read_key(TSHORT,'KEY_PKYJ',$ishtkey,$comment,$status);
 print "KEY_PKY SHORT $ishtkey $comment $status\n";
 
-fits_read_key($fptr,TINT,'KEY_PKYJ',$ilkey,$comment,$status);
+$fptr->read_key(TINT,'KEY_PKYJ',$ilkey,$comment,$status);
 print "KEY_PKY INT $ilkey $comment $status\n";
 
 $ijkey=0;
-fits_read_key($fptr,TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
+$fptr->read_key(TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
 print "KEY_PKY J $ijkey $comment $status\n";
 
 $iekey=0;
-fits_read_key($fptr,TFLOAT,'KEY_PKYE',$iekey,$comment,$status);
+$fptr->read_key(TFLOAT,'KEY_PKYE',$iekey,$comment,$status);
 printf "KEY_PKY E %f $comment $status\n",$iekey;
 
 $idkey=0;
-fits_read_key($fptr,TDOUBLE,'KEY_PKYD',$idkey,$comment,$status);
+$fptr->read_key(TDOUBLE,'KEY_PKYD',$idkey,$comment,$status);
 printf "KEY_PKY D %f $comment $status\n",$idkey;
 
-fits_read_key_dbl($fptr,'KEY_PKYF',$idkey,$comment,$status);
+$fptr->read_key_dbl('KEY_PKYF',$idkey,$comment,$status);
 printf "KEY_PKYF %f $comment $status\n",$idkey;
 
-fits_read_key_dbl($fptr,'KEY_PKYE',$idkey,$comment,$status);
+$fptr->read_key_dbl('KEY_PKYE',$idkey,$comment,$status);
 printf "KEY_PKYE %f $comment $status\n",$idkey;
 
-fits_read_key_dbl($fptr,'KEY_PKYG',$idkey,$comment,$status);
+$fptr->read_key_dbl('KEY_PKYG',$idkey,$comment,$status);
 printf "KEY_PKYG %.14f $comment $status\n",$idkey;
 
-fits_read_key_dbl($fptr,'KEY_PKYD',$idkey,$comment,$status);
+$fptr->read_key_dbl('KEY_PKYD',$idkey,$comment,$status);
 printf "KEY_PKYD %.14f $comment $status\n",$idkey;
 
-fits_read_key_cmp($fptr,'KEY_PKYC',$inekey,$comment,$status);
+$fptr->read_key_cmp('KEY_PKYC',$inekey,$comment,$status);
 printf "KEY_PKYC %f %f $comment $status\n",@$inekey;
 
-fits_read_key_cmp($fptr,'KEY_PKFC',$inekey,$comment,$status);
+$fptr->read_key_cmp('KEY_PKFC',$inekey,$comment,$status);
 printf "KEY_PKFC %f %f $comment $status\n",@$inekey;
 
-fits_read_key_dblcmp($fptr,'KEY_PKYM',$indkey,$comment,$status);
+$fptr->read_key_dblcmp('KEY_PKYM',$indkey,$comment,$status);
 printf "KEY_PKYM %f %f $comment $status\n",@$indkey;
 
-fits_read_key_dblcmp($fptr,'KEY_PKFM',$indkey,$comment,$status);
+$fptr->read_key_dblcmp('KEY_PKFM',$indkey,$comment,$status);
 printf "KEY_PKFM %f %f $comment $status\n",@$indkey;
 
-fits_read_key_triple($fptr,'KEY_PKYT',$ijkey,$idkey,$comment,$status);
+$fptr->read_key_triple('KEY_PKYT',$ijkey,$idkey,$comment,$status);
 printf "KEY_PKYT $ijkey %.14f $comment $status\n",$idkey;
 
-fits_write_key_unit($fptr,'KEY_PKYJ',"km/s/Mpc",$status);
+$fptr->write_key_unit('KEY_PKYJ',"km/s/Mpc",$status);
 $ijkey=0;
-fits_read_key($fptr,TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
+$fptr->read_key(TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
 print "KEY_PKY J $ijkey $comment $status\n";
-fits_read_key_unit($fptr,'KEY_PKYJ',$comment,$status);
+$fptr->read_key_unit('KEY_PKYJ',$comment,$status);
 print "KEY_PKY units = $comment\n";
 
-fits_write_key_unit($fptr,'KEY_PKYJ','',$status);
+$fptr->write_key_unit('KEY_PKYJ','',$status);
 $ijkey=0;
-fits_read_key($fptr,TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
+$fptr->read_key(TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
 print "KEY_PKY J $ijkey $comment $status\n";
-fits_read_key_unit($fptr,'KEY_PKYJ',$comment,$status);
+$fptr->read_key_unit('KEY_PKYJ',$comment,$status);
 print "KEY_PKY units = $comment\n";
 
-fits_write_key_unit($fptr,'KEY_PKYJ','feet/second/second',$status);
+$fptr->write_key_unit('KEY_PKYJ','feet/second/second',$status);
 $ijkey=0;
-fits_read_key($fptr,TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
+$fptr->read_key(TLONG,'KEY_PKYJ',$ijkey,$comment,$status);
 print "KEY_PKY J $ijkey $comment $status\n";
-fits_read_key_unit($fptr,'KEY_PKYJ',$comment,$status);
+$fptr->read_key_unit('KEY_PKYJ',$comment,$status);
 print "KEY_PKY units = $comment\n";
 
-fits_read_key_longstr($fptr,'key_pkls',$lsptr,$comment,$status);
+$fptr->read_key_longstr('key_pkls',$lsptr,$comment,$status);
 print "KEY_PKLS long string value = \n$lsptr\n";
 
-fits_get_hdrpos($fptr,$existkeys,$keynum,$status);
+$fptr->get_hdrpos($existkeys,$keynum,$status);
 print "header contains $existkeys keywords; located at keyword $keynum \n";
 
 ############################
 #  read array keywords     #
 ############################
 
-fits_read_keys_str($fptr,'ky_pkns',1,3,$inskey,$nfound,$status);
+$fptr->read_keys_str('ky_pkns',1,3,$inskey,$nfound,$status);
 print "ffgkns:  $inskey->[0], $inskey->[1], $inskey->[2]\n";
 ($nfound == 3 and $status == 0) or print "\nERROR in ffgkns $nfound, $status\n";
 
-fits_read_keys_log($fptr,'ky_pknl',1,3,$inlkey,$nfound,$status);
+$fptr->read_keys_log('ky_pknl',1,3,$inlkey,$nfound,$status);
 print "ffgknl:  $inlkey->[0], $inlkey->[1], $inlkey->[2]\n";
 ($nfound == 3 and $status == 0) or print "\nERROR in ffgknl $nfound, $status\n";
 
-fits_read_keys_lng($fptr,'ky_pknj',1,3,$injkey,$nfound,$status);
+$fptr->read_keys_lng('ky_pknj',1,3,$injkey,$nfound,$status);
 print "ffgknj:  $injkey->[0], $injkey->[1], $injkey->[2]\n";
 ($nfound == 3 and $status == 0) or print "\nERROR in ffgknj $nfound, $status\n";
 
-fits_read_keys_flt($fptr,'ky_pkne',1,3,$inekey,$nfound,$status);
+$fptr->read_keys_flt('ky_pkne',1,3,$inekey,$nfound,$status);
 printf "ffgkne:  %f, %f, %f\n",@{$inekey};
 ($nfound == 3 and $status == 0) or print "\nERROR in ffgkne $nfound, $status\n";
 
-fits_read_keys_dbl($fptr,'ky_pknd',1,3,$indkey,$nfound,$status);
+$fptr->read_keys_dbl('ky_pknd',1,3,$indkey,$nfound,$status);
 printf "ffgknd:  %f, %f, %f\n",@{$indkey};
 ($nfound == 3 and $status == 0) or print "\nERROR in ffgknd $nfound, $status\n";
 
-fits_read_card($fptr,'HISTORY',$card,$status);
-fits_get_hdrpos($fptr,$existkeys,$keynum,$status);
+$fptr->read_card('HISTORY',$card,$status);
+$fptr->get_hdrpos($existkeys,$keynum,$status);
 $keynum -= 2;
 
 print "\nBefore deleting the HISTORY and DATE keywords...\n";
 for ($ii=$keynum; $ii<=$keynum+3;$ii++) {
-	fits_read_record($fptr,$ii,$card,$status);
+	$fptr->read_record($ii,$card,$status);
 	print substr($card,0,8),"\n";
 }
 
@@ -559,16 +560,14 @@ for ($ii=$keynum; $ii<=$keynum+3;$ii++) {
 #  delete keywords         #
 ############################
 
-fits_delete_record($fptr,$keynum+1,$status);
-fits_delete_key($fptr,'DATE',$status);
+$fptr->delete_record($keynum+1,$status);
+$fptr->delete_key('DATE',$status);
 
-=head1
 print "\nAfter deleting the keywords...\n";
 for ($ii=$keynum; $ii<=$keynum+1;$ii++) {
-	fits_read_record($fptr,$ii,$card,$status);
+	$fptr->read_record($ii,$card,$status);
 	print $card,"\n";
 }
-=cut
 
 $status and print "ERROR deleting keywords\n";
 
@@ -577,21 +576,21 @@ $status and print "ERROR deleting keywords\n";
 ############################
 
 $keynum += 4;
-fits_insert_record($fptr,$keynum-3,"KY_IREC = 'This keyword inserted by fxirec'",$status);
-fits_insert_key_str($fptr,'KY_IKYS',"insert_value_string", "ikys comment", $status);
-fits_insert_key_lng($fptr,'KY_IKYJ',49,"ikyj comment", $status);
-fits_insert_key_log($fptr,'KY_IKYL',1, "ikyl comment", $status);
-fits_insert_key_flt($fptr,'KY_IKYE',12.3456, 4, "ikye comment", $status);
-fits_insert_key_dbl($fptr,'KY_IKYD',12.345678901234567, 14, "ikyd comment", $status);
+$fptr->insert_record($keynum-3,"KY_IREC = 'This keyword inserted by fxirec'",$status);
+$fptr->insert_key_str('KY_IKYS',"insert_value_string", "ikys comment", $status);
+$fptr->insert_key_lng('KY_IKYJ',49,"ikyj comment", $status);
+$fptr->insert_key_log('KY_IKYL',1, "ikyl comment", $status);
+$fptr->insert_key_flt('KY_IKYE',12.3456, 4, "ikye comment", $status);
+$fptr->insert_key_dbl('KY_IKYD',12.345678901234567, 14, "ikyd comment", $status);
    ############################################
    # PROBLEM: SEGV on Solaris 2.5, Perl 5.004 #
    ############################################
-fits_insert_key_fixflt($fptr,'KY_IKYF',12.3456, 4, "ikyf comment", $status);
-fits_insert_key_fixdbl($fptr,'KY_IKYG',12.345678901234567, 13, "ikyg comment", $status);
+$fptr->insert_key_fixflt('KY_IKYF',12.3456, 4, "ikyf comment", $status);
+$fptr->insert_key_fixdbl('KY_IKYG',12.345678901234567, 13, "ikyg comment", $status);
 
 print "\nAfter inserting the keywords...\n";
 for ($ii=$keynum-4; $ii<=$keynum+5;$ii++) {
-	fits_read_record($fptr,$ii,$card,$status);
+	$fptr->read_record($ii,$card,$status);
 	print $card,"\n";
 }
 
@@ -601,21 +600,21 @@ $status and print "ERROR inserting keywords\n";
 #  modify keywords         #
 ############################
 
-fits_modify_record($fptr,$keynum-4,'COMMENT   This keyword was modified by fxmrec', $status);
-fits_modify_card($fptr,'KY_IREC',"KY_MREC = 'This keyword was modified by fxmcrd'",$status);
-fits_modify_name($fptr,'KY_IKYS','NEWIKYS',$status);
-fits_modify_comment($fptr,'KY_IKYJ','This is a modified comment', $status);
-fits_modify_key_lng($fptr,'KY_IKYJ',50,'&',$status);
-fits_modify_key_log($fptr,'KY_IKYL',0,'&',$status);
-fits_modify_key_str($fptr,'NEWIKYS','modified_string', '&', $status);
-fits_modify_key_flt($fptr,'KY_IKYE',-12.3456, 4, '&', $status);
-fits_modify_key_dbl($fptr,'KY_IKYD',-12.345678901234567, 14, 'modified comment', $status);
-fits_modify_key_fixflt($fptr,'KY_IKYF',-12.3456, 4, '&', $status);
-fits_modify_key_fixdbl($fptr,'KY_IKYG',-12.345678901234567, 13, '&', $status);
+$fptr->modify_record($keynum-4,'COMMENT   This keyword was modified by fxmrec', $status);
+$fptr->modify_card('KY_IREC',"KY_MREC = 'This keyword was modified by fxmcrd'",$status);
+$fptr->modify_name('KY_IKYS','NEWIKYS',$status);
+$fptr->modify_comment('KY_IKYJ','This is a modified comment', $status);
+$fptr->modify_key_lng('KY_IKYJ',50,'&',$status);
+$fptr->modify_key_log('KY_IKYL',0,'&',$status);
+$fptr->modify_key_str('NEWIKYS','modified_string', '&', $status);
+$fptr->modify_key_flt('KY_IKYE',-12.3456, 4, '&', $status);
+$fptr->modify_key_dbl('KY_IKYD',-12.345678901234567, 14, 'modified comment', $status);
+$fptr->modify_key_fixflt('KY_IKYF',-12.3456, 4, '&', $status);
+$fptr->modify_key_fixdbl('KY_IKYG',-12.345678901234567, 13, '&', $status);
 
 print "\nAfter modifying the keywords...\n";
 for ($ii=$keynum-4; $ii<=$keynum+5;$ii++) {
-	fits_read_record($fptr,$ii,$card,$status);
+	$fptr->read_record($ii,$card,$status);
 	print $card,"\n";
 }
 
@@ -625,29 +624,29 @@ $status and print "ERROR modifying keywords\n";
 #  update keywords         #
 ############################
 
-fits_update_card($fptr,'KY_MREC',"KY_UCRD = 'This keyword was updated by fxucrd'",$status);
+$fptr->update_card('KY_MREC',"KY_UCRD = 'This keyword was updated by fxucrd'",$status);
 
-fits_update_key_lng($fptr,'KY_IKYJ',51,'&',$status);
-fits_update_key_log($fptr,'KY_IKYL',1,'&',$status);
-fits_update_key_str($fptr,'NEWIKYS',"updated_string",'&',$status);
-fits_update_key_flt($fptr,'KY_IKYE',-13.3456, 4,'&',$status);
-fits_update_key_dbl($fptr,'KY_IKYD',-13.345678901234567, 14,'modified comment',$status);
-fits_update_key_fixflt($fptr,'KY_IKYF',-13.3456, 4,'&',$status);
-fits_update_key_fixdbl($fptr,'KY_IKYG',-13.345678901234567, 13,'&',$status);
+$fptr->update_key_lng('KY_IKYJ',51,'&',$status);
+$fptr->update_key_log('KY_IKYL',1,'&',$status);
+$fptr->update_key_str('NEWIKYS',"updated_string",'&',$status);
+$fptr->update_key_flt('KY_IKYE',-13.3456, 4,'&',$status);
+$fptr->update_key_dbl('KY_IKYD',-13.345678901234567, 14,'modified comment',$status);
+$fptr->update_key_fixflt('KY_IKYF',-13.3456, 4,'&',$status);
+$fptr->update_key_fixdbl('KY_IKYG',-13.345678901234567, 13,'&',$status);
 
 print "\nAfter updating the keywords...\n";
 for ($ii=$keynum-4; $ii<=$keynum+5;$ii++) {
-	fits_read_record($fptr,$ii,$card,$status);
+	$fptr->read_record($ii,$card,$status);
 	print $card,"\n";
 }
 
 $status and print "ERROR modifying keywords\n";
 
-fits_read_record($fptr,0,$card,$status);
+$fptr->read_record(0,$card,$status);
 
 print "\nKeywords found using wildcard search (should be 13)...\n";
 $nfound = 0;
-while (!fits_find_nextkey($fptr,$inclist,2,$exclist,2,$card,$status)) {
+while (!$fptr->find_nextkey($inclist,2,$exclist,2,$card,$status)) {
 	$nfound++;
 	print $card,"\n";
 }
@@ -659,8 +658,8 @@ $status=0;
 #  copy index keyword      #
 ############################
 
-fits_copy_key($fptr,$fptr,1,4,'KY_PKNE',$status);
-fits_read_keys_str($fptr,'ky_pkne',2,4,$inekey,$nfound,$status);
+$fptr->copy_key($fptr,1,4,'KY_PKNE',$status);
+$fptr->read_keys_str('ky_pkne',2,4,$inekey,$nfound,$status);
 printf "\nCopied keyword: ffgkne:  %f, %f, %f\n", @$inekey;
 
 $status and print("\nERROR in ffgkne $nfound, $status\n"),goto ERRSTATUS;
@@ -669,7 +668,7 @@ $status and print("\nERROR in ffgkne $nfound, $status\n"),goto ERRSTATUS;
 #  modify header using template file #
 ######################################
 
-fits_write_key_template($fptr,$template,$status) and
+$fptr->write_key_template($template,$status) and
 	print "\nERROR returned by ffpktp\n", goto ERRSTATUS;
 print "Updated header using template file (ffpktp)\n";
 
@@ -685,38 +684,38 @@ $nrows = 21;
 $tfields = 10;
 $pcount = 0;
 
-fits_insert_btbl($fptr,$nrows,$tfields,$ttype,$tform,$tunit,$binname,0,$status);
+$fptr->insert_btbl($nrows,$tfields,$ttype,$tform,$tunit,$binname,0,$status);
 print "\nffibin status = $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
-fits_get_hdrpos($fptr,$existkeys,$keynum,$status);
+$fptr->get_hdrpos($existkeys,$keynum,$status);
 print "header contains $existkeys keywords; located at keyword $keynum \n";
 
 $morekeys=40;
-fits_set_hdrsize($fptr,$morekeys,$status);
-fits_get_hdrspace($fptr,$existkeys,$morekeys,$status);
+$fptr->set_hdrsize($morekeys,$status);
+$fptr->get_hdrspace($existkeys,$morekeys,$status);
 print "header contains $existkeys keywords with room for $morekeys more\n";
 
-fits_set_btblnull($fptr,4,99,$status);
-fits_set_btblnull($fptr,5,99,$status);
-fits_set_btblnull($fptr,6,99,$status);
+$fptr->set_btblnull(4,99,$status);
+$fptr->set_btblnull(5,99,$status);
+$fptr->set_btblnull(6,99,$status);
 
 $extvers=1;
-fits_write_key_lng($fptr,'EXTVER',$extvers,'extension version number', $status);
-fits_write_key_lng($fptr,'TNULL4',99,'value for undefined pixels',$status);
-fits_write_key_lng($fptr,'TNULL5',99,'value for undefined pixels',$status);
-fits_write_key_lng($fptr,'TNULL6',99,'value for undefined pixels',$status);
+$fptr->write_key_lng('EXTVER',$extvers,'extension version number', $status);
+$fptr->write_key_lng('TNULL4',99,'value for undefined pixels',$status);
+$fptr->write_key_lng('TNULL5',99,'value for undefined pixels',$status);
+$fptr->write_key_lng('TNULL6',99,'value for undefined pixels',$status);
 
 $naxis=3;
 $naxes=[1,2,8];
-fits_write_tdim($fptr,3,$naxis,$naxes,$status);
+$fptr->write_tdim(3,$naxis,$naxes,$status);
 $naxis=0;
 $naxes=undef;
-fits_read_tdim($fptr,3,0,$naxis,$naxes,$status);
-fits_read_key_str($fptr,'TDIM3',$iskey,$comment,$status);
+$fptr->read_tdim(3,0,$naxis,$naxes,$status);
+$fptr->read_key_str('TDIM3',$iskey,$comment,$status);
 print "TDIM3 = $iskey, $naxis, $naxes->[0], $naxes->[1], $naxes->[2]\n";
 
-fits_set_hdustruc($fptr,$status);
+$fptr->set_hdustruc($status);
 
 ############################
 #  write data to columns   #
@@ -733,43 +732,43 @@ for ($ii=0;$ii<21;$ii++) {
 	$doutarray->[$ii] = ($ii + 1) * $signval;
 }
 
-fits_write_col_str($fptr,1,1,1,3,$onskey,$status);
-fits_write_col_null($fptr,1,4,1,1,$status);
+$fptr->write_col_str(1,1,1,3,$onskey,$status);
+$fptr->write_col_null(1,4,1,1,$status);
 
 $larray = [0,1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,1,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0];
-fits_write_col_bit($fptr,3,1,1,36,$larray,$status);
+$fptr->write_col_bit(3,1,1,36,$larray,$status);
 
 for ($ii=4;$ii<9;$ii++) {
-	fits_write_col_byt($fptr,$ii,1,1,2,$boutarray,$status);
+	$fptr->write_col_byt($ii,1,1,2,$boutarray,$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_sht($fptr,$ii,3,1,2,[@{$ioutarray}[2..3]],$status);
+	$fptr->write_col_sht($ii,3,1,2,[@{$ioutarray}[2..3]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_int($fptr,$ii,5,1,2,[@{$koutarray}[4..5]],$status);
+	$fptr->write_col_int($ii,5,1,2,[@{$koutarray}[4..5]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_flt($fptr,$ii,7,1,2,[@{$eoutarray}[6..7]],$status);
+	$fptr->write_col_flt($ii,7,1,2,[@{$eoutarray}[6..7]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_dbl($fptr,$ii,9,1,2,[@{$doutarray}[8..9]],$status);
+	$fptr->write_col_dbl($ii,9,1,2,[@{$doutarray}[8..9]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_null($fptr,$ii,11,1,1,$status);
+	$fptr->write_col_null($ii,11,1,1,$status);
 }
 
-fits_write_col_cmp($fptr,9,1,1,10,$eoutarray,$status);
-fits_write_col_dblcmp($fptr,10,1,1,10,$doutarray,$status);
+$fptr->write_col_cmp(9,1,1,10,$eoutarray,$status);
+$fptr->write_col_dblcmp(10,1,1,10,$doutarray,$status);
 
 for ($ii=4;$ii<9;$ii++) {
-	fits_write_colnull_byt($fptr,$ii,12,1,2,[@{$boutarray}[11..12]],13,$status);
+	$fptr->write_colnull_byt($ii,12,1,2,[@{$boutarray}[11..12]],13,$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_colnull_sht($fptr,$ii,14,1,2,[@{$ioutarray}[13..14]],15,$status);
+	$fptr->write_colnull_sht($ii,14,1,2,[@{$ioutarray}[13..14]],15,$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_colnull_int($fptr,$ii,16,1,2,[@{$koutarray}[15..16]],17,$status);
+	$fptr->write_colnull_int($ii,16,1,2,[@{$koutarray}[15..16]],17,$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_colnull_flt($fptr,$ii,18,1,2,[@{$eoutarray}[17..18]],19.,$status);
+	$fptr->write_colnull_flt($ii,18,1,2,[@{$eoutarray}[17..18]],19.,$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_colnull_dbl($fptr,$ii,20,1,2,[@{$doutarray}[19..20]],21.,$status);
+	$fptr->write_colnull_dbl($ii,20,1,2,[@{$doutarray}[19..20]],21.,$status);
 	($status == NUM_OVERFLOW) and $status = 0;
 }
-fits_write_col_log($fptr,2,1,1,21,$larray,$status);
-fits_write_col_null($fptr,2,11,1,1,$status);
+$fptr->write_col_log(2,1,1,21,$larray,$status);
+$fptr->write_col_null(2,11,1,1,$status);
 print "ffpcl_ status = $status\n";
 
 #########################################
@@ -781,20 +780,20 @@ print "\nexpected and indicates that more than one column name matches";
 print "\nthe input column name template.  Status = 219 indicates that";
 print "\nthere was no matching column name.";
 
-fits_get_colnum($fptr,0,'Xvalue',$colnum,$status);
+$fptr->get_colnum(0,'Xvalue',$colnum,$status);
 print "\nColumn Xvalue is number $colnum; status = $status.\n";
 
 while ($status != COL_NOT_FOUND) {
-	fits_get_colname($fptr,1,'*ue',$colname,$colnum,$status);
+	$fptr->get_colname(1,'*ue',$colname,$colnum,$status);
 	print "Column $colname is number $colnum; status = $status.\n";
 }
 $status = 0;
 
 print "\nInformation about each column:\n";
 for ($ii=0;$ii<$tfields;$ii++) {
-	fits_get_coltype($fptr,$ii+1,$typecode,$repeat,$width,$status);
+	$fptr->get_coltype($ii+1,$typecode,$repeat,$width,$status);
 	printf("%4s %3d %2d %2d", $tform->[$ii], $typecode, $repeat, $width);
-	fits_get_bcolparms($fptr,$ii+1,$ttype->[0],$tunit->[0],$cval,$repeat,$scale,$zero,$jnulval,$tdisp,$status);
+	$fptr->get_bcolparms($ii+1,$ttype->[0],$tunit->[0],$cval,$repeat,$scale,$zero,$jnulval,$tdisp,$status);
 	printf " $ttype->[0], $tunit->[0], $cval, $repeat, %f, %f, $jnulval, $tdisp.\n",$scale,$zero;
 }
 print "\n";
@@ -803,7 +802,7 @@ print "\n";
 #  insert ASCII table before the binary table #
 ###############################################
 
-fits_movrel_hdu($fptr,-1,$hdutype,$status) and goto ERRSTATUS;
+$fptr->movrel_hdu(-1,$hdutype,$status) and goto ERRSTATUS;
 
 $tform = [ qw( A15 I10 F14.6 E12.5 D21.14 ) ];
 $ttype = [ qw( Name Ivalue Fvalue Evalue Dvalue ) ];
@@ -812,23 +811,23 @@ $rowlen = 76;
 $nrows = 11;
 $tfields = 5;
 
-fits_insert_atbl($fptr,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
+$fptr->insert_atbl($rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
 print "ffitab status = $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
-fits_set_atblnull($fptr,1,'null1',$status);
-fits_set_atblnull($fptr,2,'null2',$status);
-fits_set_atblnull($fptr,3,'null3',$status);
-fits_set_atblnull($fptr,4,'null4',$status);
-fits_set_atblnull($fptr,5,'null5',$status);
+$fptr->set_atblnull(1,'null1',$status);
+$fptr->set_atblnull(2,'null2',$status);
+$fptr->set_atblnull(3,'null3',$status);
+$fptr->set_atblnull(4,'null4',$status);
+$fptr->set_atblnull(5,'null5',$status);
 
 $extvers=2;
-fits_write_key_lng($fptr,'EXTVER',$extvers,'extension version number',$status);
-fits_write_key_str($fptr,'TNULL1','null1','value for undefined pixels',$status);
-fits_write_key_str($fptr,'TNULL2','null2','value for undefined pixels',$status);
-fits_write_key_str($fptr,'TNULL3','null3','value for undefined pixels',$status);
-fits_write_key_str($fptr,'TNULL4','null4','value for undefined pixels',$status);
-fits_write_key_str($fptr,'TNULL5','null5','value for undefined pixels',$status);
+$fptr->write_key_lng('EXTVER',$extvers,'extension version number',$status);
+$fptr->write_key_str('TNULL1','null1','value for undefined pixels',$status);
+$fptr->write_key_str('TNULL2','null2','value for undefined pixels',$status);
+$fptr->write_key_str('TNULL3','null3','value for undefined pixels',$status);
+$fptr->write_key_str('TNULL4','null4','value for undefined pixels',$status);
+$fptr->write_key_str('TNULL5','null5','value for undefined pixels',$status);
 
 $status and goto ERRSTATUS;
 
@@ -844,22 +843,22 @@ for ($ii=0;$ii<21;$ii++) {
 	$doutarray->[$ii] = $ii+1;
 }
 
-fits_write_col_str($fptr,1,1,1,3,$onskey,$status);
-fits_write_col_null($fptr,1,4,1,1,$status);
+$fptr->write_col_str(1,1,1,3,$onskey,$status);
+$fptr->write_col_null(1,4,1,1,$status);
 
 for ($ii=2;$ii<6;$ii++) {
-	fits_write_col_byt($fptr,$ii,1,1,2,[@{$boutarray}[0..1]],$status);
+	$fptr->write_col_byt($ii,1,1,2,[@{$boutarray}[0..1]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_sht($fptr,$ii,3,1,2,[@{$ioutarray}[2..3]],$status);
+	$fptr->write_col_sht($ii,3,1,2,[@{$ioutarray}[2..3]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_lng($fptr,$ii,5,1,2,[@{$joutarray}[4..5]],$status);
+	$fptr->write_col_lng($ii,5,1,2,[@{$joutarray}[4..5]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_flt($fptr,$ii,7,1,2,[@{$eoutarray}[6..7]],$status);
+	$fptr->write_col_flt($ii,7,1,2,[@{$eoutarray}[6..7]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
-	fits_write_col_dbl($fptr,$ii,9,1,2,[@{$doutarray}[8..9]],$status);
+	$fptr->write_col_dbl($ii,9,1,2,[@{$doutarray}[8..9]],$status);
 	($status == NUM_OVERFLOW) and $status = 0;
 
-	fits_write_col_null($fptr,$ii,11,1,1,$status);
+	$fptr->write_col_null($ii,11,1,1,$status);
 }
 print "ffpcl_ status = $status\n";
 
@@ -867,7 +866,7 @@ print "ffpcl_ status = $status\n";
 #  read data from ASCII table  #
 ################################
 
-fits_read_atblhdr($fptr,0,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
+$fptr->read_atblhdr(0,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
 
 print "\nASCII table: rowlen, nrows, tfields, extname: $rowlen $nrows $tfields $tblname\n";
 for ($ii=0;$ii<$tfields;$ii++) {
@@ -876,12 +875,12 @@ for ($ii=0;$ii<$tfields;$ii++) {
 
 $nrows = 11;
 
-fits_read_col_str($fptr,1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,2,1,1,$nrows,99,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,2,1,1,$nrows,99,$iinarray,$anynull,$status);
-fits_read_col_lng($fptr,3,1,1,$nrows,99,$jinarray,$anynull,$status);
-fits_read_col_flt($fptr,4,1,1,$nrows,99,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,5,1,1,$nrows,99,$dinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(2,1,1,$nrows,99,$binarray,$anynull,$status);
+$fptr->read_col_sht(2,1,1,$nrows,99,$iinarray,$anynull,$status);
+$fptr->read_col_lng(3,1,1,$nrows,99,$jinarray,$anynull,$status);
+$fptr->read_col_flt(4,1,1,$nrows,99,$einarray,$anynull,$status);
+$fptr->read_col_dbl(5,1,1,$nrows,99,$dinarray,$anynull,$status);
 
 print "\nData values read from ASCII table:\n";
 for ($ii=0;$ii<$nrows;$ii++) {
@@ -891,27 +890,27 @@ for ($ii=0;$ii<$nrows;$ii++) {
 	);
 }
 
-fits_read_tblbytes($fptr,1,20,78,$uchars,$status);
+$fptr->read_tblbytes(1,20,78,$uchars,$status);
 print "\n",pack("C78",@$uchars),"\n";
-fits_write_tblbytes($fptr,1,20,78,$uchars,$status);
+$fptr->write_tblbytes(1,20,78,$uchars,$status);
 
 #########################################
 #  get information about the columns    #
 #########################################
 
-fits_get_colnum($fptr,0,'name',$colnum,$status);
+$fptr->get_colnum(0,'name',$colnum,$status);
 print "\nColumn name is number $colnum; status = $status.\n";
 
 while ($status != COL_NOT_FOUND) {
-	fits_get_colname($fptr,0,'*ue',$colname,$colnum,$status);
+	$fptr->get_colname(0,'*ue',$colname,$colnum,$status);
 	print "Column $colname is number $colnum; status = $status.\n";
 }
 $status = 0;
 
 for ($ii=0;$ii<$tfields;$ii++) {
-	fits_get_coltype($fptr,$ii+1,$typecode,$repeat,$width,$status);
+	$fptr->get_coltype($ii+1,$typecode,$repeat,$width,$status);
 	printf "%4s %3d %2d %2d", $tform->[$ii], $typecode, $repeat, $width;
-	fits_get_acolparms($fptr,$ii+1,$ttype->[0],$tbcol,$tunit->[0],$tform->[0],$scale,
+	$fptr->get_acolparms($ii+1,$ttype->[0],$tbcol,$tunit->[0],$tform->[0],$scale,
 		$zero,$nulstr,$tdisp,$status);
 	printf " $ttype->[0], $tbcol, $tunit->[0], $tform->[0], %f, %f, $nulstr, $tdisp.\n",
 		$scale, $zero;
@@ -922,16 +921,16 @@ print "\n";
 #  test the insert/delete row/column routines #
 ###############################################
 
-fits_insert_rows($fptr,2,3,$status) and goto ERRSTATUS;
+$fptr->insert_rows(2,3,$status) and goto ERRSTATUS;
 
 $nrows = 14;
 
-fits_read_col_str($fptr,1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,2,1,1,$nrows,99,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,2,1,1,$nrows,99,$iinarray,$anynull,$status);
-fits_read_col_lng($fptr,3,1,1,$nrows,99,$jinarray,$anynull,$status);
-fits_read_col_flt($fptr,4,1,1,$nrows,99,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,5,1,1,$nrows,99,$dinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(2,1,1,$nrows,99,$binarray,$anynull,$status);
+$fptr->read_col_sht(2,1,1,$nrows,99,$iinarray,$anynull,$status);
+$fptr->read_col_lng(3,1,1,$nrows,99,$jinarray,$anynull,$status);
+$fptr->read_col_flt(4,1,1,$nrows,99,$einarray,$anynull,$status);
+$fptr->read_col_dbl(5,1,1,$nrows,99,$dinarray,$anynull,$status);
 
 print "\nData values after inserting 3 rows after row 2:\n";
 for ($ii=0;$ii<$nrows;$ii++) {
@@ -941,16 +940,16 @@ for ($ii=0;$ii<$nrows;$ii++) {
 	);
 }
 
-fits_delete_rows($fptr,10,2,$status) and goto ERRSTATUS;
+$fptr->delete_rows(10,2,$status) and goto ERRSTATUS;
 
 $nrows = 12;
 
-fits_read_col_str($fptr,1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,2,1,1,$nrows,99,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,2,1,1,$nrows,99,$iinarray,$anynull,$status);
-fits_read_col_lng($fptr,3,1,1,$nrows,99,$jinarray,$anynull,$status);
-fits_read_col_flt($fptr,4,1,1,$nrows,99,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,5,1,1,$nrows,99,$dinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(2,1,1,$nrows,99,$binarray,$anynull,$status);
+$fptr->read_col_sht(2,1,1,$nrows,99,$iinarray,$anynull,$status);
+$fptr->read_col_lng(3,1,1,$nrows,99,$jinarray,$anynull,$status);
+$fptr->read_col_flt(4,1,1,$nrows,99,$einarray,$anynull,$status);
+$fptr->read_col_dbl(5,1,1,$nrows,99,$dinarray,$anynull,$status);
 
 print "\nData values after deleting 2 rows at row 10:\n";
 for ($ii=0;$ii<$nrows;$ii++) {
@@ -960,13 +959,13 @@ for ($ii=0;$ii<$nrows;$ii++) {
 	);
 }
 
-fits_delete_col($fptr,3,$status) and goto ERRSTATUS;
+$fptr->delete_col(3,$status) and goto ERRSTATUS;
 
-fits_read_col_str($fptr,1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,2,1,1,$nrows,99,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,2,1,1,$nrows,99,$iinarray,$anynull,$status);
-fits_read_col_flt($fptr,3,1,1,$nrows,99,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,4,1,1,$nrows,99,$dinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(2,1,1,$nrows,99,$binarray,$anynull,$status);
+$fptr->read_col_sht(2,1,1,$nrows,99,$iinarray,$anynull,$status);
+$fptr->read_col_flt(3,1,1,$nrows,99,$einarray,$anynull,$status);
+$fptr->read_col_dbl(4,1,1,$nrows,99,$dinarray,$anynull,$status);
 
 print "\nData values after deleting column 3:\n";
 for ($ii=0;$ii<$nrows;$ii++) {
@@ -976,14 +975,14 @@ for ($ii=0;$ii<$nrows;$ii++) {
 	);
 }
 
-fits_insert_col($fptr,5,'INSERT_COL','F14.6',$status) and goto ERRSTATUS;
+$fptr->insert_col(5,'INSERT_COL','F14.6',$status) and goto ERRSTATUS;
 
-fits_read_col_str($fptr,1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,2,1,1,$nrows,99,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,2,1,1,$nrows,99,$iinarray,$anynull,$status);
-fits_read_col_flt($fptr,3,1,1,$nrows,99,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,4,1,1,$nrows,99,$dinarray,$anynull,$status);
-fits_read_col_lng($fptr,5,1,1,$nrows,99,$jinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'UNDEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(2,1,1,$nrows,99,$binarray,$anynull,$status);
+$fptr->read_col_sht(2,1,1,$nrows,99,$iinarray,$anynull,$status);
+$fptr->read_col_flt(3,1,1,$nrows,99,$einarray,$anynull,$status);
+$fptr->read_col_dbl(4,1,1,$nrows,99,$dinarray,$anynull,$status);
+$fptr->read_col_lng(5,1,1,$nrows,99,$jinarray,$anynull,$status);
 
 print "\nData values after inserting column 5:\n";
 for ($ii=0;$ii<$nrows;$ii++) {
@@ -1001,41 +1000,41 @@ for ($ii=0;$ii<$nrows;$ii++) {
 $bitpix=16;
 $naxis=0;
 $filename = '!t1q2s3v6.tmp';
-fits_create_file($tmpfptr,$filename,$status);
+$tmpfptr=CFITSIO::create_file($filename,$status);
 print "Create temporary file: ffinit status = $status\n";
 
-fits_insert_img($tmpfptr,$bitpix,$naxis,$naxes,$status);
+$tmpfptr->insert_img($bitpix,$naxis,$naxes,$status);
 print "\nCreate null primary array: ffiimg status = $status\n";
 
 $nrows=12;
 $tfields=0;
 $rowlen=0;
 
-fits_insert_atbl($tmpfptr,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
+$tmpfptr->insert_atbl($rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
 print "\nCreate ASCII table with 0 columns: ffitab status = $status\n";
 
-fits_copy_col($fptr,$tmpfptr,4,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,4,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,3,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,3,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,2,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,2,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,1,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,1,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
 
-fits_insert_btbl($tmpfptr,$nrows,$tfields,$ttype,$tform,$tunit,$tblname,0,$status);
+$tmpfptr->insert_btbl($nrows,$tfields,$ttype,$tform,$tunit,$tblname,0,$status);
 print "\nCreate Binary table with 0 columns: ffibin status = $status\n";
 
-fits_copy_col($fptr,$tmpfptr,4,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,4,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,3,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,3,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,2,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,2,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,1,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,1,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
 
-fits_delete_file($tmpfptr,$status);
+$tmpfptr->delete_file($status);
 print "Delete the tmp file: ffdelt status = $status\n";
 
 $status and goto ERRSTATUS;
@@ -1044,13 +1043,13 @@ $status and goto ERRSTATUS;
 #  read data from binary table #
 ################################
 
-fits_movrel_hdu($fptr,1,$hdutype,$status) and goto ERRSTATUS;
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+$fptr->movrel_hdu(1,$hdutype,$status) and goto ERRSTATUS;
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
-fits_get_hdrspace($fptr,$existkeys,$morekeys,$status);
+$fptr->get_hdrspace($existkeys,$morekeys,$status);
 print "header contains $existkeys keywords with room for $morekeys more\n";
 
-fits_read_btblhdr($fptr,0,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
+$fptr->read_btblhdr(0,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
 print "\nBinary table: nrows, tfields, extname, pcount: $nrows $tfields $binname $pcount\n";
 
 for ($ii=0;$ii<$tfields;$ii++) {
@@ -1061,7 +1060,7 @@ for ($ii=0;$ii<$tfields;$ii++) {
 print "\nData values read from binary table:\n";
 printf "  Bit column (X) data values: \n\n";
 
-fits_read_col_bit($fptr,3,1,1,36,$larray,$status);
+$fptr->read_col_bit(3,1,1,36,$larray,$status);
 for ($jj=0;$jj<5;$jj++) {
 	print @{$larray}[$jj*8..$jj*8+7];
 	print " ";
@@ -1079,20 +1078,20 @@ for ($jj=0;$jj<5;$jj++) {
 
 print "\n\n";
 
-fits_read_col_str($fptr,1,4,1,1,'',$inskey,$anynull,$status);
+$fptr->read_col_str(1,4,1,1,'',$inskey,$anynull,$status);
 print "null string column value = -$inskey->[0]- (should be --)\n";
 
 $nrows=21;
-fits_read_col_str($fptr,1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
-fits_read_col_log($fptr,2,1,1,$nrows,0,$larray,$anynull,$status);
-fits_read_col_byt($fptr,3,1,1,$nrows,98,$xinarray,$anynull,$status);
-fits_read_col_byt($fptr,4,1,1,$nrows,98,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,5,1,1,$nrows,98,$iinarray,$anynull,$status);
-fits_read_col_lng($fptr,6,1,1,$nrows,98,$kinarray,$anynull,$status);
-fits_read_col_flt($fptr,7,1,1,$nrows,98.,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,8,1,1,$nrows,98.,$dinarray,$anynull,$status);
-fits_read_col_cmp($fptr,9,1,1,$nrows,98.,$cinarray,$anynull,$status);
-fits_read_col_dblcmp($fptr,10,1,1,$nrows,98.,$minarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
+$fptr->read_col_log(2,1,1,$nrows,0,$larray,$anynull,$status);
+$fptr->read_col_byt(3,1,1,$nrows,98,$xinarray,$anynull,$status);
+$fptr->read_col_byt(4,1,1,$nrows,98,$binarray,$anynull,$status);
+$fptr->read_col_sht(5,1,1,$nrows,98,$iinarray,$anynull,$status);
+$fptr->read_col_lng(6,1,1,$nrows,98,$kinarray,$anynull,$status);
+$fptr->read_col_flt(7,1,1,$nrows,98.,$einarray,$anynull,$status);
+$fptr->read_col_dbl(8,1,1,$nrows,98.,$dinarray,$anynull,$status);
+$fptr->read_col_cmp(9,1,1,$nrows,98.,$cinarray,$anynull,$status);
+$fptr->read_col_dblcmp(10,1,1,$nrows,98.,$minarray,$anynull,$status);
 
 print "\nRead columns with ffgcv_:\n";
 for ($ii=0;$ii<$nrows;$ii++) {
@@ -1114,21 +1113,21 @@ for ($ii=0;$ii<$nrows;$ii++) {
 @$cinarray = @tmp;
 @$minarray = @tmp;
 
-fits_read_colnull_str($fptr,1,1,1,$nrows,$inskey,$larray2,$anynull,$status);
-fits_read_colnull_log($fptr,2,1,1,$nrows,$larray,$larray2,$anynull,$status);
-fits_read_colnull_byt($fptr,3,1,1,$nrows,$xinarray,$larray2,$anynull,$status);
-fits_read_colnull_byt($fptr,4,1,1,$nrows,$binarray,,$larray2,$anynull,$status);
-fits_read_colnull_sht($fptr,5,1,1,$nrows,$iinarray,$larray2,$anynull,$status);
-fits_read_colnull_int($fptr,6,1,1,$nrows,$kinarray,$larray2,$anynull,$status);
-fits_read_colnull_flt($fptr,7,1,1,$nrows,$einarray,$larray2,$anynull,$status);
-fits_read_colnull_dbl($fptr,8,1,1,$nrows,$dinarray,$larray2,$anynull,$status);
+$fptr->read_colnull_str(1,1,1,$nrows,$inskey,$larray2,$anynull,$status);
+$fptr->read_colnull_log(2,1,1,$nrows,$larray,$larray2,$anynull,$status);
+$fptr->read_colnull_byt(3,1,1,$nrows,$xinarray,$larray2,$anynull,$status);
+$fptr->read_colnull_byt(4,1,1,$nrows,$binarray,,$larray2,$anynull,$status);
+$fptr->read_colnull_sht(5,1,1,$nrows,$iinarray,$larray2,$anynull,$status);
+$fptr->read_colnull_int(6,1,1,$nrows,$kinarray,$larray2,$anynull,$status);
+$fptr->read_colnull_flt(7,1,1,$nrows,$einarray,$larray2,$anynull,$status);
+$fptr->read_colnull_dbl(8,1,1,$nrows,$dinarray,$larray2,$anynull,$status);
    ####################################
    # PROBLEM: sporadic SEGVs on Linux #
    ####################################
-#fits_read_colnull_cmp($fptr,9,1,1,$nrows,$cinarray,$larray2,$anynull,$status);
-#fits_read_colnull_dblcmp($fptr,10,1,1,$nrows,$minarray,$larray2,$anynull,$status);
-fits_read_col_cmp($fptr,9,1,1,$nrows,98.,$cinarray,$anynull,$status);
-fits_read_col_dblcmp($fptr,10,1,1,$nrows,98.,$minarray,$anynull,$status);
+#$fptr->read_colnull_cmp(9,1,1,$nrows,$cinarray,$larray2,$anynull,$status);
+#$fptr->read_colnull_dblcmp(10,1,1,$nrows,$minarray,$larray2,$anynull,$status);
+$fptr->read_col_cmp(9,1,1,$nrows,98.,$cinarray,$anynull,$status);
+$fptr->read_col_dblcmp(10,1,1,$nrows,98.,$minarray,$anynull,$status);
 
 print "\nRead columns with ffgcf_:\n";
 for ($ii=0;$ii<10;$ii++) {
@@ -1143,20 +1142,20 @@ for ($ii=10; $ii<$nrows;$ii++) {
 		$inskey->[$ii], $larray->[$ii], $xinarray->[$ii], $binarray->[$ii],
 		$iinarray->[$ii];
 }
-fits_write_record($fptr,"key_prec= 'This keyword was written by f_prec' / comment here", $status);
+$fptr->write_record("key_prec= 'This keyword was written by f_prec' / comment here", $status);
 
 ###############################################
 #  test the insert/delete row/column routines #
 ###############################################
 
-fits_insert_rows($fptr,2,3,$status) and goto ERRSTATUS;
+$fptr->insert_rows(2,3,$status) and goto ERRSTATUS;
 $nrows=14;
-fits_read_col_str($fptr,1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,4,1,1,$nrows,98,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,5,1,1,$nrows,98,$iinarray,$anynull,$status);
-fits_read_col_lng($fptr,6,1,1,$nrows,98,$jinarray,$anynull,$status);
-fits_read_col_flt($fptr,7,1,1,$nrows,98.,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,8,1,1,$nrows,98.,$dinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(4,1,1,$nrows,98,$binarray,$anynull,$status);
+$fptr->read_col_sht(5,1,1,$nrows,98,$iinarray,$anynull,$status);
+$fptr->read_col_lng(6,1,1,$nrows,98,$jinarray,$anynull,$status);
+$fptr->read_col_flt(7,1,1,$nrows,98.,$einarray,$anynull,$status);
+$fptr->read_col_dbl(8,1,1,$nrows,98.,$dinarray,$anynull,$status);
 
 print "\nData values after inserting 3 rows after row 2:\n";
 for ($ii = 0; $ii < $nrows; $ii++) {
@@ -1165,15 +1164,15 @@ for ($ii = 0; $ii < $nrows; $ii++) {
 		$einarray->[$ii], $dinarray->[$ii];
 }
 
-fits_delete_rows($fptr,10,2,$status) and goto ERRSTATUS;
+$fptr->delete_rows(10,2,$status) and goto ERRSTATUS;
 
 $nrows=12;
-fits_read_col_str($fptr,1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,4,1,1,$nrows,98,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,5,1,1,$nrows,98,$iinarray,$anynull,$status);
-fits_read_col_lng($fptr,6,1,1,$nrows,98,$jinarray,$anynull,$status);
-fits_read_col_flt($fptr,7,1,1,$nrows,98.,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,8,1,1,$nrows,98.,$dinarray,$anynull,$status);
+$fptr->read_col_str(1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(4,1,1,$nrows,98,$binarray,$anynull,$status);
+$fptr->read_col_sht(5,1,1,$nrows,98,$iinarray,$anynull,$status);
+$fptr->read_col_lng(6,1,1,$nrows,98,$jinarray,$anynull,$status);
+$fptr->read_col_flt(7,1,1,$nrows,98.,$einarray,$anynull,$status);
+$fptr->read_col_dbl(8,1,1,$nrows,98.,$dinarray,$anynull,$status);
 
 print "\nData values after deleting 2 rows at row 10:\n";
 for ($ii = 0; $ii < $nrows; $ii++) {
@@ -1182,12 +1181,12 @@ for ($ii = 0; $ii < $nrows; $ii++) {
 		$einarray->[$ii], $dinarray->[$ii];
 }
 
-fits_delete_col($fptr,6,$status) and goto ERRSTATUS;
-fits_read_col_str($fptr,1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,4,1,1,$nrows,98,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,5,1,1,$nrows,98,$iinarray,$anynull,$status);
-fits_read_col_flt($fptr,6,1,1,$nrows,98.,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,7,1,1,$nrows,98.,$dinarray,$anynull,$status);
+$fptr->delete_col(6,$status) and goto ERRSTATUS;
+$fptr->read_col_str(1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(4,1,1,$nrows,98,$binarray,$anynull,$status);
+$fptr->read_col_sht(5,1,1,$nrows,98,$iinarray,$anynull,$status);
+$fptr->read_col_flt(6,1,1,$nrows,98.,$einarray,$anynull,$status);
+$fptr->read_col_dbl(7,1,1,$nrows,98.,$dinarray,$anynull,$status);
 
 print "\nData values after deleting column 6:\n";
 for ($ii = 0; $ii < $nrows; $ii++) {
@@ -1196,13 +1195,13 @@ for ($ii = 0; $ii < $nrows; $ii++) {
 		$dinarray->[$ii];
 }
 
-fits_insert_col($fptr,8,'INSERT_COL','1E',$status) and goto ERRSTATUS;
-fits_read_col_str($fptr,1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,4,1,1,$nrows,98,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,5,1,1,$nrows,98,$iinarray,$anynull,$status);
-fits_read_col_flt($fptr,6,1,1,$nrows,98.,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,7,1,1,$nrows,98.,$dinarray,$anynull,$status);
-fits_read_col_lng($fptr,8,1,1,$nrows,98,$jinarray,$anynull,$status);
+$fptr->insert_col(8,'INSERT_COL','1E',$status) and goto ERRSTATUS;
+$fptr->read_col_str(1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(4,1,1,$nrows,98,$binarray,$anynull,$status);
+$fptr->read_col_sht(5,1,1,$nrows,98,$iinarray,$anynull,$status);
+$fptr->read_col_flt(6,1,1,$nrows,98.,$einarray,$anynull,$status);
+$fptr->read_col_dbl(7,1,1,$nrows,98.,$dinarray,$anynull,$status);
+$fptr->read_col_lng(8,1,1,$nrows,98,$jinarray,$anynull,$status);
 
 print "\nData values after inserting column 8:\n";
 for ($ii = 0; $ii < $nrows; $ii++) {
@@ -1212,13 +1211,13 @@ for ($ii = 0; $ii < $nrows; $ii++) {
 }
 
 
-fits_write_col_null($fptr,8,1,1,10,$status);
-fits_read_col_str($fptr,1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
-fits_read_col_byt($fptr,4,1,1,$nrows,98,$binarray,$anynull,$status);
-fits_read_col_sht($fptr,5,1,1,$nrows,98,$iinarray,$anynull,$status);
-fits_read_col_flt($fptr,6,1,1,$nrows,98.,$einarray,$anynull,$status);
-fits_read_col_dbl($fptr,7,1,1,$nrows,98.,$dinarray,$anynull,$status);
-fits_read_col_lng($fptr,8,1,1,$nrows,98,$jinarray,$anynull,$status);
+$fptr->write_col_null(8,1,1,10,$status);
+$fptr->read_col_str(1,1,1,$nrows,'NOT DEFINED',$inskey,$anynull,$status);
+$fptr->read_col_byt(4,1,1,$nrows,98,$binarray,$anynull,$status);
+$fptr->read_col_sht(5,1,1,$nrows,98,$iinarray,$anynull,$status);
+$fptr->read_col_flt(6,1,1,$nrows,98.,$einarray,$anynull,$status);
+$fptr->read_col_dbl(7,1,1,$nrows,98.,$dinarray,$anynull,$status);
+$fptr->read_col_lng(8,1,1,$nrows,98,$jinarray,$anynull,$status);
 
 print "\nValues after setting 1st 10 elements in column 8 = null:\n";
 for ($ii = 0; $ii < $nrows; $ii++) {
@@ -1236,33 +1235,33 @@ $bitpix=16;
 $naxis=0;
 $filename = '!t1q2s3v5.tmp';
 
-fits_create_file($tmpfptr,$filename,$status);
+$tmpfptr=CFITSIO::create_file($filename,$status);
 print "Create temporary file: ffinit status = $status\n";
 
-fits_insert_img($tmpfptr,$bitpix,$naxis,$naxes,$status);
+$tmpfptr->insert_img($bitpix,$naxis,$naxes,$status);
 print "\nCreate null primary array: ffiimg status = $status\n";
 
 $nrows=22;
 $tfields=0;
-fits_insert_btbl($tmpfptr,$nrows,$tfields,$ttype,$tform,$tunit,$binname,0,$status);
+$tmpfptr->insert_btbl($nrows,$tfields,$ttype,$tform,$tunit,$binname,0,$status);
 print "\nCreate binary table with 0 columns: ffibin status = $status\n";
 
-fits_copy_col($fptr,$tmpfptr,7,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,7,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,6,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,6,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,5,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,5,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,4,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,4,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,3,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,3,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,2,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,2,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
-fits_copy_col($fptr,$tmpfptr,1,1,TRUE,$status);
+$fptr->copy_col($tmpfptr,1,1,TRUE,$status);
 print "copy column, ffcpcl status = $status\n";
 
-fits_delete_file($tmpfptr,$status);
+$tmpfptr->delete_file($status);
 print "Delete the tmp file: ffdelt status = $status\n";
 
 $status and goto ERRSTATUS;
@@ -1271,7 +1270,7 @@ $status and goto ERRSTATUS;
 #  insert binary table following the primary array #
 ####################################################
 
-fits_movabs_hdu($fptr,1,$hdutype,$status);
+$fptr->movabs_hdu(1,$hdutype,$status);
 $tform = [ qw( 15A 1L 16X 1B 1I 1J 1E 1D 1C 1M ) ];
 $ttype = [ qw( Avalue Lvalue Xvalue Bvalue Ivalue Jvalue Evalue Dvalue Cvalue Mvalue ) ];
 $tunit = [ ( '', 'm**2', 'cm', 'erg/s', 'km/s', '', '', '', '', '' ) ];
@@ -1280,32 +1279,32 @@ $nrows=20;
 $tfields=10;
 $pcount=0;
 
-fits_insert_btbl($fptr,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
+$fptr->insert_btbl($nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
 print "ffibin status = $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
 $extvers=3;
-fits_write_key_lng($fptr,'EXTVER',$extvers,'extension version number',$status);
+$fptr->write_key_lng('EXTVER',$extvers,'extension version number',$status);
 
-fits_write_key_lng($fptr,'TNULL4',77,'value for undefined pixels',$status);
-fits_write_key_lng($fptr,'TNULL5',77,'value for undefined pixels',$status);
-fits_write_key_lng($fptr,'TNULL6',77,'value for undefined pixels',$status);
+$fptr->write_key_lng('TNULL4',77,'value for undefined pixels',$status);
+$fptr->write_key_lng('TNULL5',77,'value for undefined pixels',$status);
+$fptr->write_key_lng('TNULL6',77,'value for undefined pixels',$status);
 
-fits_write_key_lng($fptr,'TSCAL4',1000,'scaling factor',$status);
-fits_write_key_lng($fptr,'TSCAL5',1,'scaling factor',$status);
-fits_write_key_lng($fptr,'TSCAL6',100,'scaling factor',$status);
+$fptr->write_key_lng('TSCAL4',1000,'scaling factor',$status);
+$fptr->write_key_lng('TSCAL5',1,'scaling factor',$status);
+$fptr->write_key_lng('TSCAL6',100,'scaling factor',$status);
 
-fits_write_key_lng($fptr,'TZERO4',0,'scaling offset',$status);
-fits_write_key_lng($fptr,'TZERO5',32768,'scaling offset',$status);
-fits_write_key_lng($fptr,'TZERO6',100,'scaling offset',$status);
+$fptr->write_key_lng('TZERO4',0,'scaling offset',$status);
+$fptr->write_key_lng('TZERO5',32768,'scaling offset',$status);
+$fptr->write_key_lng('TZERO6',100,'scaling offset',$status);
 
-fits_set_btblnull($fptr,4,77,$status);
-fits_set_btblnull($fptr,5,77,$status);
-fits_set_btblnull($fptr,6,77,$status);
+$fptr->set_btblnull(4,77,$status);
+$fptr->set_btblnull(5,77,$status);
+$fptr->set_btblnull(6,77,$status);
 
-fits_set_tscale($fptr,4,1000.,0.,$status);
-fits_set_tscale($fptr,5,1.,32768.,$status);
-fits_set_tscale($fptr,6,100.,100.,$status);
+$fptr->set_tscale(4,1000.,0.,$status);
+$fptr->set_tscale(5,1.,32768.,$status);
+$fptr->set_tscale(6,100.,100.,$status);
 
 ############################
 #  write data to columns   #
@@ -1314,13 +1313,13 @@ fits_set_tscale($fptr,6,100.,100.,$status);
 @$joutarray = (0,1000,10000,32768,65535);
 
 for ($ii=4;$ii<7;$ii++) {
-	fits_write_col_lng($fptr,$ii,1,1,5,$joutarray,$status);
+	$fptr->write_col_lng($ii,1,1,5,$joutarray,$status);
 	($status == NUM_OVERFLOW) and print("Overflow writing to column $ii\n"),$status=0;
-	fits_write_col_null($fptr,$ii,6,1,1,$status);
+	$fptr->write_col_null($ii,6,1,1,$status);
 }
 
 for ($jj=4;$jj<7;$jj++) {
-	fits_read_col_lng($fptr,$jj,1,1,6,-999,$jinarray,$anynull,$status);
+	$fptr->read_col_lng($jj,1,1,6,-999,$jinarray,$anynull,$status);
 	for ($ii=0;$ii<6;$ii++) {
 		printf " %6d",$jinarray->[$ii];
 	}
@@ -1328,12 +1327,12 @@ for ($jj=4;$jj<7;$jj++) {
 }
 
 print "\n";
-fits_set_tscale($fptr,4,1.,0.,$status);
-fits_set_tscale($fptr,5,1.,0.,$status);
-fits_set_tscale($fptr,6,1.,0.,$status);
+$fptr->set_tscale(4,1.,0.,$status);
+$fptr->set_tscale(5,1.,0.,$status);
+$fptr->set_tscale(6,1.,0.,$status);
 
 for ($jj=4;$jj<7;$jj++) {
-	fits_read_col_lng($fptr,$jj,1,1,6,-999,$jinarray,$anynull,$status);
+	$fptr->read_col_lng($jj,1,1,6,-999,$jinarray,$anynull,$status);
 	for ($ii=0;$ii<6;$ii++) {
 		printf " %6d",$jinarray->[$ii];
 	}
@@ -1347,9 +1346,9 @@ for ($jj=4;$jj<7;$jj++) {
 $bitpix=-32;
 $naxis=2;
 $naxes=[15,25];
-fits_insert_img($fptr,$bitpix,$naxis,$naxes,$status);
+$fptr->insert_img($bitpix,$naxis,$naxes,$status);
 print "\nCreate image extension: ffiimg status = $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
 for ($jj=0;$jj<30;$jj++) {
 	for ($ii=0;$ii<19;$ii++) {
@@ -1357,14 +1356,14 @@ for ($jj=0;$jj<30;$jj++) {
 	}
 }
 
-fits_write_2d_sht($fptr,1,19,$naxes->[0],$naxes->[1],$imgarray,$status);
+$fptr->write_2d_sht(1,19,$naxes->[0],$naxes->[1],$imgarray,$status);
 print "\nWrote whole 2D array: ffp2di status = $status\n";
 
 for ($jj=0;$jj<30;$jj++) {
 	@{$imgarray->[$jj]} = map(0,(0..18));
 }
 
-fits_read_2d_sht($fptr,1,0,19,$naxes->[0],$naxes->[1],$imgarray,$anynull,$status);
+$fptr->read_2d_sht(1,0,19,$naxes->[0],$naxes->[1],$imgarray,$anynull,$status);
 print "\nRead whole 2D array: ffg2di status = $status\n";
 
 for ($jj=0;$jj<30;$jj++) {
@@ -1385,10 +1384,10 @@ for ($jj=0;$jj<20;$jj++) {
 
 $fpixels=[5,5];
 $lpixels = [14,14];
-fits_write_subset_sht($fptr,1,$naxis,$naxes,$fpixels,$lpixels,$imgarray2,$status);
+$fptr->write_subset_sht(1,$naxis,$naxes,$fpixels,$lpixels,$imgarray2,$status);
 print "\nWrote subset 2D array: ffpssi status = $status\n";
 
-fits_read_2d_sht($fptr,1,0,19,$naxes->[0],$naxes->[1],$imgarray,$anynull,$status);
+$fptr->read_2d_sht(1,0,19,$naxes->[0],$naxes->[1],$imgarray,$anynull,$status);
 print "\nRead whole 2D array: ffg2di status = $status\n";
 
 for ($jj=0;$jj<30;$jj++) {
@@ -1407,7 +1406,7 @@ for ($jj=0;$jj<30;$jj++) {
 	@{$imgarray->[$jj]} = map(0,(0..18));
 }
 
-fits_read_subset_sht($fptr,1,$naxis,$naxes,$fpixels,$lpixels,$inc,0,$imgarray->[0],$anynull,$status);
+$fptr->read_subset_sht(1,$naxis,$naxes,$fpixels,$lpixels,$inc,0,$imgarray->[0],$anynull,$status);
 print "\nRead subset of 2D array: ffgsvi status = $status\n";
 
 for ($ii=0;$ii<10;$ii++) {
@@ -1424,43 +1423,43 @@ print "\n";
 $bitpix=16;
 $naxis=2;
 $naxes = [15,25];
-fits_insert_img($fptr,$bitpix,$naxis,$naxes,$status);
+$fptr->insert_img($bitpix,$naxis,$naxes,$status);
 print "\nCreate image extension: ffiimg status = $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
 $filename = 't1q2s3v4.tmp';
-fits_create_file($tmpfptr,$filename,$status);
+$tmpfptr=CFITSIO::create_file($filename,$status);
 print "Create temporary file: ffinit status = $status\n";
 
-fits_copy_hdu($fptr,$tmpfptr,0,$status);
+$fptr->copy_hdu($tmpfptr,0,$status);
 print "Copy image extension to primary array of tmp file.\n";
 print "ffcopy status = $status\n";
 
-fits_read_record($tmpfptr,1,$card,$status);
+$tmpfptr->read_record(1,$card,$status);
 print "$card\n";
-fits_read_record($tmpfptr,2,$card,$status);
+$tmpfptr->read_record(2,$card,$status);
 print "$card\n";
-fits_read_record($tmpfptr,3,$card,$status);
+$tmpfptr->read_record(3,$card,$status);
 print "$card\n";
-fits_read_record($tmpfptr,4,$card,$status);
+$tmpfptr->read_record(4,$card,$status);
 print "$card\n";
-fits_read_record($tmpfptr,5,$card,$status);
+$tmpfptr->read_record(5,$card,$status);
 print "$card\n";
-fits_read_record($tmpfptr,6,$card,$status);
+$tmpfptr->read_record(6,$card,$status);
 print "$card\n";
 
-fits_delete_file($tmpfptr,$status);
+$tmpfptr->delete_file($status);
 print "Delete the tmp file: ffdelt status = $status\n";
 
-fits_delete_hdu($fptr,$hdutype,$status);
+$fptr->delete_hdu($hdutype,$status);
 print "Delete the image extension; hdutype, status = $hdutype $status\n";
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 
 ###########################################################
 #  append bintable extension with variable length columns #
 ###########################################################
 
-fits_create_hdu($fptr,$status);
+$fptr->create_hdu($status);
 print "ffcrhd status = $status\n";
 
 $tform = [ qw( 1PA 1PL 1PB 1PB 1PI 1PJ 1PE 1PD 1PC 1PM ) ];
@@ -1471,15 +1470,15 @@ $nrows=20;
 $tfields = 10;
 $pcount=0;
 
-fits_write_btblhdr($fptr,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
+$fptr->write_btblhdr($nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
 print "Variable length arrays: ffphbn status = $status\n";
 
 $extvers=4;
-fits_write_key_lng($fptr,'EXTVER',$extvers,'extension version number',$status);
+$fptr->write_key_lng('EXTVER',$extvers,'extension version number',$status);
 
-fits_write_key_lng($fptr, 'TNULL4', 88, 'value for undefined pixels', $status);
-fits_write_key_lng($fptr, 'TNULL5', 88, 'value for undefined pixels', $status);
-fits_write_key_lng($fptr, 'TNULL6', 88, 'value for undefined pixels', $status);
+$fptr->write_key_lng('TNULL4', 88, 'value for undefined pixels', $status);
+$fptr->write_key_lng('TNULL5', 88, 'value for undefined pixels', $status);
+$fptr->write_key_lng('TNULL6', 88, 'value for undefined pixels', $status);
 
 ############################
 #  write data to columns   #
@@ -1497,39 +1496,39 @@ $iskey = 'abcdefghijklmnopqrst';
 $larray = [0,1,0,0,1,1,0,0,0,1,1,1,0,0,0,0,1,1,1,1];
 
 $inskey=[''];
-fits_write_col_str($fptr,1,1,1,1,$inskey,$status);
-fits_write_col_log($fptr,2,1,1,1,$larray,$status);
-fits_write_col_bit($fptr,3,1,1,1,$larray,$status);
-fits_write_col_byt($fptr,4,1,1,1,$boutarray,$status);
-fits_write_col_sht($fptr,5,1,1,1,$ioutarray,$status);
-fits_write_col_lng($fptr,6,1,1,1,$joutarray,$status);
-fits_write_col_flt($fptr,7,1,1,1,$eoutarray,$status);
-fits_write_col_dbl($fptr,8,1,1,1,$doutarray,$status);
+$fptr->write_col_str(1,1,1,1,$inskey,$status);
+$fptr->write_col_log(2,1,1,1,$larray,$status);
+$fptr->write_col_bit(3,1,1,1,$larray,$status);
+$fptr->write_col_byt(4,1,1,1,$boutarray,$status);
+$fptr->write_col_sht(5,1,1,1,$ioutarray,$status);
+$fptr->write_col_lng(6,1,1,1,$joutarray,$status);
+$fptr->write_col_flt(7,1,1,1,$eoutarray,$status);
+$fptr->write_col_dbl(8,1,1,1,$doutarray,$status);
 
 for ($ii=2;$ii<=20;$ii++) {
 	$inskey->[0] = $iskey;
 	$inskey->[0] = substr($inskey->[0],0,$ii);
-	fits_write_col_str($fptr,1,$ii,1,1,$inskey,$status);
+	$fptr->write_col_str(1,$ii,1,1,$inskey,$status);
 
-	fits_write_col_log($fptr,2,$ii,1,$ii,$larray,$status);
-	fits_write_col_null($fptr,2,$ii,$ii-1,1,$status);
+	$fptr->write_col_log(2,$ii,1,$ii,$larray,$status);
+	$fptr->write_col_null(2,$ii,$ii-1,1,$status);
 
-	fits_write_col_bit($fptr,3,$ii,1,$ii,$larray,$status);
+	$fptr->write_col_bit(3,$ii,1,$ii,$larray,$status);
 	
-	fits_write_col_byt($fptr,4,$ii,1,$ii,$boutarray,$status);
-	fits_write_col_null($fptr,4,$ii,$ii-1,1,$status);
+	$fptr->write_col_byt(4,$ii,1,$ii,$boutarray,$status);
+	$fptr->write_col_null(4,$ii,$ii-1,1,$status);
 
-	fits_write_col_sht($fptr,5,$ii,1,$ii,$ioutarray,$status);
-	fits_write_col_null($fptr,5,$ii,$ii-1,1,$status);
+	$fptr->write_col_sht(5,$ii,1,$ii,$ioutarray,$status);
+	$fptr->write_col_null(5,$ii,$ii-1,1,$status);
 
-	fits_write_col_lng($fptr,6,$ii,1,$ii,$joutarray,$status);
-	fits_write_col_null($fptr,6,$ii,$ii-1,1,$status);
+	$fptr->write_col_lng(6,$ii,1,$ii,$joutarray,$status);
+	$fptr->write_col_null(6,$ii,$ii-1,1,$status);
 
-	fits_write_col_flt($fptr,7,$ii,1,$ii,$eoutarray,$status);
-	fits_write_col_null($fptr,7,$ii,$ii-1,1,$status);
+	$fptr->write_col_flt(7,$ii,1,$ii,$eoutarray,$status);
+	$fptr->write_col_null(7,$ii,$ii-1,1,$status);
 
-	fits_write_col_dbl($fptr,8,$ii,1,$ii,$doutarray,$status);
-	fits_write_col_null($fptr,8,$ii,$ii-1,1,$status);
+	$fptr->write_col_dbl(8,$ii,1,$ii,$doutarray,$status);
+	$fptr->write_col_null(8,$ii,$ii-1,1,$status);
 }
 print "ffpcl_ status = $status\n";
 
@@ -1537,20 +1536,20 @@ print "ffpcl_ status = $status\n";
 #  close then reopen this HDU   #
 #################################
 
-fits_movrel_hdu($fptr,-1,$hdutype,$status);
-fits_movrel_hdu($fptr,1,$hdutype,$status);
+$fptr->movrel_hdu(-1,$hdutype,$status);
+$fptr->movrel_hdu(1,$hdutype,$status);
 
 #############################
 #  read data from columns   #
 #############################
 
-fits_read_key_lng($fptr,'PCOUNT',$pcount,$comm,$status);
+$fptr->read_key_lng('PCOUNT',$pcount,$comm,$status);
 print "PCOUNT = $pcount\n";
 
 $inskey->[0] = ' ';
 $iskey = ' ';
 
-print "HDU number = ${\(fits_get_hdu_num($fptr,$hdunum))}\n";
+print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 for ($ii=1;$ii<=20;$ii++) {
 	@tmp = map(0,(0..$ii-1));
 	@$larray = @tmp;
@@ -1560,52 +1559,52 @@ for ($ii=1;$ii<=20;$ii++) {
 	@$eoutarray = @tmp;
 	@$doutarray = @tmp;
 
-	fits_read_col_str($fptr,1,$ii,1,1,$iskey,$inskey,$anynull,$status);
+	$fptr->read_col_str(1,$ii,1,1,$iskey,$inskey,$anynull,$status);
 	print "A $inskey->[0] $status\nL";
 
-	fits_read_col_log($fptr,2,$ii,1,$ii,0,$larray,$anynull,$status);
+	$fptr->read_col_log(2,$ii,1,$ii,0,$larray,$anynull,$status);
 	foreach (0..$ii-1) {
 		printf " %2d", $larray->[$_];
 	}
 	print " $status\nX";
 
-	fits_read_col_bit($fptr,3,$ii,1,$ii,$larray,$status);
+	$fptr->read_col_bit(3,$ii,1,$ii,$larray,$status);
 	foreach (0..$ii-1) {
 		printf " %2d", $larray->[$_];
 	}
 	print " $status\nB";
 
-	fits_read_col_byt($fptr,4,$ii,1,$ii,99,$boutarray,$anynull,$status);
+	$fptr->read_col_byt(4,$ii,1,$ii,99,$boutarray,$anynull,$status);
 	foreach (0..$ii-1) {
 		printf " %2d", $boutarray->[$_];
 	}
 	print " $status\nI";
 
-	fits_read_col_sht($fptr,5,$ii,1,$ii,99,$ioutarray,$anynull,$status);
+	$fptr->read_col_sht(5,$ii,1,$ii,99,$ioutarray,$anynull,$status);
 	foreach (0..$ii-1) {
 		printf " %2d", $ioutarray->[$_];
 	}
 	print " $status\nJ";
 
-	fits_read_col_lng($fptr,6,$ii,1,$ii,99,$joutarray,$anynull,$status);
+	$fptr->read_col_lng(6,$ii,1,$ii,99,$joutarray,$anynull,$status);
 	foreach (0..$ii-1) {
 		printf " %2d", $joutarray->[$_];
 	}
 	print " $status\nE";
 
-	fits_read_col_flt($fptr,7,$ii,1,$ii,99,$eoutarray,$anynull,$status);
+	$fptr->read_col_flt(7,$ii,1,$ii,99,$eoutarray,$anynull,$status);
 	foreach (0..$ii-1) {
 		printf " %2.0f", $eoutarray->[$_];
 	}
 	print " $status\nD";
 
-	fits_read_col_dbl($fptr,8,$ii,1,$ii,99,$doutarray,$anynull,$status);
+	$fptr->read_col_dbl(8,$ii,1,$ii,99,$doutarray,$anynull,$status);
 	foreach (0..$ii-1) {
 		printf " %2.0f", $doutarray->[$_];
 	}
 	print " $status\n";
 	
-	fits_read_descript($fptr,8,$ii,$repeat,$offset,$status);
+	$fptr->read_descript(8,$ii,$repeat,$offset,$status);
 	print "Column 8 repeat and offset = $repeat $offset\n";
 }
 
@@ -1618,7 +1617,7 @@ $naxis=2;
 $naxes=[10,2];
 $npixels=20;
 
-fits_insert_img($fptr,$bitpix,$naxis,$naxes,$status);
+$fptr->insert_img($bitpix,$naxis,$naxes,$status);
 print "\nffcrim status = $status\n";
 
 @tmp = map(($_*2),(0..$npixels-1));
@@ -1629,13 +1628,13 @@ print "\nffcrim status = $status\n";
 @$eoutarray = @tmp;
 @$doutarray = @tmp;
 
-fits_write_img($fptr,TBYTE, 1, 2, [@{$boutarray}[0..1]], $status);
-fits_write_img($fptr,TSHORT, 3, 2,[ @{$ioutarray}[2..3]], $status);
-fits_write_img($fptr,TINT, 5, 2, [@{$koutarray}[4..5]], $status);
-fits_write_img($fptr,TSHORT, 7, 2, [@{$ioutarray}[6..7]], $status);
-fits_write_img($fptr,TLONG, 9, 2, [@{$joutarray}[8..9]], $status);
-fits_write_img($fptr,TFLOAT, 11, 2, [@{$eoutarray}[10..11]], $status);
-fits_write_img($fptr,TDOUBLE, 13, 2, [@{$doutarray}[12..13]], $status);
+$fptr->write_img(TBYTE, 1, 2, [@{$boutarray}[0..1]], $status);
+$fptr->write_img(TSHORT, 3, 2,[ @{$ioutarray}[2..3]], $status);
+$fptr->write_img(TINT, 5, 2, [@{$koutarray}[4..5]], $status);
+$fptr->write_img(TSHORT, 7, 2, [@{$ioutarray}[6..7]], $status);
+$fptr->write_img(TLONG, 9, 2, [@{$joutarray}[8..9]], $status);
+$fptr->write_img(TFLOAT, 11, 2, [@{$eoutarray}[10..11]], $status);
+$fptr->write_img(TDOUBLE, 13, 2, [@{$doutarray}[12..13]], $status);
 print "ffppr status = $status\n";
 
 $bnul=0;
@@ -1645,12 +1644,12 @@ $jnul=0;
 $enul=0.0;
 $dnul=0.0;
 
-fits_read_img($fptr,TBYTE,1,14,$bnul,$binarray,$anynull,$status);
-fits_read_img($fptr,TSHORT,1,14,$inul,$iinarray,$anynull,$status);
-fits_read_img($fptr,TINT,1,14,$knul,$kinarray,$anynull,$status);
-fits_read_img($fptr,TLONG,1,14,$jnul,$jinarray,$anynull,$status);
-fits_read_img($fptr,TFLOAT,1,14,$enul,$einarray,$anynull,$status);
-fits_read_img($fptr,TDOUBLE,1,14,$dnul,$dinarray,$anynull,$status);
+$fptr->read_img(TBYTE,1,14,$bnul,$binarray,$anynull,$status);
+$fptr->read_img(TSHORT,1,14,$inul,$iinarray,$anynull,$status);
+$fptr->read_img(TINT,1,14,$knul,$kinarray,$anynull,$status);
+$fptr->read_img(TLONG,1,14,$jnul,$jinarray,$anynull,$status);
+$fptr->read_img(TFLOAT,1,14,$enul,$einarray,$anynull,$status);
+$fptr->read_img(TDOUBLE,1,14,$dnul,$dinarray,$anynull,$status);
 
 print "\nImage values written with ffppr and read with ffgpv:\n";
 
@@ -1673,14 +1672,14 @@ $yrpix=257.0;
 $xinc =  -.00277777;
 $yinc =   .00277777; 
 
-fits_write_key_dbl($fptr,'CRVAL1',$xrval,10,'comment',$status);
-fits_write_key_dbl($fptr,'CRVAL2',$yrval,10,'comment',$status);
-fits_write_key_dbl($fptr,'CRPIX1',$xrpix,10,'comment',$status);
-fits_write_key_dbl($fptr,'CRPIX2',$yrpix,10,'comment',$status);
-fits_write_key_dbl($fptr,'CDELT1',$xinc,10,'comment',$status);
-fits_write_key_dbl($fptr,'CDELT2',$yinc,10,'comment',$status);
-fits_write_key_str($fptr,'CTYPE1',$xcoordtype,'comment',$status);
-fits_write_key_str($fptr,'CTYPE2',$ycoordtype,'comment',$status);
+$fptr->write_key_dbl('CRVAL1',$xrval,10,'comment',$status);
+$fptr->write_key_dbl('CRVAL2',$yrval,10,'comment',$status);
+$fptr->write_key_dbl('CRPIX1',$xrpix,10,'comment',$status);
+$fptr->write_key_dbl('CRPIX2',$yrpix,10,'comment',$status);
+$fptr->write_key_dbl('CDELT1',$xinc,10,'comment',$status);
+$fptr->write_key_dbl('CDELT2',$yinc,10,'comment',$status);
+$fptr->write_key_str('CTYPE1',$xcoordtype,'comment',$status);
+$fptr->write_key_str('CTYPE2',$ycoordtype,'comment',$status);
 print "\nWrote WCS keywords status = $status\n";
 
 $xrval = 0;
@@ -1691,7 +1690,7 @@ $xinc = 0;
 $yinc = 0;
 $rot = 0;
 
-fits_read_img_coord($fptr,$xrval,$yrval,$xrpix,$yrpix,$xinc,$yinc,$rot,$ctype,$status);
+$fptr->read_img_coord($xrval,$yrval,$xrpix,$yrpix,$xinc,$yinc,$rot,$ctype,$status);
 print "Read WCS keywords with ffgics status = $status\n";
 
 $xpix = 0.5;
@@ -1722,13 +1721,13 @@ $nrows = 11;
 $tfields = 5;
 $tblname = 'new_table';
 
-fits_create_tbl($fptr,ASCII_TBL,$nrows,$tfields,$ttype,$tform,$tunit,$tblname,$status);
+$fptr->create_tbl(ASCII_TBL,$nrows,$tfields,$ttype,$tform,$tunit,$tblname,$status);
 print "\nffcrtb status = $status\n";
 
 $extvers = 5;
-fits_write_key_lng($fptr,'EXTVER',$extvers,'extension version number',$status);
+$fptr->write_key_lng('EXTVER',$extvers,'extension version number',$status);
 
-fits_write_col($fptr,TSTRING,1,1,1,3,$onskey,$status);
+$fptr->write_col(TSTRING,1,1,1,3,$onskey,$status);
 
 @tmp = map(($_*3),(0..$npixels-1));
 @$boutarray = @tmp;
@@ -1739,24 +1738,24 @@ fits_write_col($fptr,TSTRING,1,1,1,3,$onskey,$status);
 @$doutarray = @tmp;
 
 for ($ii=2;$ii<6;$ii++) {
-	fits_write_col($fptr,TBYTE,$ii,1,1,2,[@{$boutarray}[0..1]],$status);
-	fits_write_col($fptr,TSHORT,$ii,3,1,2,[@{$ioutarray}[2..3]],$status);
-	fits_write_col($fptr,TLONG,$ii,5,1,2,[@{$joutarray}[4..5]],$status);
-	fits_write_col($fptr,TFLOAT,$ii,7,1,2,[@{$eoutarray}[6..7]],$status);
-	fits_write_col($fptr,TDOUBLE,$ii,9,1,2,[@{$doutarray}[8..9]],$status);
+	$fptr->write_col(TBYTE,$ii,1,1,2,[@{$boutarray}[0..1]],$status);
+	$fptr->write_col(TSHORT,$ii,3,1,2,[@{$ioutarray}[2..3]],$status);
+	$fptr->write_col(TLONG,$ii,5,1,2,[@{$joutarray}[4..5]],$status);
+	$fptr->write_col(TFLOAT,$ii,7,1,2,[@{$eoutarray}[6..7]],$status);
+	$fptr->write_col(TDOUBLE,$ii,9,1,2,[@{$doutarray}[8..9]],$status);
 }
 print "ffpcl status = $status\n";
 
-fits_read_col($fptr,TBYTE,2,1,1,10,$bnul,$binarray,$anynull,$status);
-fits_read_col($fptr,TSHORT,2,1,1,10,$inul,$iinarray,$anynull,$status);
-fits_read_col($fptr,TINT,3,1,1,10,$knul,$kinarray,$anynull,$status);
-fits_read_col($fptr,TLONG,3,1,1,10,$jnul,$jinarray,$anynull,$status);
-fits_read_col($fptr,TFLOAT,4,1,1,10,$enul,$einarray,$anynull,$status);
+$fptr->read_col(TBYTE,2,1,1,10,$bnul,$binarray,$anynull,$status);
+$fptr->read_col(TSHORT,2,1,1,10,$inul,$iinarray,$anynull,$status);
+$fptr->read_col(TINT,3,1,1,10,$knul,$kinarray,$anynull,$status);
+$fptr->read_col(TLONG,3,1,1,10,$jnul,$jinarray,$anynull,$status);
+$fptr->read_col(TFLOAT,4,1,1,10,$enul,$einarray,$anynull,$status);
    #######################################################
    # PROBLEM: Bus Error on Solaris 2.5 (TFLOAT fixes it) #
    #######################################################
-#fits_read_col($fptr,TDOUBLE,5,1,1,10,$dnul,$dinarray,$anynull,$status);
-fits_read_col_dbl($fptr,5,1,1,10,$dnul,$dinarray,$anynull,$status);
+#$fptr->read_col(TDOUBLE,5,1,1,10,$dnul,$dinarray,$anynull,$status);
+$fptr->read_col_dbl(5,1,1,10,$dnul,$dinarray,$anynull,$status);
 
 print "\nColumn values written with ffpcl and read with ffgcl:\n";
 $npixels = 10;
@@ -1773,63 +1772,63 @@ foreach (0..$npixels-1) { printf " %2.0f",$dinarray->[$_] }; print "  $anynull (
 
 print "\nRepeatedly move to the 1st 4 HDUs of the file:\n";
 for ($ii=0;$ii<10;$ii++) {
-	fits_movabs_hdu($fptr,1,$hdutype,$status);
-	print fits_get_hdu_num($fptr,$hdunum);
-	fits_movrel_hdu($fptr,1,$hdutype,$status);
-	print fits_get_hdu_num($fptr,$hdunum);
-	fits_movrel_hdu($fptr,1,$hdutype,$status);
-	print fits_get_hdu_num($fptr,$hdunum);
-	fits_movrel_hdu($fptr,1,$hdutype,$status);
-	print fits_get_hdu_num($fptr,$hdunum);
-	fits_movrel_hdu($fptr,-1,$hdutype,$status);
-	print fits_get_hdu_num($fptr,$hdunum);
+	$fptr->movabs_hdu(1,$hdutype,$status);
+	print $fptr->get_hdu_num($hdunum);
+	$fptr->movrel_hdu(1,$hdutype,$status);
+	print $fptr->get_hdu_num($hdunum);
+	$fptr->movrel_hdu(1,$hdutype,$status);
+	print $fptr->get_hdu_num($hdunum);
+	$fptr->movrel_hdu(1,$hdutype,$status);
+	print $fptr->get_hdu_num($hdunum);
+	$fptr->movrel_hdu(-1,$hdutype,$status);
+	print $fptr->get_hdu_num($hdunum);
 	$status and last;
 }
 print "\n";
 
 print "Move to extensions by name and version number: (ffmnhd)\n";
 $extvers=1;
-fits_movnam_hdu($fptr,ANY_HDU,$binname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$binname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $binname, $extvers = hdu $hdunum, $status\n";
 
 $extvers=3;
-fits_movnam_hdu($fptr,ANY_HDU,$binname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$binname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $binname, $extvers = hdu $hdunum, $status\n";
 
 $extvers=4;
-fits_movnam_hdu($fptr,ANY_HDU,$binname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$binname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $binname, $extvers = hdu $hdunum, $status\n";
 
 
 $tblname = 'Test-ASCII';
 $extvers=2;
-fits_movnam_hdu($fptr,ANY_HDU,$tblname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$tblname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $tblname, $extvers = hdu $hdunum, $status\n";
 
 $tblname = 'new_table';
 $extvers=5;
-fits_movnam_hdu($fptr,ANY_HDU,$tblname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$tblname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $tblname, $extvers = hdu $hdunum, $status\n";
 
 $extvers=0;
-fits_movnam_hdu($fptr,ANY_HDU,$binname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$binname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $binname, $extvers = hdu $hdunum, $status\n";
 
 $extvers=17;
-fits_movnam_hdu($fptr,ANY_HDU,$binname,$extvers,$status);
-fits_get_hdu_num($fptr,$hdunum);
+$fptr->movnam_hdu(ANY_HDU,$binname,$extvers,$status);
+$fptr->get_hdu_num($hdunum);
 print " $binname, $extvers = hdu $hdunum, $status";
 
 print " (expect a 301 error status here)\n";
 $status = 0;
 
-fits_get_num_hdus($fptr,$hdunum,$status);
+$fptr->get_num_hdus($hdunum,$status);
 print "Total number of HDUs in the file = $hdunum\n";
 
 ########################
@@ -1843,35 +1842,35 @@ $checksum = 0;
 fits_decode_chksum($asciisum,0,$checksum);
 print "Decode checksum: $asciisum -> $checksum\n";
 
-fits_write_chksum($fptr,$status);
+$fptr->write_chksum($status);
 
-fits_read_card($fptr,'DATASUM',$card,$status);
+$fptr->read_card('DATASUM',$card,$status);
 printf "%.30s\n", $card;
 
-fits_get_chksum($fptr,$datsum,$checksum,$status);
+$fptr->get_chksum($datsum,$checksum,$status);
 print "ffgcks data checksum, status = $datsum, $status\n";
 
-fits_verify_chksum($fptr,$datastatus,$hdustatus,$status);
+$fptr->verify_chksum($datastatus,$hdustatus,$status);
 print "ffvcks datastatus, hdustatus, status = $datastatus $hdustatus $status\n";
 
-fits_write_record($fptr,"new_key = 'written by fxprec' / to change checksum",$status);
-fits_update_chksum($fptr,$status);
+$fptr->write_record("new_key = 'written by fxprec' / to change checksum",$status);
+$fptr->update_chksum($status);
 print "ffupck status = $status\n";
 
-fits_read_card($fptr,'DATASUM',$card,$status);
+$fptr->read_card('DATASUM',$card,$status);
 printf "%.30s\n", $card;
-fits_verify_chksum($fptr,$datastatus,$hdustatus,$status);
+$fptr->verify_chksum($datastatus,$hdustatus,$status);
 print "ffvcks datastatus, hdustatus, status = $datastatus $hdustatus $status\n";
 
-fits_delete_key($fptr,'CHECKSUM',$status);
-fits_delete_key($fptr,'DATASUM',$status);
+$fptr->delete_key('CHECKSUM',$status);
+$fptr->delete_key('DATASUM',$status);
 
 ############################
 #  close file and quit     #
 ############################
 
 ERRSTATUS: {
-	fits_close_file($fptr,$status);
+	$fptr->close_file($status);
 	print "ffclos status = $status\n";
 
 	print "\nNormally, there should be 8 error messages on the stack\n";

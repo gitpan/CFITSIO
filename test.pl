@@ -19,8 +19,11 @@ print "ok 1\n";
 # of the test code):
 
 print <<EOP;
+
 This is alpha software, and no real test suite is yet available.
-You may find testprog.pl of interest, however.
+You may find the scripts in ./testprog and ./examples of interest,
+however.
+
 EOP
 
 

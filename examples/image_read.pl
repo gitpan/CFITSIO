@@ -1,53 +1,59 @@
-#
-# Read FITS image, unpacking data into scalar. Make a piddle and
-# display the image.
-#
+#!/usr/bin/perl
+use strict;
+use blib;
 
-use CFITSIO;
-use PDL;
-use PDL::Types;
+my ($file,$fptr,$status,$naxis1,$naxis2,$array,$anynul);
 
-PerlyUnpacking(0);
+#
+# Read FITS image, unpacking data into Perl array.
+# Display image with PGPLOT
+
+use CFITSIO qw( :constants );
+use PGPLOT;
+
 $status = 0;
+
+$file = @ARGV ? shift : 'm51.fits';
 
 #
 # open file
 #
-fits_open_file($fptr,"m51.fits",READONLY, $status);
+$fptr = CFITSIO::open_file($file,READONLY,$status);
 check_status($status);
 
 #
 # read dimensions of image
 #
-fits_read_key($fptr,TSTRING,'NAXIS1',$naxis1,$comment,$status);
+$fptr->read_key(TSTRING,'NAXIS1',$naxis1,undef,$status);
 check_status($status);
-fits_read_key($fptr,TSTRING,'NAXIS1',$naxis2,$comment,$status);
+$fptr->read_key(TSTRING,'NAXIS2',$naxis2,undef,$status);
 check_status($status);
+print "Reading ${naxis2}x${naxis1} image...";
 
 #
-# read image into $array
+# read image into $array, close file
 #
-fits_read_2d_lng($fptr,1,0,$naxis1,$naxis1,$naxis2,$array,$anynul,$status);
+$fptr->read_2d_lng(1,0,$naxis1,$naxis1,$naxis2,$array,$anynul,$status);
+print "done\n";
 check_status($status);
-
-#
-# create new PDL with proper dimensions and set data value
-#
-$pdl = PDL->new;
-$pdl->set_datatype($PDL_L);
-$pdl->setdims([$naxis2,$naxis1]);
-${$dref = $pdl->get_dataref} = $array;
+$fptr->close_file($status);
+check_status($status);
 
 #
 # have a look
 #
-imag $pdl;
+pgbeg(0,'/xs',1,1);
+pgenv(0,$naxis2-1,0,$naxis1-1,0,0);
+pgimag($array,$naxis2,$naxis1,1,$naxis2,1,$naxis1,0,400,[0,1,0,0,0,1]);
+pgend();
+
+exit;
 
 sub check_status {
 	my $status = shift;
 	my $errtxt;
 	if ($status) {
-		fits_get_errstatus($status,$errtxt);
+		CFITSIO::fits_get_errstatus($status,$errtxt);
 		print STDERR <<EOP;
 $0 - CFITSIO error detected (see below), aborting
 

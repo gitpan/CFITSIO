@@ -7,5 +7,5 @@ WriteMakefile(
     'LIBS'	=> ['-L/home/rpete/cfitsio -lcfitsio -lm'],
     'INC'	=> '-I/home/rpete/cfitsio',
     'DEFINE'	=> '',
-	'clean' => { FILES => "testprog.fit" },
+	'clean' => { FILES => "testprog/testprog.{fit,lis}" },
 );

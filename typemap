@@ -5,7 +5,7 @@
 TYPEMAP
 cmp *            T_COMPLEXP
 dblcmp *         T_DBLCOMPLEXP
-fitsfile *       T_PTR
+fitsfile *       T_PTROBJ
 logical *        T_LOGICALP
 byte *           T_BYTEP
 unsigned short * T_USHORTP

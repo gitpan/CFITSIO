@@ -1,8 +1,28 @@
 Revision history for Perl extension CFITSIO.
 
+      Mon Nov 23 1998
+    - Added OO support:
+      * changed fitsfile* typemap to T_PTROBJ
+      * Added longname minus 'fits_' aliases to all functions which
+        accept fitsfile* as first argument -  these aliases go into
+        fitsfilePtr package.
+      * Added functions CFITSIO::{open_file,create_file,create_template}
+        which return fitsfilePtr objects.
+      * testprog_OO.pl - parallels testprog.pl and testprog_longnames.pl
+    - Namespace now governed by %EXPORT_TAGS{longnames,shortnames,constants}.
+    - Put testprog*.pl in their own directory.
+
+      Fri Nov 20 1998
+    - Finished short names, made testprog.pl use the short names.
+      testprog_longnames.pl is the old version.
+
+      Wed Nov 17 1998
+    - Began support for short function names (slow going, it is).
+    - Small tweak to testprog.pl.
+
 0.10  Wed Nov 17 1998
-    - initial release
+    - Initial release.
 
 0.01  Wed Nov  4 23:50:39 1998
-	- original version; created by h2xs 1.18
+    - original version; created by h2xs 1.18
 

@@ -1187,21 +1187,26 @@ PerlyUnpacking(value)
 	int value
 
 int
-fits_add_group_member(gfptr,mfptr,hdupos,status)
+ffgtam(gfptr,mfptr,hdupos,status)
 	fitsfile * gfptr
 	fitsfile * mfptr
 	int hdupos
 	int &status
+	ALIAS:
+		CFITSIO::fits_add_group_member = 1
+		fitsfilePtr::add_group_member = 2
 	OUTPUT:
 		status
 
 int
-fits_ascii_tform(tform,typecode,width,decimals,status)
+ffasfm(tform,typecode,width,decimals,status)
 	char * tform
 	int &typecode = NO_INIT
 	long &width = NO_INIT
 	int &decimals = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_ascii_tform = 1
 	OUTPUT:
 		typecode
 		width
@@ -1209,12 +1214,14 @@ fits_ascii_tform(tform,typecode,width,decimals,status)
 		status
 
 int
-fits_binary_tform(tform,typecode,repeat,width,status)
+ffbnfm(tform,typecode,repeat,width,status)
 	char * tform
 	int &typecode = NO_INIT
 	long &repeat  = NO_INIT
 	long &width = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_binary_tform = 1
 	OUTPUT:
 		typecode
 		repeat
@@ -1222,7 +1229,7 @@ fits_binary_tform(tform,typecode,repeat,width,status)
 		status
 
 int
-fits_calc_rows(fptr,datatype,expr,firstrow,nelements,nulval,array,anynul,status)
+ffcrow(fptr,datatype,expr,firstrow,nelements,nulval,array,anynul,status)
 	fitsfile * fptr
 	int datatype
 	char * expr
@@ -1232,9 +1239,12 @@ fits_calc_rows(fptr,datatype,expr,firstrow,nelements,nulval,array,anynul,status)
 	void * array = NO_INIT
 	int anynul = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_calc_rows = 1
+		fitsfilePtr::calc_rows = 2
 	CODE:
 		array = get_mortalspace(nelements,datatype);
-		RETVAL=fits_calc_rows(fptr,datatype,expr,firstrow,nelements,packND(nulval,datatype),array,&anynul,&status);
+		RETVAL=ffcrow(fptr,datatype,expr,firstrow,nelements,packND(nulval,datatype),array,&anynul,&status);
 		unpack1D(ST(6),array,nelements,datatype);
 	OUTPUT:
 		anynul
@@ -1242,145 +1252,203 @@ fits_calc_rows(fptr,datatype,expr,firstrow,nelements,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_change_group(gfptr,grouptype,status)
+ffgtch(gfptr,grouptype,status)
 	fitsfile * gfptr
 	int grouptype
 	int &status
+	ALIAS:
+		CFITSIO::fits_change_group = 1
+		fitsfilePtr::change_group = 2
 	OUTPUT:
 		status
 
 void
-fits_clear_errmsg()
+ffcmsg()
+	ALIAS:
+		CFITSIO::fits_clear_errmsg = 1
 
 int
-fits_close_file(fptr, status)
+ffclos(fptr, status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_close_file = 1
+		fitsfilePtr::close_file = 2
 	OUTPUT:
 		status
 
 int
-fits_compact_group(gfptr,cmopt,status)
+ffgtcm(gfptr,cmopt,status)
 	fitsfile * gfptr
 	int cmopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_compact_group = 1
+		fitsfilePtr::compact_group = 2
 	OUTPUT:
 		status
 
 void
-fits_compare_str(templt,string,casesen,match,exact)
+ffcmps(templt,string,casesen,match,exact)
 	char * templt
 	char * string
 	int casesen
 	int &match
 	int &exact
+	ALIAS:
+		CFITSIO::fits_compare_str = 1
 	OUTPUT:
 		match
 		exact
 
 int
-fits_copy_col(infptr,outfptr,incolnum,outcolnum,create_col,status)
+ffcpcl(infptr,outfptr,incolnum,outcolnum,create_col,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int incolnum
 	int outcolnum
 	int create_col
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_col = 1
+		fitsfilePtr::copy_col = 2
 	OUTPUT:
 		status
 
 int
-fits_copy_data(infptr,outfptr,status)
+ffcpdt(infptr,outfptr,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_data = 1
+		fitsfilePtr::copy_data = 2
 	OUTPUT:
 		status
 
 int
-fits_copy_group(infptr,outfptr,cpopt,status)
+ffgtcp(infptr,outfptr,cpopt,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int cpopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_group = 1
+		fitsfilePtr::copy_group = 2
 	OUTPUT:
 		status
 
 int
-fits_copy_hdu(infptr,outfptr,morekeys,status)
+ffcopy(infptr,outfptr,morekeys,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int morekeys
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_hdu = 1
+		fitsfilePtr::copy_hdu = 2
 	OUTPUT:
 		status
 
 int
-fits_copy_header(infptr,outfptr,status)
+ffcphd(infptr,outfptr,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_header = 1
+		fitsfilePtr::copy_header = 2
 	OUTPUT:
 		status
 
 int
-fits_copy_key(infptr,outfptr,innum,outnum,keyroot,status)
+ffcpky(infptr,outfptr,innum,outnum,keyroot,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int innum
 	int outnum
 	char * keyroot
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_key = 1
+		fitsfilePtr::copy_key = 2
 	OUTPUT:
 		status
 
 int
-fits_copy_member(gfptr,mfptr,member,cpopt,status)
+ffgmcp(gfptr,mfptr,member,cpopt,status)
 	fitsfile * gfptr
 	fitsfile * mfptr
 	long member
 	int cpopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_copy_member = 1
+		fitsfilePtr::copy_member = 2
 	OUTPUT:
 		status
 
+fitsfile *
+create_file(name,status)
+	char * name
+	int status
+	PREINIT:
+		fitsfile * fptr;
+	CODE:
+		ffinit(&fptr,name,&status);
+		RETVAL = fptr;
+	OUTPUT:
+		RETVAL
+		status
+
 int
-fits_create_file(fptr,name,status)
+ffinit(fptr,name,status)
 	fitsfile * &fptr = NO_INIT
 	char * name
 	int &status
+	ALIAS:
+		CFITSIO::fits_create_file = 1
 	OUTPUT:
 		fptr
 		status
 
 int
-fits_create_group(fptr,grpname,grouptype,status)
+ffgtcr(fptr,grpname,grouptype,status)
 	fitsfile * fptr
 	char * grpname
 	int grouptype
 	int &status
+	ALIAS:
+		CFITSIO::fits_create_group = 1
+		fitsfilePtr::create_group = 2
 	OUTPUT:
 		status
 
 int
-fits_create_hdu(fptr,status)
+ffcrhd(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_create_hdu = 1
+		fitsfilePtr::create_hdu = 2
 	OUTPUT:
 		status
 
 int
-fits_create_img(fptr,bitpix,naxis,naxes,status)
+ffcrim(fptr,bitpix,naxis,naxes,status)
 	fitsfile * fptr
 	int bitpix
 	int naxis
 	long * naxes
 	int &status
+	ALIAS:
+		CFITSIO::fits_create_img = 1
+		fitsfilePtr::create_img = 2
 	OUTPUT:
 		status
 
 int
-fits_create_tbl(fptr,tbltype,naxis2,tfields,ttype,tform,tunit,extname,status)
+ffcrtb(fptr,tbltype,naxis2,tfields,ttype,tform,tunit,extname,status)
 	fitsfile * fptr
 	int tbltype
 	long naxis2
@@ -1390,135 +1458,187 @@ fits_create_tbl(fptr,tbltype,naxis2,tfields,ttype,tform,tunit,extname,status)
 	char ** tunit
 	char * extname
 	int &status
+	ALIAS:
+		CFITSIO::fits_create_tbl = 1
+		fitsfilePtr::create_tbl = 2
 	OUTPUT:
 		status
 
+fitsfile *
+create_template(filename,tpltfile,status)
+	char * filename
+	char * tpltfile
+	int status
+	PREINIT:
+		fitsfile * fptr;
+	CODE:
+		fftplt(&fptr,filename,tpltfile,&status);
+		RETVAL = fptr;
+	OUTPUT:
+		RETVAL
+		status
+
 int
-fits_create_template(fptr,filename,tpltfile,status)
+fftplt(fptr,filename,tpltfile,status)
 	fitsfile * &fptr = NO_INIT
 	char * filename
 	char * tpltfile
 	int &status
+	ALIAS:
+		CFITSIO::fits_create_template = 1
 	OUTPUT:
 		fptr
 		status
 
 int
-fits_date2str(year,month,day,datestr,status)
+ffdt2s(year,month,day,datestr,status)
 	int year
 	int month
 	int day
 	char * datestr = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_date2str = 1
 	CODE:
 		datestr = get_mortalspace(11,TBYTE); /* YYYY-MM-DD or dd/mm/yy */
-		RETVAL=fits_date2str(year,month,day,datestr,&status);
+		RETVAL=ffdt2s(year,month,day,datestr,&status);
 	OUTPUT:
 		datestr
 		status
 		RETVAL
 
 unsigned long
-fits_decode_chksum(ascii,complm,sum)
+ffdsum(ascii,complm,sum)
 	char * ascii
 	int complm
 	unsigned long &sum
+	ALIAS:
+		CFITSIO::fits_decode_chksum = 1
 	OUTPUT:
 		sum
 
 int
-fits_delete_col(fptr,colnum,status)
+ffdcol(fptr,colnum,status)
 	fitsfile * fptr
 	int colnum
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_col = 1
+		fitsfilePtr::delete_col = 2
 	OUTPUT:
 		status
 
 int
-fits_delete_file(fptr,status)
+ffdelt(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_file = 1
+		fitsfilePtr::delete_file = 2
 	OUTPUT:
 		status
 
 int
-fits_delete_hdu(fptr,hdutype,status)
+ffdhdu(fptr,hdutype,status)
 	fitsfile * fptr
 	int &hdutype
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_hdu = 1
+		fitsfilePtr::delete_hdu = 2
 	OUTPUT:
 		hdutype
 		status
 
 int
-fits_delete_key(fptr,keyname,status)
+ffdkey(fptr,keyname,status)
 	fitsfile * fptr
 	char * keyname
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_key = 1
+		fitsfilePtr::delete_key = 2
 	OUTPUT:
 		status
 
 int
-fits_delete_record(fptr,keynum,status)
+ffdrec(fptr,keynum,status)
 	fitsfile * fptr
 	int keynum
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_record  = 1
+		fitsfilePtr::delete_record  = 2
 	OUTPUT:
 		status
 
 int
-fits_delete_rowlist(fptr,rowlist,nrows,status)
+ffdrws(fptr,rowlist,nrows,status)
 	fitsfile * fptr
 	long * rowlist
 	long nrows
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_rowlist = 1
+		fitsfilePtr::delete_rowlist = 2
 	OUTPUT:
 		status
 
 int
-fits_delete_rows(fptr,firstrow,nrows,status)
+ffdrow(fptr,firstrow,nrows,status)
 	fitsfile * fptr
 	long firstrow
 	long nrows
 	int &status
+	ALIAS:
+		CFITSIO::fits_delete_rows = 1
+		fitsfilePtr::delete_rows = 2
 	OUTPUT:
 		status
 
 void
-fits_encode_chksum(sum,complm,ascii)
+ffesum(sum,complm,ascii)
 	unsigned long sum
 	int complm
 	char * ascii = NO_INIT
+	ALIAS:
+		CFITSIO::fits_encode_chksum = 1
 	CODE:
 		ascii = get_mortalspace(17,TBYTE);
-		fits_encode_chksum(sum,complm,ascii);
+		ffesum(sum,complm,ascii);
 	OUTPUT:
 		ascii
 
 int
-fits_file_mode(fptr,iomode,status)
+ffflmd(fptr,iomode,status)
 	fitsfile * fptr
 	int &iomode
 	int &status
+	ALIAS:
+		CFITSIO::fits_file_mode = 1
+		fitsfilePtr::file_mode = 2
 	OUTPUT:
 		iomode
 		status
 
 int
-fits_file_name(fptr,filename,status)
+ffflnm(fptr,filename,status)
 	fitsfile * fptr
 	char * filename = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_file_name = 1
+		fitsfilePtr::file_name = 2
 	CODE:
 		filename = get_mortalspace(FLEN_FILENAME,TBYTE);
-		RETVAL=fits_file_name(fptr,filename,&status);
+		RETVAL=ffflnm(fptr,filename,&status);
 	OUTPUT:
 		filename
 		status
 		RETVAL
 
 int
-fits_find_nextkey(fptr,inclist,ninc,exclist,nexc,card,status)
+ffgnxk(fptr,inclist,ninc,exclist,nexc,card,status)
 	fitsfile * fptr
 	char ** inclist
 	int ninc
@@ -1526,16 +1646,19 @@ fits_find_nextkey(fptr,inclist,ninc,exclist,nexc,card,status)
 	int nexc
 	char * card = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_find_nextkey = 1
+		fitsfilePtr::find_nextkey = 2
 	CODE:
 		card = get_mortalspace(FLEN_CARD,TBYTE);
-		RETVAL=fits_find_nextkey(fptr,inclist,ninc,exclist,nexc,card,&status);
+		RETVAL=ffgnxk(fptr,inclist,ninc,exclist,nexc,card,&status);
 	OUTPUT:
 		card
 		status
 		RETVAL
 
 int
-fits_find_rows(fptr,expr,firstrow,nrows,n_good_rows,row_status,status)
+fffrow(fptr,expr,firstrow,nrows,n_good_rows,row_status,status)
 	fitsfile * fptr
 	char * expr
 	long firstrow
@@ -1543,9 +1666,12 @@ fits_find_rows(fptr,expr,firstrow,nrows,n_good_rows,row_status,status)
 	long n_good_rows = NO_INIT
 	char * row_status = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_find_rows = 1
+		fitsfilePtr::find_rows = 2
 	CODE:
 		row_status = get_mortalspace(nrows,TLOGICAL);
-		RETVAL=fits_find_rows(fptr,expr,firstrow,nrows,&n_good_rows,row_status,&status);
+		RETVAL=fffrow(fptr,expr,firstrow,nrows,&n_good_rows,row_status,&status);
 		unpack1D(ST(5),row_status,nrows,TLOGICAL);
 	OUTPUT:
 		n_good_rows
@@ -1554,14 +1680,17 @@ fits_find_rows(fptr,expr,firstrow,nrows,n_good_rows,row_status,status)
 		RETVAL
 
 int
-fits_flush_file(fptr,status)
+ffflus(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_flush_file = 1
+		fitsfilePtr::flush_file = 2
 	OUTPUT:
 		status
 
 int
-fits_get_acolparms(fptr,colnum,ttype,tbcol,tunit,tform,scale,zero,nulstr,tdisp,status)
+ffgacl(fptr,colnum,ttype,tbcol,tunit,tform,scale,zero,nulstr,tdisp,status)
 	fitsfile * fptr
 	int colnum
 	char * ttype = NO_INIT
@@ -1573,13 +1702,16 @@ fits_get_acolparms(fptr,colnum,ttype,tbcol,tunit,tform,scale,zero,nulstr,tdisp,s
 	char * nulstr = NO_INIT
 	char * tdisp = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_get_acolparms = 1
+		fitsfilePtr::get_acolparms = 2
 	CODE:
 		ttype = get_mortalspace(FLEN_VALUE,TBYTE);
 		tunit = get_mortalspace(FLEN_VALUE,TBYTE);
 		tform = get_mortalspace(FLEN_VALUE,TBYTE);
 		nulstr = get_mortalspace(FLEN_VALUE,TBYTE);
 		tdisp = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_get_acolparms(fptr,colnum,ttype,&tbcol,tunit,tform,&scale,&zero,nulstr,tdisp,&status);
+		RETVAL=ffgacl(fptr,colnum,ttype,&tbcol,tunit,tform,&scale,&zero,nulstr,tdisp,&status);
 	OUTPUT:
 		ttype
 		tbcol
@@ -1593,7 +1725,7 @@ fits_get_acolparms(fptr,colnum,ttype,tbcol,tunit,tform,scale,zero,nulstr,tdisp,s
 		RETVAL
 
 int
-fits_get_bcolparms(fptr,colnum,ttype,tunit,dtype,repeat,scale,zero,nulval,tdisp,status)
+ffgbcl(fptr,colnum,ttype,tunit,dtype,repeat,scale,zero,nulval,tdisp,status)
 	fitsfile * fptr
 	int colnum
 	char * ttype = NO_INIT
@@ -1605,12 +1737,15 @@ fits_get_bcolparms(fptr,colnum,ttype,tunit,dtype,repeat,scale,zero,nulval,tdisp,
 	long nulval = NO_INIT
 	char * tdisp = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_get_bcolparms = 1
+		fitsfilePtr::get_bcolparms = 2
 	CODE:
 		ttype = get_mortalspace(FLEN_VALUE,TBYTE);
 		tunit = get_mortalspace(FLEN_VALUE,TBYTE);
 		tdisp = get_mortalspace(FLEN_VALUE,TBYTE);
 		dtype = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_get_bcolparms(fptr,colnum,ttype,tunit,dtype,&repeat,&scale,&zero,&nulval,tdisp,&status);
+		RETVAL=ffgbcl(fptr,colnum,ttype,tunit,dtype,&repeat,&scale,&zero,&nulval,tdisp,&status);
 	OUTPUT:
 		ttype
 		tunit
@@ -1624,38 +1759,47 @@ fits_get_bcolparms(fptr,colnum,ttype,tunit,dtype,repeat,scale,zero,nulval,tdisp,
 		RETVAL
 
 int
-fits_get_chksum(fptr,datasum,hdusum,status)
+ffgcks(fptr,datasum,hdusum,status)
 	fitsfile * fptr
 	unsigned long &datasum = NO_INIT
 	unsigned long &hdusum = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_chksum = 1
+		fitsfilePtr::get_chksum = 2
 	OUTPUT:
 		datasum
 		hdusum
 		status
 
 int
-fits_get_colnum(fptr,casesen,templt,colnum,status)
+ffgcno(fptr,casesen,templt,colnum,status)
 	fitsfile * fptr
 	int casesen
 	char * templt
 	int &colnum = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_colnum = 1
+		fitsfilePtr::get_colnum = 2
 	OUTPUT:
 		colnum
 		status
 
 int
-fits_get_colname(fptr,casesen,templt,colname,colnum,status)
+ffgcnn(fptr,casesen,templt,colname,colnum,status)
 	fitsfile * fptr
 	int casesen
 	char * templt
 	char * colname = NO_INIT
 	int colnum = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_get_colname = 1
+		fitsfilePtr::get_colname = 2
 	CODE:
 		colname = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_get_colname(fptr,casesen,templt,colname,&colnum,&status);
+		RETVAL=ffgcnn(fptr,casesen,templt,colname,&colnum,&status);
 	OUTPUT:
 		colname
 		colnum
@@ -1663,13 +1807,16 @@ fits_get_colname(fptr,casesen,templt,colname,colnum,status)
 		RETVAL
 
 int
-fits_get_coltype(fptr,colnum,typecode,repeat,width,status)
+ffgtcl(fptr,colnum,typecode,repeat,width,status)
 	fitsfile * fptr
 	int colnum
 	int &typecode = NO_INIT
 	long &repeat = NO_INIT
 	long &width = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_coltype = 1
+		fitsfilePtr::get_coltype = 2
 	OUTPUT:
 		typecode
 		repeat
@@ -1677,60 +1824,77 @@ fits_get_coltype(fptr,colnum,typecode,repeat,width,status)
 		status
 
 void
-fits_get_errstatus(status,err_text)
+ffgerr(status,err_text)
 	int status
 	char * err_text = NO_INIT
+	ALIAS:
+		CFITSIO::fits_get_errstatus = 1
 	CODE:
 		err_text = get_mortalspace(FLEN_ERRMSG,TBYTE);
-		fits_get_errstatus(status,err_text);
+		ffgerr(status,err_text);
 	OUTPUT:
 		err_text
 
 int
-fits_get_hdrpos(fptr,keysexist,keynum,status)
+ffghps(fptr,keysexist,keynum,status)
 	fitsfile * fptr
 	int &keysexist = NO_INIT
 	int &keynum = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_hdrpos = 1
+		fitsfilePtr::get_hdrpos = 2
 	OUTPUT:
 		keysexist
 		keynum
 		status
 
 int
-fits_get_hdrspace(fptr,keysexist,morekeys,status)
+ffghsp(fptr,keysexist,morekeys,status)
 	fitsfile * fptr
 	int &keysexist = NO_INIT
 	int &morekeys = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_hdrspace = 1
+		fitsfilePtr::get_hdrspace = 2
 	OUTPUT:
 		keysexist
 		morekeys
 		status
 
 int 
-fits_get_hdu_num(fptr,hdunum)
+ffghdn(fptr,hdunum)
 	fitsfile * fptr
 	int &hdunum = NO_INIT
+	ALIAS:
+		CFITSIO::fits_get_hdu_num = 1
+		fitsfilePtr::get_hdu_num = 2
 	OUTPUT:
 		hdunum
 
 int
-fits_get_hdu_type(fptr,hdutype,status)
+ffghdt(fptr,hdutype,status)
 	fitsfile * fptr
 	int &hdutype = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_hdu_type = 1
+		fitsfilePtr::get_hdu_type = 2
 	OUTPUT:
 		hdutype
 		status
 
 int
-fits_get_hduaddr(fptr,headstart,datastart,dataend,status)
+ffghad(fptr,headstart,datastart,dataend,status)
 	fitsfile * fptr
 	long &headstart = NO_INIT
 	long &datastart = NO_INIT
 	long &dataend = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_hduaddr = 1
+		fitsfilePtr::get_hduaddr = 2
 	OUTPUT:
 		headstart
 		datastart
@@ -1738,76 +1902,98 @@ fits_get_hduaddr(fptr,headstart,datastart,dataend,status)
 		status
 
 int
-fits_get_keytype(value,dtype,status)
+ffdtyp(value,dtype,status)
 	char * value
 	char &dtype = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_keytype = 1
 	OUTPUT:
 		dtype
 		status
 
 int
-fits_get_num_cols(fptr,ncols,status)
+ffgncl(fptr,ncols,status)
 	fitsfile * fptr
 	int &ncols = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_num_cols = 1
+		fitsfilePtr::get_num_cols = 2
 	OUTPUT:
 		ncols
 		status
 
 int
-fits_get_num_groups(mfptr,nmembers,status)
+ffgmng(mfptr,nmembers,status)
 	fitsfile * mfptr
 	long &nmembers = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_num_groups = 1
+		fitsfilePtr::get_num_groups = 2
 	OUTPUT:
 		nmembers
 		status
 
 int
-fits_get_num_hdus(fptr,hdunum,status)
+ffthdu(fptr,hdunum,status)
 	fitsfile * fptr
 	int &hdunum = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_num_hdus = 1
+		fitsfilePtr::get_num_hdus = 2
 	OUTPUT:
 		hdunum
 		status
 
 int
-fits_get_num_members(gfptr,nmembers,status)
+ffgtnm(gfptr,nmembers,status)
 	fitsfile * gfptr
 	long &nmembers = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_num_members = 1
+		fitsfilePtr::get_num_members = 2
 	OUTPUT:
 		nmembers
 		status
 
 int
-fits_get_num_rows(fptr,nrows,status)
+ffgnrw(fptr,nrows,status)
 	fitsfile * fptr
 	long &nrows = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_num_rows = 1
+		fitsfilePtr::get_num_rows = 2
 	OUTPUT:
 		nrows
 		status
 
 int
-fits_get_rowsize(fptr,nrows,status)
+ffgrsz(fptr,nrows,status)
 	fitsfile * fptr
 	long &nrows = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_get_rowsize = 1
+		fitsfilePtr::get_rowsize = 2
 	OUTPUT:
 		nrows
 		status
 
 int
-fits_get_system_time(timestr,timeref,status)
+ffgstm(timestr,timeref,status)
 	char * timestr = NO_INIT
 	int timeref = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_get_system_time = 1
 	CODE:
 		timestr = get_mortalspace(20,TBYTE); /* YYYY-MM-DDThh:mm:ss */
-		RETVAL=fits_get_system_time(timestr,&timeref,&status);
+		RETVAL=ffgstm(timestr,&timeref,&status);
 	OUTPUT:
 		timestr
 		timeref
@@ -1815,16 +2001,18 @@ fits_get_system_time(timestr,timeref,status)
 		RETVAL
 
 int
-fits_get_tbcol(tfields,tform,space,rowlen,tbcol,status)
+ffgabc(tfields,tform,space,rowlen,tbcol,status)
 	int tfields
 	char ** tform
 	int space
 	long rowlen = NO_INIT
 	long * tbcol = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_get_tbcol = 1
 	CODE:
 		tbcol = get_mortalspace(tfields,TLONG);
-		RETVAL=fits_get_tbcol(tfields,tform,space,&rowlen,tbcol,&status);
+		RETVAL=ffgabc(tfields,tform,space,&rowlen,tbcol,&status);
 		unpack1D(ST(4),tbcol,tfields,TLONG);
 	OUTPUT:
 		rowlen
@@ -1832,13 +2020,15 @@ fits_get_tbcol(tfields,tform,space,rowlen,tbcol,status)
 		RETVAL
 
 float
-fits_get_version(version)
+ffvers(version)
 	float &version = NO_INIT
+	ALIAS:
+		CFITSIO::fits_get_version = 1
 	OUTPUT:
 		version
 
 int
-fits_insert_atbl(fptr,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
+ffitab(fptr,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
 	fitsfile * fptr
 	long rowlen
 	long nrows
@@ -1849,11 +2039,14 @@ fits_insert_atbl(fptr,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,statu
 	char ** tunit
 	char * extname
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_atbl = 1
+		fitsfilePtr::insert_atbl = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_btbl(fptr,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
+ffibin(fptr,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
 	fitsfile * fptr
 	long nrows 
 	int tfields
@@ -1863,474 +2056,622 @@ fits_insert_btbl(fptr,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
 	char * extname
 	long pcount
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_btbl = 1
+		fitsfilePtr::insert_btbl = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_col(fptr,colnum,ttype,tform,status)
+fficol(fptr,colnum,ttype,tform,status)
 	fitsfile * fptr
 	int colnum
 	char * ttype
 	char * tform
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_col = 1
+		fitsfilePtr::insert_col = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_cols(fptr,colnum,ncols,ttype,tform,status)
+fficls(fptr,colnum,ncols,ttype,tform,status)
 	fitsfile * fptr
 	int colnum
 	int ncols
 	char ** ttype
 	char ** tform
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_cols = 1
+		fitsfilePtr::insert_cols = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_group(fptr,grpname,grouptype,status)
+ffgtis(fptr,grpname,grouptype,status)
 	fitsfile * fptr
 	char * grpname
 	int grouptype
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_group = 1
+		fitsfilePtr::insert_group = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_img(fptr,bitpix,naxis,naxes,status)
+ffiimg(fptr,bitpix,naxis,naxes,status)
 	fitsfile * fptr
 	int bitpix
 	int naxis
 	long * naxes
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_img = 1
+		fitsfilePtr::insert_img = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_null(fptr,keyname,comment,status)
+ffikyu(fptr,keyname,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_null = 1
+		fitsfilePtr::insert_key_null = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_str(fptr,keyname,value,comment,status)
+ffikys(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_str = 1
+		fitsfilePtr::insert_key_str = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_log(fptr,keyname,value,comment,status)
+ffikyl(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	int value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_log = 1
+		fitsfilePtr::insert_key_log = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_lng(fptr,keyname,value,comment,status)
+ffikyj(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_lng = 1
+		fitsfilePtr::insert_key_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_flt(fptr,keyname,value,decimals,comment,status)
+ffikye(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_flt = 1
+		fitsfilePtr::insert_key_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_fixflt(fptr,keyname,value,decimals,comment,status)
+ffikyf(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_fixflt = 1
+		fitsfilePtr::insert_key_fixflt = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_dbl(fptr,keyname,value,decimals,comment,status)
+ffikyd(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_dbl = 1
+		fitsfilePtr::insert_key_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_fixdbl(fptr,keyname,value,decimals,comment,status)
+ffikyg(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_fixdbl = 1
+		fitsfilePtr::insert_key_fixdbl = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_cmp(fptr,keyname,value,decimals,comment,status)
+ffikyc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_cmp = 1
+		fitsfilePtr::insert_key_cmp = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_fixcmp(fptr,keyname,value,decimals,comment,status)
+ffikfc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_fixcmp = 1
+		fitsfilePtr::insert_key_fixcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_dblcmp(fptr,keyname,value,decimals,comment,status)
+ffikym(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_dblcmp = 1
+		fitsfilePtr::insert_key_dblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_key_fixdblcmp(fptr,keyname,value,decimals,comment,status)
+ffikfm(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_key_fixdblcmp = 1
+		fitsfilePtr::insert_key_fixdblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_record(fptr,keynum,card,status)
+ffirec(fptr,keynum,card,status)
 	fitsfile * fptr
 	int keynum
 	char * card
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_record = 1
+		fitsfilePtr::insert_record = 2
 	OUTPUT:
 		status
 
 int
-fits_insert_rows(fptr,firstrow,nrows,status)
+ffirow(fptr,firstrow,nrows,status)
 	fitsfile * fptr
 	long firstrow
 	long nrows
 	int &status
+	ALIAS:
+		CFITSIO::fits_insert_rows = 1
+		fitsfilePtr::insert_rows = 2
 	OUTPUT:
 		status
 
 int
-fits_make_keyn(keyroot,value,keyname,status)
+ffkeyn(keyroot,value,keyname,status)
 	char * keyroot
 	int value
 	char * keyname = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_make_keyn = 1
 	CODE:
 		keyname = get_mortalspace(FLEN_KEYWORD,TBYTE);
-		RETVAL=fits_make_keyn(keyroot,value,keyname,&status);
+		RETVAL=ffkeyn(keyroot,value,keyname,&status);
 	OUTPUT:
 		keyname
 		status
 		RETVAL
 
 int
-fits_make_nkey(value,keyroot,keyname,status)
+ffnkey(value,keyroot,keyname,status)
 	int value
 	char * keyroot
 	char * keyname = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_make_nkey = 1
 	CODE:
 		keyname = get_mortalspace(FLEN_KEYWORD,TBYTE);
-		RETVAL=fits_make_nkey(value,keyroot,keyname,&status);
+		RETVAL=ffnkey(value,keyroot,keyname,&status);
 	OUTPUT:
 		keyname
 		status
 		RETVAL
 
 int
-fits_merge_groups(infptr,outfptr,mgopt,status)
+ffgtmg(infptr,outfptr,mgopt,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	int mgopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_merge_groups = 1
+		fitsfilePtr::merge_groups = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_card(fptr,keyname,card,status)
+ffmcrd(fptr,keyname,card,status)
 	fitsfile * fptr
 	char * keyname
 	char * card
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_card = 1
+		fitsfilePtr::modify_card = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_comment(fptr,keyname,comment,status)
+ffmcom(fptr,keyname,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_comment = 1
+		fitsfilePtr::modify_comment = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_null(fptr,keyname,comment,status)
+ffmkyu(fptr,keyname,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_null = 1
+		fitsfilePtr::modify_key_null = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_str(fptr,keyname,value,comment,status)
+ffmkys(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_str = 1
+		fitsfilePtr::modify_key_str = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_log(fptr,keyname,value,comment,status)
+ffmkyl(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	int value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_log = 1
+		fitsfilePtr::modify_key_log = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_lng(fptr,keyname,value,comment,status)
+ffmkyj(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_lng = 1
+		fitsfilePtr::modify_key_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_flt(fptr,keyname,value,decimals,comment,status)
+ffmkye(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_flt = 1
+		fitsfilePtr::modify_key_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_fixflt(fptr,keyname,value,decimals,comment,status)
+ffmkyf(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_fixflt = 1
+		fitsfilePtr::modify_key_fixflt = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_dbl(fptr,keyname,value,decimals,comment,status)
+ffmkyd(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_dbl = 1
+		fitsfilePtr::modify_key_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_fixdbl(fptr,keyname,value,decimals,comment,status)
+ffmkyg(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_fixdbl = 1
+		fitsfilePtr::modify_key_fixdbl = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_cmp(fptr,keyname,value,decimals,comment,status)
+ffmkyc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_cmp = 1
+		fitsfilePtr::modify_key_cmp = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_fixcmp(fptr,keyname,value,decimals,comment,status)
+ffmkfc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_fixcmp = 1
+		fitsfilePtr::modify_key_fixcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_dblcmp(fptr,keyname,value,decimals,comment,status)
+ffmkym(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_dblcmp = 1
+		fitsfilePtr::modify_key_dblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_key_fixdblcmp(fptr,keyname,value,decimals,comment,status)
+ffmkfm(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_key_fixdblcmp = 1
+		fitsfilePtr::modify_key_fixdblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_name(fptr,oldname,newname,status)
+ffmnam(fptr,oldname,newname,status)
 	fitsfile * fptr
 	char * oldname
 	char * newname
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_name = 1
+		fitsfilePtr::modify_name = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_record(fptr,keynum,card,status)
+ffmrec(fptr,keynum,card,status)
 	fitsfile * fptr
 	int keynum
 	char * card
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_record = 1
+		fitsfilePtr::modify_record = 2
 	OUTPUT:
 		status
 
 int
-fits_modify_vector_len(fptr,colnum,newveclen,status)
+ffmvec(fptr,colnum,newveclen,status)
 	fitsfile * fptr
 	int colnum
 	long newveclen
 	int &status
+	ALIAS:
+		CFITSIO::fits_modify_vector_len = 1
+		fitsfilePtr::modify_vector_len = 2
 	OUTPUT:
 		status
 
 int
-fits_movabs_hdu(fptr,hdunum,hdutype,status)
+ffmahd(fptr,hdunum,hdutype,status)
 	fitsfile * fptr
 	int hdunum
 	int &hdutype = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_movabs_hdu = 1
+		fitsfilePtr::movabs_hdu = 2
 	OUTPUT:
 		hdutype
 		status
 
 int
-fits_movnam_hdu(fptr,hdunum,extname,extvers,status)
+ffmnhd(fptr,hdunum,extname,extvers,status)
 	fitsfile * fptr
 	int hdunum
 	char * extname
 	int extvers
 	int &status
+	ALIAS:
+		CFITSIO::fits_movnam_hdu = 1
+		fitsfilePtr::movnam_hdu = 2
 	OUTPUT:
 		status
 
 int
-fits_movrel_hdu(fptr,nmove,hdutype,status)
+ffmrhd(fptr,nmove,hdutype,status)
 	fitsfile * fptr
 	int nmove
 	int &hdutype = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_movrel_hdu = 1
+		fitsfilePtr::movrel_hdu = 2
 	OUTPUT:
 		hdutype
 		status
 
+fitsfile *
+open_file(filename,iomode,status)
+	char * filename
+	int iomode
+	int status
+	PREINIT:
+		fitsfile * fptr;
+	CODE:
+		ffopen(&fptr,filename,iomode,&status);
+		RETVAL = fptr;
+	OUTPUT:
+		RETVAL
+		status
+
 int
-fits_open_file(fptr,filename,iomode,status)
+ffopen(fptr,filename,iomode,status)
 	fitsfile * &fptr = NO_INIT
 	char * filename
 	int iomode
 	int &status
+	ALIAS:
+		CFITSIO::fits_open_file = 1
 	OUTPUT:
 		fptr
 		status
 
 int
-fits_open_group(mfptr,group,gfptr,status)
+ffgtop(mfptr,group,gfptr,status)
 	fitsfile * mfptr
 	int group
 	fitsfile * &gfptr = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_open_group = 1
+		fitsfilePtr::open_group = 2
 	OUTPUT:
 		gfptr
 		status
 
 int
-fits_open_member(gfptr,member,mfptr,status)
+ffgmop(gfptr,member,mfptr,status)
 	fitsfile * gfptr
 	long member
 	fitsfile * &mfptr = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_open_member = 1
+		fitsfilePtr::open_member = 2
 	OUTPUT:
 		mfptr
 		status
 
 int
-fits_parse_extnum(filename,hdunum,status)
+ffextn(filename,hdunum,status)
 	char * filename
 	int &hdunum = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_parse_extnum = 1
 	OUTPUT:
 		hdunum
 		status
 
 int
-fits_parse_input_url(filename,filetype,infile,outfile,extspec,filter,binspec,colspec,status)
+ffiurl(filename,filetype,infile,outfile,extspec,filter,binspec,colspec,status)
 	char * filename
 	char * filetype
 	char * infile
@@ -2340,6 +2681,8 @@ fits_parse_input_url(filename,filetype,infile,outfile,extspec,filter,binspec,col
 	char * binspec
 	char * colspec
 	int &status
+	ALIAS:
+		CFITSIO::fits_parse_input_url = 1
 	OUTPUT:
 		filetype
 		infile
@@ -2351,38 +2694,44 @@ fits_parse_input_url(filename,filetype,infile,outfile,extspec,filter,binspec,col
 		status
 
 int
-fits_parse_rootname(filename,rootname,status)
+ffrtnm(filename,rootname,status)
 	char * filename
 	char * rootname
 	int &status
+	ALIAS:
+		CFITSIO::fits_parse_rootname = 1
 	OUTPUT:
 		rootname
 		status
 
 int
-fits_parse_template(templt,card,keytype,status)
+ffgthd(templt,card,keytype,status)
 	char * templt
 	char * card
 	int &keytype
 	int &status
+	ALIAS:
+		CFITSIO::fits_parse_template = 1
 	OUTPUT:
 		card
 		keytype
 		status
 
 int
-fits_parse_value(card,value,comment,status)
+ffpsvc(card,value,comment,status)
 	char * card
 	char * value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_parse_value = 1
 	OUTPUT:
 		value
 		comment
 		status
 
 int
-fits_pix_to_world(xpix,ypix,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,xpos,ypos,status)
+ffwldp(xpix,ypix,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,xpos,ypos,status)
 	double xpix
 	double ypix
 	double xrefval
@@ -2396,13 +2745,15 @@ fits_pix_to_world(xpix,ypix,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordt
 	double &xpos
 	double &ypos
 	int &status
+	ALIAS:
+		CFITSIO::fits_pix_to_world = 1
 	OUTPUT:
 		xpos
 		ypos
 		status
 
 int
-fits_read_2d_byt(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2db(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	byte nulval
@@ -2412,11 +2763,15 @@ fits_read_2d_byt(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	byte * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_byt = 1
+		fitsfilePtr::read_2d_byt = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TBYTE);
-		RETVAL=fits_read_2d_byt(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2db(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TBYTE);
 	OUTPUT:
 		anynul
@@ -2424,7 +2779,7 @@ fits_read_2d_byt(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_usht(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2dui(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	unsigned short nulval
@@ -2434,11 +2789,15 @@ fits_read_2d_usht(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	unsigned short * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_usht = 1
+		fitsfilePtr::read_2d_usht = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TUSHORT);
-		RETVAL=fits_read_2d_usht(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2dui(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TUSHORT);
 	OUTPUT:
 		anynul
@@ -2446,7 +2805,7 @@ fits_read_2d_usht(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_sht(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2di(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	short nulval
@@ -2456,11 +2815,15 @@ fits_read_2d_sht(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	short * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_sht = 1
+		fitsfilePtr::read_2d_sht = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TSHORT);
-		RETVAL=fits_read_2d_sht(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2di(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TSHORT);
 	OUTPUT:
 		anynul
@@ -2468,7 +2831,7 @@ fits_read_2d_sht(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_uint(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2duk(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	unsigned int nulval
@@ -2478,11 +2841,15 @@ fits_read_2d_uint(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	unsigned int * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_uint = 1
+		fitsfilePtr::read_2d_uint = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TUINT);
-		RETVAL=fits_read_2d_uint(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2duk(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TUINT);
 	OUTPUT:
 		anynul
@@ -2490,7 +2857,7 @@ fits_read_2d_uint(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_int(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2dk(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	int nulval
@@ -2500,11 +2867,15 @@ fits_read_2d_int(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	int * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_int = 1
+		fitsfilePtr::read_2d_int = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TINT);
-		RETVAL=fits_read_2d_int(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2dk(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TINT);
 	OUTPUT:
 		anynul
@@ -2512,7 +2883,7 @@ fits_read_2d_int(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_ulng(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2duj(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	unsigned long nulval
@@ -2522,11 +2893,15 @@ fits_read_2d_ulng(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	unsigned long * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_ulng = 1
+		fitsfilePtr::read_2d_ulng = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TULONG);
-		RETVAL=fits_read_2d_ulng(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2duj(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TULONG);
 	OUTPUT:
 		anynul
@@ -2534,7 +2909,7 @@ fits_read_2d_ulng(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_lng(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2dj(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long nulval
@@ -2544,11 +2919,15 @@ fits_read_2d_lng(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	long * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_lng = 1
+		fitsfilePtr::read_2d_lng = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TLONG);
-		RETVAL=fits_read_2d_lng(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2dj(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TLONG);
 	OUTPUT:
 		anynul
@@ -2556,7 +2935,7 @@ fits_read_2d_lng(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_flt(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2de(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	float nulval
@@ -2566,11 +2945,15 @@ fits_read_2d_flt(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	float * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_flt = 1
+		fitsfilePtr::read_2d_flt = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TFLOAT);
-		RETVAL=fits_read_2d_flt(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2de(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TFLOAT);
 	OUTPUT:
 		anynul
@@ -2578,7 +2961,7 @@ fits_read_2d_flt(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_2d_dbl(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
+ffg2dd(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	fitsfile * fptr
 	long group
 	double nulval
@@ -2588,11 +2971,15 @@ fits_read_2d_dbl(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	double * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_2d_dbl = 1
+		fitsfilePtr::read_2d_dbl = 2
+	PREINIT:
 		long dims[2];
+	CODE:
 		dims[0]=naxis2; dims[1] = dim1;
 		array = get_mortalspace(naxis2*dim1,TDOUBLE);
-		RETVAL=fits_read_2d_dbl(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+		RETVAL=ffg2dd(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
 		unpack2D(ST(6),array,dims,TDOUBLE);
 	OUTPUT:
 		anynul
@@ -2600,7 +2987,7 @@ fits_read_2d_dbl(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 		RETVAL
 
 int
-fits_read_3d_byt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3db(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	byte nulval
@@ -2612,11 +2999,15 @@ fits_read_3d_byt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 	byte * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_byt = 1
+		fitsfilePtr::read_3d_byt = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TBYTE);
-		RETVAL=fits_read_3d_byt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3db(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TBYTE);
 	OUTPUT:
 		anynul
@@ -2624,7 +3015,7 @@ fits_read_3d_byt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 		RETVAL
 
 int
-fits_read_3d_usht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3dui(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	unsigned short nulval
@@ -2636,11 +3027,15 @@ fits_read_3d_usht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,
 	unsigned short * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_usht = 1
+		fitsfilePtr::read_3d_usht = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TUSHORT);
-		RETVAL=fits_read_3d_usht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3dui(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TUSHORT);
 	OUTPUT:
 		anynul
@@ -2648,7 +3043,7 @@ fits_read_3d_usht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,
 		RETVAL
 
 int
-fits_read_3d_sht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3di(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	short nulval
@@ -2660,11 +3055,15 @@ fits_read_3d_sht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 	short * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_sht = 1
+		fitsfilePtr::read_3d_sht = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TSHORT);
-		RETVAL=fits_read_3d_sht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3di(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TSHORT);
 	OUTPUT:
 		anynul
@@ -2672,7 +3071,7 @@ fits_read_3d_sht(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 		RETVAL
 
 int
-fits_read_3d_uint(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3duk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	unsigned int nulval
@@ -2684,11 +3083,15 @@ fits_read_3d_uint(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,
 	unsigned int * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_uint = 1
+		fitsfilePtr::read_3d_uint = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TUINT);
-		RETVAL=fits_read_3d_uint(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3duk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TUINT);
 	OUTPUT:
 		anynul
@@ -2696,7 +3099,7 @@ fits_read_3d_uint(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,
 		RETVAL
 
 int
-fits_read_3d_int(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3dk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	int nulval
@@ -2708,11 +3111,15 @@ fits_read_3d_int(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 	int * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_int = 1
+		fitsfilePtr::read_3d_int = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TINT);
-		RETVAL=fits_read_3d_int(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3dk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TINT);
 	OUTPUT:
 		anynul
@@ -2720,7 +3127,7 @@ fits_read_3d_int(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 		RETVAL
 
 int
-fits_read_3d_ulng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3duj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	unsigned long nulval
@@ -2732,11 +3139,15 @@ fits_read_3d_ulng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,
 	unsigned long * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_ulng = 1
+		fitsfilePtr::read_3d_ulng = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TULONG);
-		RETVAL=fits_read_3d_ulng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3duj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TULONG);
 	OUTPUT:
 		anynul
@@ -2744,7 +3155,7 @@ fits_read_3d_ulng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,
 		RETVAL
 
 int
-fits_read_3d_lng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3dj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long nulval
@@ -2756,11 +3167,15 @@ fits_read_3d_lng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 	long * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_lng = 1
+		fitsfilePtr::read_3d_lng = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TLONG);
-		RETVAL=fits_read_3d_lng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3dj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TLONG);
 	OUTPUT:
 		anynul
@@ -2768,7 +3183,7 @@ fits_read_3d_lng(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 		RETVAL
 
 int
-fits_read_3d_flt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3de(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	float nulval
@@ -2780,11 +3195,15 @@ fits_read_3d_flt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 	float * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_flt = 1
+		fitsfilePtr::read_3d_flt = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TFLOAT);
-		RETVAL=fits_read_3d_flt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3de(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TFLOAT);
 	OUTPUT:
 		anynul
@@ -2792,7 +3211,7 @@ fits_read_3d_flt(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 		RETVAL
 
 int
-fits_read_3d_dbl(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
+ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	fitsfile * fptr
 	long group
 	double nulval
@@ -2804,11 +3223,15 @@ fits_read_3d_dbl(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 	double * array = NO_INIT
 	int anynul
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_3d_dbl = 1
+		fitsfilePtr::read_3d_dbl = 2
+	PREINIT:
 		long dims[3];
+	CODE:
 		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
 		array = get_mortalspace(dim1*dim2*naxis3,TDOUBLE);
-		RETVAL=fits_read_3d_dbl(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+		RETVAL=ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
 		unpack3D(ST(8),array,dims,TDOUBLE);
 	OUTPUT:
 		anynul
@@ -2816,97 +3239,125 @@ fits_read_3d_dbl(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,s
 		RETVAL
 
 int
-fits_read_atblhdr(fptr,maxdim,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
+ffghtb(fptr,maxdim,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
 	fitsfile * fptr
 	int maxdim
-	long rowlen
-	long nrows
-	int tfields
+	long rowlen = NO_INIT
+	long nrows = NO_INIT
+	int tfields = NO_INIT
 	char ** ttype = NO_INIT
 	long * tbcol = NO_INIT
 	char ** tform = NO_INIT
 	char ** tunit = NO_INIT
 	char * extname = NO_INIT
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_atblhdr = 1
+		fitsfilePtr::read_atblhdr = 2
+	PREINIT:
 		int i,max;
-		extname = (char *)get_mortalspace(FLEN_VALUE,TBYTE);
-		fits_read_atblhdr(fptr,0,&rowlen,&nrows,&tfields,ttype,tbcol,tform,tunit,extname,&status);
-		tbcol = (long *)get_mortalspace(tfields,TLONG);
-		ttype = (char **)get_mortalspace(tfields,TSTRING);
-		tform = (char **)get_mortalspace(tfields,TSTRING);
-		tunit = (char **)get_mortalspace(tfields,TSTRING);
-		for (i=0; i<tfields; i++) {                 /* space waste? */
-			ttype[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-			tform[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-			tunit[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-		}
-		RETVAL=fits_read_atblhdr(fptr,tfields,&rowlen,&nrows,&tfields,ttype,tbcol,tform,tunit,extname,&status);
-		unpack1D(ST(5),ttype,tfields,TSTRING);
-		unpack1D(ST(6),tbcol,tfields,TLONG);
-		unpack1D(ST(7),tform,tfields,TSTRING);
-		unpack1D(ST(8),tunit,tfields,TSTRING);
+	CODE:
+		extname = (ST(9)!=&sv_undef) ? get_mortalspace(FLEN_VALUE,TBYTE) : NULL;
+		ffghtb(fptr,0,&rowlen,&nrows,&tfields,ttype,tbcol,tform,tunit,extname,&status);
+
+		if (ST(6)!=&sv_undef) tbcol = get_mortalspace(tfields,TLONG);
+		else tbcol = NULL;
+
+		if (ST(5)!=&sv_undef) {
+			ttype = get_mortalspace(tfields,TSTRING);
+			for (i=0; i<tfields; i++)
+				ttype[i] = get_mortalspace(FLEN_VALUE,TBYTE);
+		} else ttype = NULL;
+		if (ST(7)!=&sv_undef) {
+			tform = get_mortalspace(tfields,TSTRING);
+			for (i=0; i<tfields; i++)
+				tform[i] = get_mortalspace(FLEN_VALUE,TBYTE);
+		} else tform = NULL;
+		if (ST(8)!=&sv_undef) {
+			tunit = get_mortalspace(tfields,TSTRING);
+			for (i=0; i<tfields; i++)
+				tunit[i] = get_mortalspace(FLEN_VALUE,TBYTE);
+		} else tunit = NULL;
+
+		RETVAL=ffghtb(fptr,tfields,&rowlen,&nrows,&tfields,ttype,tbcol,tform,tunit,extname,&status);
+		if (ST(2)!=&sv_undef) sv_setiv(ST(2),(IV)rowlen);
+		if (ST(3)!=&sv_undef) sv_setiv(ST(3),(IV)nrows);
+		if (ST(4)!=&sv_undef) sv_setiv(ST(4),(IV)tfields);
+		if (ttype) unpack1D(ST(5),ttype,tfields,TSTRING);
+		if (tbcol) unpack1D(ST(6),tbcol,tfields,TLONG);
+		if (tform) unpack1D(ST(7),tform,tfields,TSTRING);
+		if (tunit) unpack1D(ST(8),tunit,tfields,TSTRING);
+		if (extname) sv_setpv(ST(9),extname);
 	OUTPUT:
-		rowlen
-		nrows
-		tfields
-		extname
 		status
 		RETVAL
 
 int
-fits_read_btblhdr(fptr,maxdim,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
+ffghbn(fptr,maxdim,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
 	fitsfile * fptr
 	int maxdim
-	long nrows
-	int tfields
+	long nrows = NO_INIT
+	int tfields = NO_INIT
 	char ** ttype = NO_INIT
 	char ** tform = NO_INIT
 	char ** tunit = NO_INIT
 	char * extname = NO_INIT
-	long pcount
+	long pcount = NO_INIT
 	int status
-	CODE:
+	ALIAS:
+		CFITSIO::fits_read_btblhdr = 1
+		fitsfilePtr::read_btblhdr = 2
+	PREINIT:
 		int i,max;
-		extname = get_mortalspace(FLEN_VALUE,TBYTE);
-		fits_read_btblhdr(fptr,0,&nrows,&tfields,ttype,tform,tunit,extname,&pcount,&status);
-
-		ttype = (char **)get_mortalspace(tfields,TSTRING);
-		tform = (char **)get_mortalspace(tfields,TSTRING);
-		tunit = (char **)get_mortalspace(tfields,TSTRING);
-		for (i=0; i<tfields; i++) {                 /* space waste? */
-			ttype[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-			tform[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-			tunit[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-		}
-		RETVAL=fits_read_btblhdr(fptr,tfields,&nrows,&tfields,ttype,tform,tunit,extname,&pcount,&status);
-		unpack1D(ST(4),ttype,tfields,TSTRING);
-		unpack1D(ST(5),tform,tfields,TSTRING);
-		unpack1D(ST(6),tunit,tfields,TSTRING);
+	CODE:
+		extname = (ST(7)!=&sv_undef) ? get_mortalspace(FLEN_VALUE,TBYTE) : NULL;
+		ffghbn(fptr,0,&nrows,&tfields,ttype,tform,tunit,extname,&pcount,&status);
+		if (ST(4) != &sv_undef) {
+			ttype = get_mortalspace(tfields,TSTRING);
+			for (i=0; i<tfields; i++)
+				ttype[i] = get_mortalspace(FLEN_VALUE,TBYTE);
+		} else ttype = NULL;
+		if (ST(5) != &sv_undef) {
+			tform = (char **)get_mortalspace(tfields,TSTRING);
+			for (i=0; i<tfields; i++)
+				tform[i] = get_mortalspace(FLEN_VALUE,TBYTE);
+		} else tform = NULL;
+		if (ST(6) != &sv_undef) {
+			tunit = get_mortalspace(tfields,TSTRING);
+			for (i=0; i<tfields; i++)
+				tunit[i] = get_mortalspace(FLEN_VALUE,TBYTE);
+		} else tunit = NULL;
+		RETVAL=ffghbn(fptr,tfields,&nrows,&tfields,ttype,tform,tunit,extname,&pcount,&status);
+		if (ST(2) != &sv_undef) sv_setiv(ST(2),(IV)nrows);
+		if (ST(3) != &sv_undef) sv_setiv(ST(3),(IV)tfields);
+		if (ttype) unpack1D(ST(4),ttype,tfields,TSTRING);
+		if (tform) unpack1D(ST(5),tform,tfields,TSTRING);
+		if (tunit) unpack1D(ST(6),tunit,tfields,TSTRING);
+		if (extname) sv_setpv(ST(7),extname);
+		if (ST(8) != &sv_undef) sv_setiv(ST(8),(IV)pcount);
 	OUTPUT:
-		nrows
-		tfields
-		pcount
-		extname
 		status
 		RETVAL
 
 int
-fits_read_card(fptr,keyname,card,status)
+ffgcrd(fptr,keyname,card,status)
 	fitsfile * fptr
 	char * keyname
 	char * card = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_card = 1
+		fitsfilePtr::read_card = 2
 	CODE:
 		card = (char *)get_mortalspace(FLEN_CARD,TBYTE);
-		RETVAL=fits_read_card(fptr,keyname,card,&status);
+		RETVAL=ffgcrd(fptr,keyname,card,&status);
 		sv_setpv((SV*)ST(2),card);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_col(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,anynul,status)
+ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,anynul,status)
 	fitsfile * fptr
 	int datatype
 	int colnum
@@ -2917,6 +3368,9 @@ fits_read_col(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,any
 	void * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col = 1
+		fitsfilePtr::read_col = 2
 	PREINIT:
 		long col_width, i;
 	CODE:
@@ -2926,7 +3380,7 @@ fits_read_col(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,any
 			for (i=0;i<nelements;i++)
 				*((char**)array+i)=(char *)get_mortalspace(col_width+1,TBYTE);
 		}
-		RETVAL=fits_read_col(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),array,&anynul,&status);
+		RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),array,&anynul,&status);
 		unpack1D(ST(7),array,nelements,datatype);
 	OUTPUT:
 		anynul
@@ -2934,7 +3388,7 @@ fits_read_col(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,any
 		RETVAL
 
 int
-fits_read_col_bit(fptr,colnum,frow,fbit,nbit,larray,status)
+ffgcx(fptr,colnum,frow,fbit,nbit,larray,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -2942,15 +3396,18 @@ fits_read_col_bit(fptr,colnum,frow,fbit,nbit,larray,status)
 	long nbit
 	logical * larray = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_bit = 1
+		fitsfilePtr::read_col_bit = 2
 	CODE:
 		larray = get_mortalspace(nbit,TLOGICAL);
-		RETVAL=fits_read_col_bit(fptr,colnum,frow,fbit,nbit,larray,&status);
+		RETVAL=ffgcx(fptr,colnum,frow,fbit,nbit,larray,&status);
 		unpack1D(ST(5),larray,nbit,TLOGICAL);
 	OUTPUT:
 		status
 
 int
-fits_read_col_str(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,status)
+ffgcvs(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long firstrow
@@ -2960,6 +3417,9 @@ fits_read_col_str(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,s
 	char ** array = NO_INIT
 	int anynul = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_str = 1
+		fitsfilePtr::read_col_str = 2
 	PREINIT:
 		long i;
 		long col_size;
@@ -2968,7 +3428,7 @@ fits_read_col_str(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,s
 		array = get_mortalspace(nelements,TSTRING);
 		for (i=0;i<nelements;i++)
 			array[i] = (char *)get_mortalspace(col_size+1,TBYTE);
-		RETVAL=fits_read_col_str(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,&anynul,&status);
+		RETVAL=ffgcvs(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,&anynul,&status);
 		unpack1D((SV*)ST(6),array,nelements,TSTRING);
 	OUTPUT:
 		anynul
@@ -2976,7 +3436,7 @@ fits_read_col_str(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,s
 		RETVAL
 
 int
-fits_read_col_log(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvl(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -2986,9 +3446,12 @@ fits_read_col_log(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	logical * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_log = 1
+		fitsfilePtr::read_col_log = 2
 	CODE:
 		array = (logical *)get_mortalspace(nelem,TLOGICAL);
-		RETVAL=fits_read_col_log(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvl(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TLOGICAL);
 	OUTPUT:
 		anynul
@@ -2996,7 +3459,7 @@ fits_read_col_log(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_byt(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvb(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3006,9 +3469,12 @@ fits_read_col_byt(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	byte * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_byt = 1
+		fitsfilePtr::read_col_byt = 2
 	CODE:
 		array = (byte *)get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_col_byt(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvb(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TBYTE);
 	OUTPUT:
 		anynul
@@ -3016,7 +3482,7 @@ fits_read_col_byt(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_usht(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvui(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3026,9 +3492,12 @@ fits_read_col_usht(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	unsigned short * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_usht = 1
+		fitsfilePtr::read_col_usht = 2
 	CODE:
 		array = (unsigned short *)get_mortalspace(nelem,TUSHORT);
-		RETVAL=fits_read_col_usht(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvui(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TUSHORT);
 	OUTPUT:
 		anynul
@@ -3036,7 +3505,7 @@ fits_read_col_usht(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_sht(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvi(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3046,9 +3515,12 @@ fits_read_col_sht(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	short * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_sht = 1
+		fitsfilePtr::read_col_sht = 2
 	CODE:
 		array = (short *)get_mortalspace(nelem,TSHORT);
-		RETVAL=fits_read_col_sht(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvi(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TSHORT);
 	OUTPUT:
 		anynul
@@ -3056,7 +3528,7 @@ fits_read_col_sht(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_uint(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvuk(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3066,9 +3538,12 @@ fits_read_col_uint(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	unsigned int * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_uint = 1
+		fitsfilePtr::read_col_uint = 2
 	CODE:
 		array = (unsigned int *)get_mortalspace(nelem,TUINT);
-		RETVAL=fits_read_col_uint(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvuk(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TUINT);
 	OUTPUT:
 		anynul
@@ -3076,7 +3551,7 @@ fits_read_col_uint(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_int(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvk(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3086,9 +3561,12 @@ fits_read_col_int(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	int * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_int = 1
+		fitsfilePtr::read_col_int = 2
 	CODE:
 		array = (int *)get_mortalspace(nelem,TINT);
-		RETVAL=fits_read_col_int(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvk(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TINT);
 	OUTPUT:
 		anynul
@@ -3096,7 +3574,7 @@ fits_read_col_int(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_ulng(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvuj(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3106,9 +3584,12 @@ fits_read_col_ulng(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	unsigned long * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_ulng = 1
+		fitsfilePtr::read_col_ulng = 2
 	CODE:
 		array = (unsigned long *)get_mortalspace(nelem,TULONG);
-		RETVAL=fits_read_col_ulng(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvuj(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TULONG);
 	OUTPUT:
 		anynul
@@ -3116,7 +3597,7 @@ fits_read_col_ulng(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_lng(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvj(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3126,9 +3607,12 @@ fits_read_col_lng(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	long * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_lng = 1
+		fitsfilePtr::read_col_lng = 2
 	CODE:
 		array = (long *)get_mortalspace(nelem,TLONG);
-		RETVAL=fits_read_col_lng(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvj(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TLONG);
 	OUTPUT:
 		anynul
@@ -3136,7 +3620,7 @@ fits_read_col_lng(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_flt(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcve(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3146,9 +3630,12 @@ fits_read_col_flt(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	float * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_flt = 1
+		fitsfilePtr::read_col_flt = 2
 	CODE:
 		array = (float *)get_mortalspace(nelem,TFLOAT);
-		RETVAL=fits_read_col_flt(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcve(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D((SV*)ST(6),(void*)array,nelem,TFLOAT);
 	OUTPUT:
 		anynul
@@ -3156,7 +3643,7 @@ fits_read_col_flt(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_dbl(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvd(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3166,9 +3653,12 @@ fits_read_col_dbl(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	double * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_dbl = 1
+		fitsfilePtr::read_col_dbl = 2
 	CODE:
 		array = get_mortalspace(nelem,TDOUBLE);
-		RETVAL=fits_read_col_dbl(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvd(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(6),array,nelem,TDOUBLE);
 	OUTPUT:
 		anynul
@@ -3176,7 +3666,7 @@ fits_read_col_dbl(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_dblcmp(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvm(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3186,9 +3676,12 @@ fits_read_col_dblcmp(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	double * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_dblcmp = 1
+		fitsfilePtr::read_col_dblcmp = 2
 	CODE:
 		array = get_mortalspace(nelem,TDBLCOMPLEX);
-		RETVAL=fits_read_col_dblcmp(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvm(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(6),array,nelem,TDBLCOMPLEX);
 	OUTPUT:
 		anynul
@@ -3196,7 +3689,7 @@ fits_read_col_dblcmp(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_col_cmp(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
+ffgcvc(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -3206,9 +3699,12 @@ fits_read_col_cmp(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 	float * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_col_cmp = 1
+		fitsfilePtr::read_col_cmp = 2
 	CODE:
 		array = get_mortalspace(nelem,TCOMPLEX);
-		RETVAL=fits_read_col_cmp(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgcvc(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(6),array,nelem,TCOMPLEX);
 	OUTPUT:
 		anynul
@@ -3216,7 +3712,7 @@ fits_read_col_cmp(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_str(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfs(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3226,6 +3722,9 @@ fits_read_colnull_str(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_str = 1
+		fitsfilePtr::read_colnull_str = 2
 	PREINIT:
 		long col_size, i;
 	CODE:
@@ -3234,7 +3733,7 @@ fits_read_colnull_str(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		for (i=0;i<nelem;i++)
 			array[i] = (char *)get_mortalspace(col_size+1,TBYTE);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_str(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfs(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TSTRING);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3243,7 +3742,7 @@ fits_read_colnull_str(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_log(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfl(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3253,10 +3752,13 @@ fits_read_colnull_log(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_log = 1
+		fitsfilePtr::read_colnull_log = 2
 	CODE:
 		array = get_mortalspace(nelem,TLOGICAL);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_log(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfl(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TLOGICAL);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3265,7 +3767,7 @@ fits_read_colnull_log(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_byt(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfb(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3275,10 +3777,13 @@ fits_read_colnull_byt(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_byt = 1
+		fitsfilePtr::read_colnull_byt = 2
 	CODE:
 		array = get_mortalspace(nelem,TBYTE);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_byt(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfb(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TBYTE);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3287,7 +3792,7 @@ fits_read_colnull_byt(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_usht(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfui(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3297,10 +3802,13 @@ fits_read_colnull_usht(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_usht = 1
+		fitsfilePtr::read_colnull_usht = 2
 	CODE:
 		array = get_mortalspace(nelem,TUSHORT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_usht(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfui(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TUSHORT);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3309,7 +3817,7 @@ fits_read_colnull_usht(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status
 		RETVAL
 
 int
-fits_read_colnull_sht(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfi(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3319,10 +3827,13 @@ fits_read_colnull_sht(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_sht = 1
+		fitsfilePtr::read_colnull_sht = 2
 	CODE:
 		array = get_mortalspace(nelem,TSHORT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_sht(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfi(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TSHORT);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3331,7 +3842,7 @@ fits_read_colnull_sht(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_int(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfk(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3341,10 +3852,13 @@ fits_read_colnull_int(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_int = 1
+		fitsfilePtr::read_colnull_int = 2
 	CODE:
 		array = get_mortalspace(nelem,TINT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_int(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TINT);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3353,7 +3867,7 @@ fits_read_colnull_int(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_uint(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfuk(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3363,10 +3877,13 @@ fits_read_colnull_uint(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_uint = 1
+		fitsfilePtr::read_colnull_uint = 2
 	CODE:
 		array = get_mortalspace(nelem,TUINT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_uint(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfuk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TUINT);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3375,7 +3892,7 @@ fits_read_colnull_uint(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status
 		RETVAL
 
 int
-fits_read_colnull_lng(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfj(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3385,10 +3902,13 @@ fits_read_colnull_lng(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_lng = 1
+		fitsfilePtr::read_colnull_lng = 2
 	CODE:
 		array = get_mortalspace(nelem,TLONG);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_lng(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TLONG);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3397,7 +3917,7 @@ fits_read_colnull_lng(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_ulng(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfuj(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3407,10 +3927,13 @@ fits_read_colnull_ulng(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_ulng = 1
+		fitsfilePtr::read_colnull_ulng = 2
 	CODE:
 		array = get_mortalspace(nelem,TULONG);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_ulng(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfuj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TULONG);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3419,7 +3942,7 @@ fits_read_colnull_ulng(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status
 		RETVAL
 
 int
-fits_read_colnull_flt(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfe(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3429,10 +3952,13 @@ fits_read_colnull_flt(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_flt = 1
+		fitsfilePtr::read_colnull_flt = 2
 	CODE:
 		array = get_mortalspace(nelem,TFLOAT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_flt(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfe(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TFLOAT);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3441,7 +3967,7 @@ fits_read_colnull_flt(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_dbl(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfd(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3451,10 +3977,13 @@ fits_read_colnull_dbl(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_dbl = 1
+		fitsfilePtr::read_colnull_dbl = 2
 	CODE:
 		array = get_mortalspace(nelem,TDOUBLE);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_dbl(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfd(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TDOUBLE);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3463,7 +3992,7 @@ fits_read_colnull_dbl(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_cmp(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3473,10 +4002,13 @@ fits_read_colnull_cmp(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_cmp = 1
+		fitsfilePtr::read_colnull_cmp = 2
 	CODE:
 		array = get_mortalspace(nelem,TCOMPLEX);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_cmp(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TCOMPLEX);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3485,7 +4017,7 @@ fits_read_colnull_cmp(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_colnull_dblcmp(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
+ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3495,10 +4027,13 @@ fits_read_colnull_dblcmp(fptr,colnum,frow,felem,nelem,array,nularray,anynul,stat
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_colnull_dblcmp = 1
+		fitsfilePtr::read_colnull_dblcmp = 2
 	CODE:
 		array = get_mortalspace(nelem,TDBLCOMPLEX);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_colnull_dblcmp(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TDBLCOMPLEX);
 		unpack1D(ST(6),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3507,20 +4042,23 @@ fits_read_colnull_dblcmp(fptr,colnum,frow,felem,nelem,array,nularray,anynul,stat
 		RETVAL
 
 int
-fits_read_descript(fptr,colnum,rownum,repeat,offset,status)
+ffgdes(fptr,colnum,rownum,repeat,offset,status)
 	fitsfile * fptr
 	int colnum
 	long rownum
 	long &repeat
 	long &offset
 	int &status
+	ALIAS:
+		CFITSIO::fits_read_descript = 1
+		fitsfilePtr::read_descript = 2
 	OUTPUT:
 		repeat
 		offset
 		status
 
 int
-fits_read_descripts(fptr,colnum,frow,nrows,repeat,offset,status)
+ffgdess(fptr,colnum,frow,nrows,repeat,offset,status)
 	fitsfile * fptr
 	int colnum
 	long frow
@@ -3528,10 +4066,13 @@ fits_read_descripts(fptr,colnum,frow,nrows,repeat,offset,status)
 	long * repeat = NO_INIT
 	long * offset = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_descripts = 1
+		fitsfilePtr::read_descripts = 2
 	CODE:
 		repeat = get_mortalspace(nrows,TLONG);
 		offset = get_mortalspace(nrows,TLONG);
-		RETVAL=fits_read_descripts(fptr,colnum,frow,nrows,repeat,offset,&status);
+		RETVAL=ffgdess(fptr,colnum,frow,nrows,repeat,offset,&status);
 		unpack1D(ST(4),repeat,nrows,TLONG);
 		unpack1D(ST(4),offset,nrows,TLONG);
 	OUTPUT:
@@ -3539,8 +4080,10 @@ fits_read_descripts(fptr,colnum,frow,nrows,repeat,offset,status)
 		RETVAL
 
 int
-fits_read_errmsg(err_msg)
+ffgmsg(err_msg)
 	char * err_msg = NO_INIT
+	ALIAS:
+		CFITSIO::fits_read_errmsg = 1
 	CODE:
 		err_msg = get_mortalspace(FLEN_ERRMSG,TBYTE);
 		RETVAL = fits_read_errmsg(err_msg);
@@ -3549,151 +4092,178 @@ fits_read_errmsg(err_msg)
 		RETVAL
 
 int
-fits_read_grppar_byt(fptr,group,felem,nelem,array,status)
+ffggpb(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	byte * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_byt = 1
+		fitsfilePtr::read_grppar_byt = 2
 	CODE:
 		array = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_grppar_byt(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpb(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TBYTE);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_sht(fptr,group,felem,nelem,array,status)
+ffggpi(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	short * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_sht = 1
+		fitsfilePtr::read_grppar_sht = 2
 	CODE:
 		array = get_mortalspace(nelem,TSHORT);
-		RETVAL=fits_read_grppar_sht(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpi(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TSHORT);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_usht(fptr,group,felem,nelem,array,status)
+ffggpui(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	unsigned short * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_usht = 1
+		fitsfilePtr::read_grppar_usht = 2
 	CODE:
 		array = get_mortalspace(nelem,TUSHORT);
-		RETVAL=fits_read_grppar_usht(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpui(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TUSHORT);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_int(fptr,group,felem,nelem,array,status)
+ffggpk(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	int * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_int = 1
+		fitsfilePtr::read_grppar_int = 2
 	CODE:
 		array = get_mortalspace(nelem,TINT);
-		RETVAL=fits_read_grppar_int(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpk(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TINT);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_uint(fptr,group,felem,nelem,array,status)
+ffggpuk(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	unsigned int * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_uint = 1
+		fitsfilePtr::read_grppar_uint = 2
 	CODE:
 		array = get_mortalspace(nelem,TUINT);
-		RETVAL=fits_read_grppar_uint(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpuk(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TUINT);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_lng(fptr,group,felem,nelem,array,status)
+ffggpj(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	long * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_lng = 1
+		fitsfilePtr::read_grppar_lng = 2
 	CODE:
 		array = get_mortalspace(nelem,TLONG);
-		RETVAL=fits_read_grppar_lng(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpj(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TLONG);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_ulng(fptr,group,felem,nelem,array,status)
+ffggpuj(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	unsigned long * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_ulng = 1
+		fitsfilePtr::read_grppar_ulng = 2
 	CODE:
 		array = get_mortalspace(nelem,TULONG);
-		RETVAL=fits_read_grppar_ulng(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpuj(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TULONG);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_flt(fptr,group,felem,nelem,array,status)
+ffggpe(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	float * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_flt = 1
+		fitsfilePtr::read_grppar_flt = 2
 	CODE:
 		array = get_mortalspace(nelem,TFLOAT);
-		RETVAL=fits_read_grppar_flt(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpe(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TFLOAT);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_grppar_dbl(fptr,group,felem,nelem,array,status)
+ffggpd(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	double * array = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_grppar_dbl = 1
+		fitsfilePtr::read_grppar_dbl = 2
 	CODE:
 		array = get_mortalspace(nelem,TDOUBLE);
-		RETVAL=fits_read_grppar_dbl(fptr,group,felem,nelem,array,&status);
+		RETVAL=ffggpd(fptr,group,felem,nelem,array,&status);
 		unpack1D(ST(4),array,nelem,TDOUBLE);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_img(fptr,datatype,felem,nelem,nulval,array,anynul,status)
+ffgpv(fptr,datatype,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	int datatype
 	long felem
@@ -3702,9 +4272,12 @@ fits_read_img(fptr,datatype,felem,nelem,nulval,array,anynul,status)
 	void * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img = 1
+		fitsfilePtr::read_img = 2
 	CODE:
 		array = get_mortalspace(nelem,datatype);
-		RETVAL=fits_read_img(fptr,datatype,felem,nelem,pack1D(nulval,datatype),array,&anynul,&status);
+		RETVAL=ffgpv(fptr,datatype,felem,nelem,pack1D(nulval,datatype),array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,datatype);
 	OUTPUT:
 		anynul
@@ -3712,7 +4285,7 @@ fits_read_img(fptr,datatype,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_coord(fptr,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,status)
+ffgics(fptr,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,status)
 	fitsfile * fptr
 	double xrefval
 	double yrefval
@@ -3723,9 +4296,12 @@ fits_read_img_coord(fptr,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype
 	double rot
 	char * coordtype = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_coord = 1
+		fitsfilePtr::read_img_coord = 2
 	CODE:
 		coordtype = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_read_img_coord(fptr,&xrefval,&yrefval,&xrefpix,&yrefpix,&xinc,&yinc,&rot,coordtype,&status);
+		RETVAL=ffgics(fptr,&xrefval,&yrefval,&xrefpix,&yrefpix,&xinc,&yinc,&rot,coordtype,&status);
 	OUTPUT:
 		xrefval
 		yrefval
@@ -3739,7 +4315,7 @@ fits_read_img_coord(fptr,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype
 		RETVAL
 
 int
-fits_read_img_byt(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvb(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3748,9 +4324,12 @@ fits_read_img_byt(fptr,group,felem,nelem,nulval,array,anynul,status)
 	byte * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_byt = 1
+		fitsfilePtr::read_img_byt = 2
 	CODE:
 		array = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_img_byt(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvb(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TBYTE);
 	OUTPUT:
 		anynul
@@ -3758,7 +4337,7 @@ fits_read_img_byt(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_sht(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvi(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3767,9 +4346,12 @@ fits_read_img_sht(fptr,group,felem,nelem,nulval,array,anynul,status)
 	short * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_sht = 1
+		fitsfilePtr::read_img_sht = 2
 	CODE:
 		array = get_mortalspace(nelem,TSHORT);
-		RETVAL=fits_read_img_sht(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvi(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TSHORT);
 	OUTPUT:
 		anynul
@@ -3777,7 +4359,7 @@ fits_read_img_sht(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_usht(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvui(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3786,9 +4368,12 @@ fits_read_img_usht(fptr,group,felem,nelem,nulval,array,anynul,status)
 	unsigned short * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_usht = 1
+		fitsfilePtr::read_img_usht = 2
 	CODE:
 		array = get_mortalspace(nelem,TUSHORT);
-		RETVAL=fits_read_img_usht(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvui(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TUSHORT);
 	OUTPUT:
 		anynul
@@ -3796,7 +4381,7 @@ fits_read_img_usht(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_int(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvk(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3805,9 +4390,12 @@ fits_read_img_int(fptr,group,felem,nelem,nulval,array,anynul,status)
 	int * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_int = 1
+		fitsfilePtr::read_img_int = 2
 	CODE:
 		array = get_mortalspace(nelem,TINT);
-		RETVAL=fits_read_img_int(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvk(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TINT);
 	OUTPUT:
 		anynul
@@ -3815,7 +4403,7 @@ fits_read_img_int(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_uint(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvuk(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3824,9 +4412,12 @@ fits_read_img_uint(fptr,group,felem,nelem,nulval,array,anynul,status)
 	unsigned int * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_uint = 1
+		fitsfilePtr::read_img_uint = 2
 	CODE:
 		array = get_mortalspace(nelem,TUINT);
-		RETVAL=fits_read_img_uint(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvuk(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TUINT);
 	OUTPUT:
 		anynul
@@ -3834,7 +4425,7 @@ fits_read_img_uint(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_lng(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvj(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3843,9 +4434,12 @@ fits_read_img_lng(fptr,group,felem,nelem,nulval,array,anynul,status)
 	long * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_lng = 1
+		fitsfilePtr::read_img_lng = 2
 	CODE:
 		array = get_mortalspace(nelem,TLONG);
-		RETVAL=fits_read_img_lng(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvj(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TLONG);
 	OUTPUT:
 		anynul
@@ -3853,7 +4447,7 @@ fits_read_img_lng(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_ulng(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvuj(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3862,9 +4456,12 @@ fits_read_img_ulng(fptr,group,felem,nelem,nulval,array,anynul,status)
 	unsigned long * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_ulng = 1
+		fitsfilePtr::read_img_ulng = 2
 	CODE:
 		array = get_mortalspace(nelem,TULONG);
-		RETVAL=fits_read_img_ulng(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvuj(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TULONG);
 	OUTPUT:
 		anynul
@@ -3872,7 +4469,7 @@ fits_read_img_ulng(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_flt(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpve(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3881,9 +4478,12 @@ fits_read_img_flt(fptr,group,felem,nelem,nulval,array,anynul,status)
 	float * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_flt = 1
+		fitsfilePtr::read_img_flt = 2
 	CODE:
 		array = get_mortalspace(nelem,TFLOAT);
-		RETVAL=fits_read_img_flt(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpve(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TFLOAT);
 	OUTPUT:
 		anynul
@@ -3891,7 +4491,7 @@ fits_read_img_flt(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_img_dbl(fptr,group,felem,nelem,nulval,array,anynul,status)
+ffgpvd(fptr,group,felem,nelem,nulval,array,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3900,9 +4500,12 @@ fits_read_img_dbl(fptr,group,felem,nelem,nulval,array,anynul,status)
 	double * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_img_dbl = 1
+		fitsfilePtr::read_img_dbl = 2
 	CODE:
 		array = get_mortalspace(nelem,TDOUBLE);
-		RETVAL=fits_read_img_dbl(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+		RETVAL=ffgpvd(fptr,group,felem,nelem,nulval,array,&anynul,&status);
 		unpack1D(ST(5),array,nelem,TDOUBLE);
 	OUTPUT:
 		anynul
@@ -3910,7 +4513,7 @@ fits_read_img_dbl(fptr,group,felem,nelem,nulval,array,anynul,status)
 		RETVAL
 
 int
-fits_read_imghdr(fptr,maxdim,simple,bitpix,naxis,naxes,pcount,gcount,extend,status)
+ffghpr(fptr,maxdim,simple,bitpix,naxis,naxes,pcount,gcount,extend,status)
 	fitsfile * fptr
 	int maxdim
 	int simple
@@ -3921,10 +4524,13 @@ fits_read_imghdr(fptr,maxdim,simple,bitpix,naxis,naxes,pcount,gcount,extend,stat
 	long gcount
 	int extend
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imghdr = 1
+		fitsfilePtr::read_imghdr = 2
 	CODE:
-		fits_read_imghdr(fptr,0,&simple,&bitpix,&naxis,naxes,&pcount,&gcount,&extend,&status);
+		ffghpr(fptr,0,&simple,&bitpix,&naxis,naxes,&pcount,&gcount,&extend,&status);
 		naxes = get_mortalspace(naxis,TLONG);
-		RETVAL=fits_read_imghdr(fptr,naxis,&simple,&bitpix,&naxis,naxes,&pcount,&gcount,&extend,&status);
+		RETVAL=ffghpr(fptr,naxis,&simple,&bitpix,&naxis,naxes,&pcount,&gcount,&extend,&status);
 		unpack1D(ST(5),naxes,naxis,TLONG);
 	OUTPUT:
 		simple
@@ -3937,7 +4543,7 @@ fits_read_imghdr(fptr,maxdim,simple,bitpix,naxis,naxes,pcount,gcount,extend,stat
 		RETVAL
 
 int
-fits_read_imgnull_byt(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfb(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3946,10 +4552,13 @@ fits_read_imgnull_byt(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_byt = 1
+		fitsfilePtr::read_imgnull_byt = 2
 	CODE:
 		array = get_mortalspace(nelem,TBYTE);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_byt(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfb(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TBYTE);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3958,7 +4567,7 @@ fits_read_imgnull_byt(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_sht(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfi(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3967,10 +4576,13 @@ fits_read_imgnull_sht(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_sht = 1
+		fitsfilePtr::read_imgnull_sht = 2
 	CODE:
 		array = get_mortalspace(nelem,TSHORT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_sht(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfi(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TSHORT);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -3979,7 +4591,7 @@ fits_read_imgnull_sht(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_usht(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfui(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -3988,10 +4600,13 @@ fits_read_imgnull_usht(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_usht = 1
+		fitsfilePtr::read_imgnull_usht = 2
 	CODE:
 		array = get_mortalspace(nelem,TUSHORT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_usht(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfui(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TUSHORT);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4000,7 +4615,7 @@ fits_read_imgnull_usht(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_int(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfk(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -4009,10 +4624,13 @@ fits_read_imgnull_int(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_int = 1
+		fitsfilePtr::read_imgnull_int = 2
 	CODE:
 		array = get_mortalspace(nelem,TINT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_int(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TINT);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4021,7 +4639,7 @@ fits_read_imgnull_int(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_uint(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfuk(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -4030,10 +4648,13 @@ fits_read_imgnull_uint(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_uint = 1
+		fitsfilePtr::read_imgnull_uint = 2
 	CODE:
 		array = get_mortalspace(nelem,TUINT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_uint(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfuk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TUINT);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4042,7 +4663,7 @@ fits_read_imgnull_uint(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_lng(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfj(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -4051,10 +4672,13 @@ fits_read_imgnull_lng(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_lng = 1
+		fitsfilePtr::read_imgnull_lng = 2
 	CODE:
 		array = get_mortalspace(nelem,TLONG);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_lng(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TLONG);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4063,7 +4687,7 @@ fits_read_imgnull_lng(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_ulng(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfuj(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -4072,10 +4696,13 @@ fits_read_imgnull_ulng(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_ulng = 1
+		fitsfilePtr::read_imgnull_ulng = 2
 	CODE:
 		array = get_mortalspace(nelem,TULONG);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_ulng(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfuj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TBYTE);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4084,7 +4711,7 @@ fits_read_imgnull_ulng(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_flt(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfe(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -4093,10 +4720,13 @@ fits_read_imgnull_flt(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_flt = 1
+		fitsfilePtr::read_imgnull_flt = 2
 	CODE:
 		array = get_mortalspace(nelem,TFLOAT);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_flt(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfe(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TFLOAT);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4105,7 +4735,7 @@ fits_read_imgnull_flt(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_imgnull_dbl(fptr,group,felem,nelem,array,nularray,anynul,status)
+ffgpfd(fptr,group,felem,nelem,array,nularray,anynul,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -4114,10 +4744,13 @@ fits_read_imgnull_dbl(fptr,group,felem,nelem,array,nularray,anynul,status)
 	char * nularray = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_imgnull_dbl = 1
+		fitsfilePtr::read_imgnull_dbl = 2
 	CODE:
 		array = get_mortalspace(nelem,TDOUBLE);
 		nularray = get_mortalspace(nelem,TBYTE);
-		RETVAL=fits_read_imgnull_dbl(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		RETVAL=ffgpfd(fptr,group,felem,nelem,array,nularray,&anynul,&status);
 		unpack1D(ST(4),array,nelem,TDOUBLE);
 		unpack1D(ST(5),nularray,nelem,TLOGICAL);
 	OUTPUT:
@@ -4126,13 +4759,16 @@ fits_read_imgnull_dbl(fptr,group,felem,nelem,array,nularray,anynul,status)
 		RETVAL
 
 int
-fits_read_key(fptr,datatype,keyname,value,comment,status)
+ffgky(fptr,datatype,keyname,value,comment,status)
 	fitsfile * fptr
 	int datatype
 	char * keyname
 	void * value = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key = 1
+		fitsfilePtr::read_key = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
@@ -4142,7 +4778,7 @@ fits_read_key(fptr,datatype,keyname,value,comment,status)
 			value = get_mortalspace(1,TINT);
 		else
 			value = get_mortalspace(1,datatype);
-		RETVAL=fits_read_key(fptr,datatype,keyname,value,comment,&status);
+		RETVAL=ffgky(fptr,datatype,keyname,value,comment,&status);
 		if (datatype == TLOGICAL)
 			datatype = TINT;
 		unpackScalar(ST(3),value,datatype);
@@ -4152,17 +4788,20 @@ fits_read_key(fptr,datatype,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_triple(fptr,keyname,intval,frac,comment,status)
+ffgkyt(fptr,keyname,intval,frac,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long intval
 	double frac
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_triple = 1
+		fitsfilePtr::read_key_triple = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_triple(fptr,keyname,&intval,&frac,comment,&status);
+		RETVAL=ffgkyt(fptr,keyname,&intval,&frac,comment,&status);
 	OUTPUT:
 		intval
 		frac
@@ -4171,30 +4810,36 @@ fits_read_key_triple(fptr,keyname,intval,frac,comment,status)
 		RETVAL
 
 int
-fits_read_key_unit(fptr,keyname,unit,status)
+ffgunt(fptr,keyname,unit,status)
 	fitsfile * fptr
 	char * keyname
 	char * unit = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_unit = 1
+		fitsfilePtr::read_key_unit = 2
 	CODE:
 		unit = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_read_key_unit(fptr,keyname,unit,&status);
+		RETVAL=ffgunt(fptr,keyname,unit,&status);
 	OUTPUT:
 		unit
 		status
 		RETVAL
 
 int
-fits_read_key_longstr(fptr,keyname,longstr,comment,status)
+ffgkls(fptr,keyname,longstr,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * longstr = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_longstr = 1
+		fitsfilePtr::read_key_longstr = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_longstr(fptr,keyname,&longstr,comment,&status);
+		RETVAL=ffgkls(fptr,keyname,&longstr,comment,&status);
 		unpackScalar(ST(2),longstr,TSTRING);
 		free(longstr);
 	OUTPUT:
@@ -4203,17 +4848,20 @@ fits_read_key_longstr(fptr,keyname,longstr,comment,status)
 		RETVAL
 
 int
-fits_read_key_str(fptr,keyname,value,comment,status)
+ffgkys(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * value = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_str = 1
+		fitsfilePtr::read_key_str = 2
 	CODE:
 		value = get_mortalspace(FLEN_VALUE,TBYTE);
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_str(fptr,keyname,value,comment,&status);
+		RETVAL=ffgkys(fptr,keyname,value,comment,&status);
 	OUTPUT:
 		value
 		comment
@@ -4221,16 +4869,19 @@ fits_read_key_str(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_log(fptr,keyname,value,comment,status)
+ffgkyl(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	int value
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_log = 1
+		fitsfilePtr::read_key_log = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_log(fptr,keyname,&value,comment,&status);
+		RETVAL=ffgkyl(fptr,keyname,&value,comment,&status);
 	OUTPUT:
 		value
 		comment
@@ -4238,16 +4889,19 @@ fits_read_key_log(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_lng(fptr,keyname,value,comment,status)
+ffgkyj(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long value
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_lng = 1
+		fitsfilePtr::read_key_lng = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_lng(fptr,keyname,&value,comment,&status);
+		RETVAL=ffgkyj(fptr,keyname,&value,comment,&status);
 	OUTPUT:
 		value
 		comment
@@ -4255,16 +4909,19 @@ fits_read_key_lng(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_flt(fptr,keyname,value,comment,status)
+ffgkye(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_flt = 1
+		fitsfilePtr::read_key_flt = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_flt(fptr,keyname,&value,comment,&status);
+		RETVAL=ffgkye(fptr,keyname,&value,comment,&status);
 	OUTPUT:
 		value
 		comment
@@ -4272,16 +4929,19 @@ fits_read_key_flt(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_dbl(fptr,keyname,value,comment,status)
+ffgkyd(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_dbl = 1
+		fitsfilePtr::read_key_dbl = 2
 	CODE:
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_dbl(fptr,keyname,&value,comment,&status);
+		RETVAL=ffgkyd(fptr,keyname,&value,comment,&status);
 	OUTPUT:
 		value
 		comment
@@ -4289,17 +4949,20 @@ fits_read_key_dbl(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_cmp(fptr,keyname,value,comment,status)
+ffgkyc(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_cmp = 1
+		fitsfilePtr::read_key_cmp = 2
 	CODE:
 		value = get_mortalspace(1,TCOMPLEX);
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_cmp(fptr,keyname,value,comment,&status);
+		RETVAL=ffgkyc(fptr,keyname,value,comment,&status);
 		unpackScalar(ST(2),value,TCOMPLEX);
 	OUTPUT:
 		status
@@ -4307,17 +4970,20 @@ fits_read_key_cmp(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_key_dblcmp(fptr,keyname,value,comment,status)
+ffgkym(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_key_dblcmp = 1
+		fitsfilePtr::read_key_dblcmp = 2
 	CODE:
 		value = get_mortalspace(1,TDBLCOMPLEX);
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_key_dblcmp(fptr,keyname,value,comment,&status);
+		RETVAL=ffgkym(fptr,keyname,value,comment,&status);
 		unpackScalar(ST(2),value,TDBLCOMPLEX);
 	OUTPUT:
 		comment
@@ -4325,19 +4991,22 @@ fits_read_key_dblcmp(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_keyn(fptr,keynum,keyname,value,comment,status)
+ffgkyn(fptr,keynum,keyname,value,comment,status)
 	fitsfile * fptr
 	int keynum
 	char * keyname = NO_INIT
 	char * value = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keyn = 1
+		fitsfilePtr::read_keyn = 2
 	CODE:
 		keyname = get_mortalspace(FLEN_KEYWORD,TBYTE);
 		value = get_mortalspace(FLEN_VALUE,TBYTE);
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_keyn(fptr,keynum,keyname,value,comment,&status);
+		RETVAL=ffgkyn(fptr,keynum,keyname,value,comment,&status);
 	OUTPUT:
 		keyname
 		value
@@ -4346,7 +5015,7 @@ fits_read_keyn(fptr,keynum,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_keys_str(fptr,keyname,nstart,nkeys,value,nfound,status)
+ffgkns(fptr,keyname,nstart,nkeys,value,nfound,status)
 	fitsfile * fptr
 	char * keyname
 	int nstart
@@ -4354,13 +5023,16 @@ fits_read_keys_str(fptr,keyname,nstart,nkeys,value,nfound,status)
 	char ** value = NO_INIT
 	int nfound
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keys_str = 1
+		fitsfilePtr::read_keys_str = 2
 	PREINIT:
 		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TSTRING);
 		for (i=0; i<nkeys; i++)
 			value[i] = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_read_keys_str(fptr,keyname,nstart,nkeys,value,&nfound,&status);
+		RETVAL=ffgkns(fptr,keyname,nstart,nkeys,value,&nfound,&status);
 		unpack1D(ST(4),value,(nkeys>nfound) ? nfound : nkeys,TSTRING);
 	OUTPUT:
 		nfound
@@ -4368,7 +5040,7 @@ fits_read_keys_str(fptr,keyname,nstart,nkeys,value,nfound,status)
 		RETVAL
 
 int
-fits_read_keys_log(fptr,keyname,nstart,nkeys,value,nfound,status)
+ffgknl(fptr,keyname,nstart,nkeys,value,nfound,status)
 	fitsfile * fptr
 	char * keyname
 	int nstart
@@ -4376,11 +5048,14 @@ fits_read_keys_log(fptr,keyname,nstart,nkeys,value,nfound,status)
 	int * value = NO_INIT
 	int nfound
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keys_log = 1
+		fitsfilePtr::read_keys_log = 2
 	PREINIT:
 		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TINT);
-		RETVAL=fits_read_keys_log(fptr,keyname,nstart,nkeys,value,&nfound,&status);
+		RETVAL=ffgknl(fptr,keyname,nstart,nkeys,value,&nfound,&status);
 		unpack1D(ST(4),value,(nkeys>nfound) ? nfound : nkeys,TINT);
 	OUTPUT:
 		nfound
@@ -4388,7 +5063,7 @@ fits_read_keys_log(fptr,keyname,nstart,nkeys,value,nfound,status)
 		RETVAL
 
 int
-fits_read_keys_lng(fptr,keyname,nstart,nkeys,value,nfound,status)
+ffgknj(fptr,keyname,nstart,nkeys,value,nfound,status)
 	fitsfile * fptr
 	char * keyname
 	int nstart
@@ -4396,11 +5071,14 @@ fits_read_keys_lng(fptr,keyname,nstart,nkeys,value,nfound,status)
 	long * value = NO_INIT
 	int nfound
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keys_lng = 1
+		fitsfilePtr::read_keys_lng = 2
 	PREINIT:
 		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TLONG);
-		RETVAL=fits_read_keys_lng(fptr,keyname,nstart,nkeys,value,&nfound,&status);
+		RETVAL=ffgknj(fptr,keyname,nstart,nkeys,value,&nfound,&status);
 		unpack1D(ST(4),value,(nkeys>nfound) ? nfound : nkeys,TLONG);
 	OUTPUT:
 		nfound
@@ -4408,7 +5086,7 @@ fits_read_keys_lng(fptr,keyname,nstart,nkeys,value,nfound,status)
 		RETVAL
 
 int
-fits_read_keys_flt(fptr,keyname,nstart,nkeys,value,nfound,status)
+ffgkne(fptr,keyname,nstart,nkeys,value,nfound,status)
 	fitsfile * fptr
 	char * keyname
 	int nstart
@@ -4416,11 +5094,14 @@ fits_read_keys_flt(fptr,keyname,nstart,nkeys,value,nfound,status)
 	float * value = NO_INIT
 	int nfound
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keys_flt = 1
+		fitsfilePtr::read_keys_flt = 2
 	PREINIT:
 		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TFLOAT);
-		RETVAL=fits_read_keys_flt(fptr,keyname,nstart,nkeys,value,&nfound,&status);
+		RETVAL=ffgkne(fptr,keyname,nstart,nkeys,value,&nfound,&status);
 		unpack1D(ST(4),value,(nkeys>nfound) ? nfound : nkeys,TFLOAT);
 	OUTPUT:
 		nfound
@@ -4428,7 +5109,7 @@ fits_read_keys_flt(fptr,keyname,nstart,nkeys,value,nfound,status)
 		RETVAL
 
 int
-fits_read_keys_dbl(fptr,keyname,nstart,nkeys,value,nfound,status)
+ffgknd(fptr,keyname,nstart,nkeys,value,nfound,status)
 	fitsfile * fptr
 	char * keyname
 	int nstart
@@ -4436,11 +5117,14 @@ fits_read_keys_dbl(fptr,keyname,nstart,nkeys,value,nfound,status)
 	double * value = NO_INIT
 	int nfound
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keys_dbl = 1
+		fitsfilePtr::read_keys_dbl = 2
 	PREINIT:
 		int i;
 	CODE:
 		value=get_mortalspace(nkeys,TDOUBLE);
-		RETVAL=fits_read_keys_dbl(fptr,keyname,nstart,nkeys,value,&nfound,&status);
+		RETVAL=ffgknd(fptr,keyname,nstart,nkeys,value,&nfound,&status);
 		unpack1D(ST(4),value,(nkeys>nfound) ? nfound : nkeys,TDOUBLE);
 	OUTPUT:
 		nfound
@@ -4448,17 +5132,20 @@ fits_read_keys_dbl(fptr,keyname,nstart,nkeys,value,nfound,status)
 		RETVAL
 
 int
-fits_read_keyword(fptr,keyname,value,comment,status)
+ffgkey(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * value = NO_INIT
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_read_keyword = 1
+		fitsfilePtr::read_keyword = 2
 	CODE:
 		value = get_mortalspace(FLEN_VALUE,TBYTE);
 		if (comment != NULL)
 			comment = get_mortalspace(FLEN_COMMENT,TBYTE);
-		RETVAL=fits_read_keyword(fptr,keyname,value,comment,&status);
+		RETVAL=ffgkey(fptr,keyname,value,comment,&status);
 	OUTPUT:
 		value
 		comment
@@ -4466,21 +5153,24 @@ fits_read_keyword(fptr,keyname,value,comment,status)
 		RETVAL
 
 int
-fits_read_record(fptr,keynum,card,status)
+ffgrec(fptr,keynum,card,status)
 	fitsfile * fptr
 	int keynum
 	char * card = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_record = 1
+		fitsfilePtr::read_record = 2
 	CODE:
 		card = get_mortalspace(FLEN_CARD,TBYTE);
-		RETVAL=fits_read_record(fptr,keynum,card,&status);
+		RETVAL=ffgrec(fptr,keynum,card,&status);
 	OUTPUT:
 		card
 		status
 		RETVAL
 
 int
-fits_read_subset_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4492,6 +5182,9 @@ fits_read_subset_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 	byte * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_byt = 1
+		fitsfilePtr::read_subset_byt = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4501,7 +5194,7 @@ fits_read_subset_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TBYTE);
-		RETVAL=fits_read_subset_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TBYTE);
 	OUTPUT:
 		anynul
@@ -4509,7 +5202,7 @@ fits_read_subset_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 		RETVAL
 
 int
-fits_read_subset_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvi(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4521,6 +5214,9 @@ fits_read_subset_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 	short * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_sht = 1
+		fitsfilePtr::read_subset_sht = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4530,7 +5226,7 @@ fits_read_subset_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TSHORT);
-		RETVAL=fits_read_subset_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvi(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TSHORT);
 	OUTPUT:
 		anynul
@@ -4538,7 +5234,7 @@ fits_read_subset_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 		RETVAL
 
 int
-fits_read_subset_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvui(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4550,6 +5246,9 @@ fits_read_subset_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 	unsigned short * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_usht = 1
+		fitsfilePtr::read_subset_usht = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4559,7 +5258,7 @@ fits_read_subset_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TUSHORT);
-		RETVAL=fits_read_subset_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvui(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TUSHORT);
 	OUTPUT:
 		anynul
@@ -4567,7 +5266,7 @@ fits_read_subset_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 		RETVAL
 
 int
-fits_read_subset_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4579,6 +5278,9 @@ fits_read_subset_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 	int * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_int = 1
+		fitsfilePtr::read_subset_int = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4588,7 +5290,7 @@ fits_read_subset_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TINT);
-		RETVAL=fits_read_subset_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TINT);
 	OUTPUT:
 		anynul
@@ -4596,7 +5298,7 @@ fits_read_subset_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 		RETVAL
 
 int
-fits_read_subset_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4608,6 +5310,9 @@ fits_read_subset_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 	unsigned int * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_uint = 1
+		fitsfilePtr::read_subset_uint = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4617,7 +5322,7 @@ fits_read_subset_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TUINT);
-		RETVAL=fits_read_subset_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TUINT);
 	OUTPUT:
 		anynul
@@ -4625,7 +5330,7 @@ fits_read_subset_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 		RETVAL
 
 int
-fits_read_subset_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4637,6 +5342,9 @@ fits_read_subset_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 	long * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_lng = 1
+		fitsfilePtr::read_subset_lng = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4646,7 +5354,7 @@ fits_read_subset_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TLONG);
-		RETVAL=fits_read_subset_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TLONG);
 	OUTPUT:
 		anynul
@@ -4654,7 +5362,7 @@ fits_read_subset_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 		RETVAL
 
 int
-fits_read_subset_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4666,6 +5374,9 @@ fits_read_subset_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 	unsigned long * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_ulng = 1
+		fitsfilePtr::read_subset_ulng = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4675,7 +5386,7 @@ fits_read_subset_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TULONG);
-		RETVAL=fits_read_subset_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TULONG);
 	OUTPUT:
 		anynul
@@ -4683,7 +5394,7 @@ fits_read_subset_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,an
 		RETVAL
 
 int
-fits_read_subset_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsve(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4695,6 +5406,9 @@ fits_read_subset_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 	float * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_flt = 1
+		fitsfilePtr::read_subset_flt = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4704,7 +5418,7 @@ fits_read_subset_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TFLOAT);
-		RETVAL=fits_read_subset_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsve(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TFLOAT);
 	OUTPUT:
 		anynul
@@ -4712,7 +5426,7 @@ fits_read_subset_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 		RETVAL
 
 int
-fits_read_subset_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
+ffgsvd(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4724,6 +5438,9 @@ fits_read_subset_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 	double * array = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subset_dbl = 1
+		fitsfilePtr::read_subset_dbl = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4733,7 +5450,7 @@ fits_read_subset_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TDOUBLE);
-		RETVAL=fits_read_subset_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+		RETVAL=ffgsvd(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
 		unpack1D(ST(8),array,ndata,TDOUBLE);
 	OUTPUT:
 		anynul
@@ -4741,7 +5458,7 @@ fits_read_subset_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,any
 		RETVAL
 
 int
-fits_read_subsetnull_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfb(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4753,6 +5470,9 @@ fits_read_subsetnull_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_byt = 1
+		fitsfilePtr::read_subsetnull_byt = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4763,7 +5483,7 @@ fits_read_subsetnull_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TBYTE);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfb(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TBYTE);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4772,7 +5492,7 @@ fits_read_subsetnull_byt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 		RETVAL
 
 int
-fits_read_subsetnull_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfi(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4784,6 +5504,9 @@ fits_read_subsetnull_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_sht = 1
+		fitsfilePtr::read_subsetnull_sht = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4794,7 +5517,7 @@ fits_read_subsetnull_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TSHORT);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfi(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TSHORT);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4803,7 +5526,7 @@ fits_read_subsetnull_sht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 		RETVAL
 
 int
-fits_read_subsetnull_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfui(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4815,6 +5538,9 @@ fits_read_subsetnull_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_usht = 1
+		fitsfilePtr::read_subsetnull_usht = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4825,7 +5551,7 @@ fits_read_subsetnull_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TUSHORT);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfui(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TUSHORT);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4834,7 +5560,7 @@ fits_read_subsetnull_usht(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 		RETVAL
 
 int
-fits_read_subsetnull_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4846,6 +5572,9 @@ fits_read_subsetnull_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_int = 1
+		fitsfilePtr::read_subsetnull_int = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4856,7 +5585,7 @@ fits_read_subsetnull_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TINT);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TINT);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4865,7 +5594,7 @@ fits_read_subsetnull_int(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 		RETVAL
 
 int
-fits_read_subsetnull_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4877,6 +5606,9 @@ fits_read_subsetnull_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_uint = 1
+		fitsfilePtr::read_subsetnull_uint = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4887,7 +5619,7 @@ fits_read_subsetnull_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TUINT);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TUINT);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4896,7 +5628,7 @@ fits_read_subsetnull_uint(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 		RETVAL
 
 int
-fits_read_subsetnull_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4908,6 +5640,9 @@ fits_read_subsetnull_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_lng = 1
+		fitsfilePtr::read_subsetnull_lng = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4918,7 +5653,7 @@ fits_read_subsetnull_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TLONG);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TLONG);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4927,7 +5662,7 @@ fits_read_subsetnull_lng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 		RETVAL
 
 int
-fits_read_subsetnull_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4939,6 +5674,9 @@ fits_read_subsetnull_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_ulng = 1
+		fitsfilePtr::read_subsetnull_ulng = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4949,7 +5687,7 @@ fits_read_subsetnull_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TULONG);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TULONG);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4958,7 +5696,7 @@ fits_read_subsetnull_ulng(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nular
 		RETVAL
 
 int
-fits_read_subsetnull_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfe(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -4970,6 +5708,9 @@ fits_read_subsetnull_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_flt = 1
+		fitsfilePtr::read_subsetnull_flt = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -4980,7 +5721,7 @@ fits_read_subsetnull_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TFLOAT);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfe(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TFLOAT);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -4989,7 +5730,7 @@ fits_read_subsetnull_flt(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 		RETVAL
 
 int
-fits_read_subsetnull_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
+ffgsfd(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 	fitsfile * fptr
 	int group
 	int naxis
@@ -5001,6 +5742,9 @@ fits_read_subsetnull_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 	logical * nularr = NO_INIT
 	int anynul
 	int status
+	ALIAS:
+		CFITSIO::fits_read_subsetnull_dbl = 1
+		fitsfilePtr::read_subsetnull_dbl = 2
 	PREINIT:
 		long ndata;
 		int i;
@@ -5011,7 +5755,7 @@ fits_read_subsetnull_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
 		array = get_mortalspace(ndata,TDOUBLE);
 		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=fits_read_subsetnull_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		RETVAL=ffgsfd(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
 		unpack1D(ST(7),array,ndata,TDOUBLE);
 		unpack1D(ST(8),nularr,ndata,TLOGICAL);
 	OUTPUT:
@@ -5020,7 +5764,7 @@ fits_read_subsetnull_dbl(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr
 		RETVAL
 
 int
-fits_read_tbl_coord(fptr,xcol,ycol,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,status)
+ffgtcs(fptr,xcol,ycol,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,status)
 	fitsfile * fptr
 	int xcol
 	int ycol
@@ -5033,9 +5777,12 @@ fits_read_tbl_coord(fptr,xcol,ycol,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot
 	double rot
 	char * coordtype = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_tbl_coord = 1
+		fitsfilePtr::read_tbl_coord = 2
 	CODE:
 		coordtype = get_mortalspace(FLEN_VALUE,TBYTE);
-		RETVAL=fits_read_tbl_coord(fptr,xcol,ycol,&xrefval,&yrefval,&xrefpix,&yrefpix,&xinc,&yinc,&rot,coordtype,&status);
+		RETVAL=ffgtcs(fptr,xcol,ycol,&xrefval,&yrefval,&xrefpix,&yrefpix,&xinc,&yinc,&rot,coordtype,&status);
 	OUTPUT:
 		xrefval
 		yrefval
@@ -5049,33 +5796,39 @@ fits_read_tbl_coord(fptr,xcol,ycol,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot
 		RETVAL
 
 int
-fits_read_tblbytes(fptr,frow,fchar,nchars,values,status)
+ffgtbb(fptr,frow,fchar,nchars,values,status)
 	fitsfile * fptr
 	long frow
 	long fchar
 	long nchars
 	byte * values = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_tblbytes = 1
+		fitsfilePtr::read_tblbytes = 2
 	CODE:
 		values = get_mortalspace(nchars,TBYTE);
-		RETVAL=fits_read_tblbytes(fptr,frow,fchar,nchars,values,&status);
+		RETVAL=ffgtbb(fptr,frow,fchar,nchars,values,&status);
 		unpack1D(ST(4),values,nchars,TBYTE);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_read_tdim(fptr,colnum,maxdim,naxis,naxes,status)
+ffgtdm(fptr,colnum,maxdim,naxis,naxes,status)
 	fitsfile * fptr
 	int colnum
 	int maxdim
 	int naxis
 	long * naxes = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_read_tdim = 1
+		fitsfilePtr::read_tdim = 2
 	CODE:
 		fits_read_tdim(fptr,colnum,0,&naxis,naxes,&status);
 		naxes = get_mortalspace(naxis,TLONG);
-		RETVAL=fits_read_tdim(fptr,colnum,naxis,&naxis,naxes,&status);
+		RETVAL=ffgtdm(fptr,colnum,naxis,&naxis,naxes,&status);
 		unpack1D(ST(4),naxes,naxis,TLONG);
 	OUTPUT:
 		status
@@ -5083,122 +5836,162 @@ fits_read_tdim(fptr,colnum,maxdim,naxis,naxes,status)
 		RETVAL
 
 int
-fits_remove_group(gfptr,rmopt,status)
+ffgtrm(gfptr,rmopt,status)
 	fitsfile * gfptr
 	int rmopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_remove_group = 1
+		fitsfilePtr::remove_group = 2
 	OUTPUT:
 		status
 
 int
-fits_remove_member(fptr,member,rmopt,status)
+ffgmrm(fptr,member,rmopt,status)
 	fitsfile * fptr
 	long member
 	int rmopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_remove_member = 1
+		fitsfilePtr::remove_member = 2
 	OUTPUT:
 		status
 
 int
-fits_reopen_file(openfptr,newfptr,status)
+ffreopen(openfptr,newfptr,status)
 	fitsfile * openfptr
-	fitsfile * &newfptr
+	fitsfile * &newfptr = NO_INIT
 	int &status
+	ALIAS:
+		CFITSIO::fits_reopen_file = 1
+		fitsfilePtr::reopen_file = 2
 	OUTPUT:
 		newfptr
 		status
 
 void
-fits_report_error(stream, status)
+ffrprt(stream, status)
 	FILE * stream
 	int status
+	ALIAS:
+		CFITSIO::fits_report_error = 1
 
 int
-fits_resize_img(fptr,bitpix,naxis,naxes,status)
+ffrsim(fptr,bitpix,naxis,naxes,status)
 	fitsfile * fptr
 	int bitpix
 	int naxis
 	long * naxes
 	int &status
+	ALIAS:
+		CFITSIO::fits_resize_img = 1
+		fitsfilePtr::resize_img = 2
 	OUTPUT:
 		status
 
 int
-fits_select_rows(infptr,outfptr,expr,status)
+ffsrow(infptr,outfptr,expr,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	char * expr
 	int &status
+	ALIAS:
+		CFITSIO::fits_select_rows = 1
+		fitsfilePtr::select_rows = 2
 	OUTPUT:
 		status
 
 int
-fits_set_bscale(fptr,scale,zero,status)
+ffpscl(fptr,scale,zero,status)
 	fitsfile * fptr
 	double scale
 	double zero
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_bscale = 1
+		fitsfilePtr::set_bscale = 2
 	OUTPUT:
 		status
 
 int
-fits_set_atblnull(fptr,colnum,nulstr,status)
+ffsnul(fptr,colnum,nulstr,status)
 	fitsfile * fptr
 	int colnum
 	char * nulstr
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_atblnull = 1
+		fitsfilePtr::set_atblnull = 2
 	OUTPUT:
 		status
 
 int
-fits_set_btblnull(fptr,colnum,nulval,status)
+fftnul(fptr,colnum,nulval,status)
 	fitsfile * fptr
 	int colnum
 	long nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_btblnull = 1
+		fitsfilePtr::set_btblnull = 2
 	OUTPUT:
 		status
 
 int
-fits_set_hdrsize(fptr,morekeys,status)
+ffhdef(fptr,morekeys,status)
 	fitsfile * fptr
 	int morekeys
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_hdrsize = 1
+		fitsfilePtr::set_hdrsize = 2
 	OUTPUT:
 		status
 
 int
-fits_set_hdustruc(fptr,status)
+ffrdef(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_hdustruc = 1
+		fitsfilePtr::set_hdustruc = 2
 	OUTPUT:
 		status
 
 int
-fits_set_imgnull(fptr,nulval,status)
+ffpnul(fptr,nulval,status)
 	fitsfile * fptr
 	long nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_imgnull = 1
+		fitsfilePtr::set_imgnull = 2
 	OUTPUT:
 		status
 
 int
-fits_set_tscale(fptr,colnum,scale,zero,status)
+fftscl(fptr,colnum,scale,zero,status)
 	fitsfile * fptr
 	int colnum
 	double scale
 	double zero
 	int &status
+	ALIAS:
+		CFITSIO::fits_set_tscale = 1
+		fitsfilePtr::set_tscale = 2
 	OUTPUT:
 		status
 
 int
-fits_str2date(datestr,year,month,day,status)
+ffs2dt(datestr,year,month,day,status)
 	char * datestr
 	int &year
 	int &month
 	int &day
 	int &status
+	ALIAS:
+		CFITSIO::fits_str2date = 1
 	OUTPUT:
 		year
 		month
@@ -5206,7 +5999,7 @@ fits_str2date(datestr,year,month,day,status)
 		status
 
 int
-fits_str2time(datestr,year,month,day,hour,minute,second,status)
+ffs2tm(datestr,year,month,day,hour,minute,second,status)
 	char * datestr
 	int &year
 	int &month
@@ -5215,6 +6008,8 @@ fits_str2time(datestr,year,month,day,hour,minute,second,status)
 	int &minute
 	double &second
 	int &status
+	ALIAS:
+		CFITSIO::fits_str2time = 1
 	OUTPUT:
 		year
 		month
@@ -5225,7 +6020,7 @@ fits_str2time(datestr,year,month,day,hour,minute,second,status)
 		status
 
 int
-fits_test_expr(fptr,expr,maxdim,datatype,nelem,naxis,naxes,status)
+fftexp(fptr,expr,maxdim,datatype,nelem,naxis,naxes,status)
 	fitsfile * fptr
 	char * expr
 	int maxdim
@@ -5234,10 +6029,13 @@ fits_test_expr(fptr,expr,maxdim,datatype,nelem,naxis,naxes,status)
 	int naxis
 	long * naxes = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_test_expr = 1
+		fitsfilePtr::test_expr = 2
 	CODE:
-		fits_test_expr(fptr,expr,0,&datatype,&nelem,&naxis,naxes,&status);
+		fftexp(fptr,expr,0,&datatype,&nelem,&naxis,naxes,&status);
 		naxes = (long*)get_mortalspace(naxis,TLONG);
-		RETVAL=fits_test_expr(fptr,expr,naxis,&datatype,&nelem,&naxis,naxes,&status);
+		RETVAL=fftexp(fptr,expr,naxis,&datatype,&nelem,&naxis,naxes,&status);
 		unpack1D((SV*)ST(5),naxes,naxis,TLONG);
 	OUTPUT:
 		datatype
@@ -5247,21 +6045,25 @@ fits_test_expr(fptr,expr,maxdim,datatype,nelem,naxis,naxes,status)
 		RETVAL
 
 int
-fits_test_keyword(keyname,status)
+fftkey(keyname,status)
 	char * keyname
 	int &status
+	ALIAS:
+		CFITSIO::fits_test_keyword = 1
 	OUTPUT:
 		status
 
 int
-fits_test_record(card,status)
+fftrec(card,status)
 	char * card
 	int &status
+	ALIAS:
+		CFITSIO::fits_test_record = 1
 	OUTPUT:
 		status
 
 int
-fits_time2str(year,month,day,hr,min,sec,decimals,datestr,status)
+fftm2s(year,month,day,hr,min,sec,decimals,datestr,status)
 	int year
 	int month
 	int day
@@ -5271,209 +6073,267 @@ fits_time2str(year,month,day,hr,min,sec,decimals,datestr,status)
 	int decimals
 	char * datestr = NO_INIT
 	int status
+	ALIAS:
+		CFITSIO::fits_time2str = 1
 	CODE:
 		datestr = get_mortalspace(20+decimals,TBYTE);
-		RETVAL=fits_time2str(year,month,day,hr,min,sec,decimals,datestr,&status);
+		RETVAL=fftm2s(year,month,day,hr,min,sec,decimals,datestr,&status);
 	OUTPUT:
 		datestr
 		status
 		RETVAL
 
 int
-fits_transfer_member(infptr,outfptr,member,tfopt,status)
+ffgmtf(infptr,outfptr,member,tfopt,status)
 	fitsfile * infptr
 	fitsfile * outfptr
 	long member
 	int tfopt
 	int &status
+	ALIAS:
+		CFITSIO::fits_transfer_member = 1
+		fitsfilePtr::transfer_member = 2
 	OUTPUT:
 		status
 
 int
-fits_update_card(fptr,keyname,card,status)
+ffucrd(fptr,keyname,card,status)
 	fitsfile *fptr
 	char * keyname
 	char * card
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_card = 1
+		fitsfilePtr::update_card = 2
 	OUTPUT:
 		status
 
 int
-fits_update_chksum(fptr,status)
+ffupck(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_chksum = 1
+		fitsfilePtr::update_chksum = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key(fptr,datatype,keyname,value,comm,status)
+ffuky(fptr,datatype,keyname,value,comm,status)
 	fitsfile * fptr
 	int datatype
 	char * keyname
 	SV * value
 	char * comm
 	int status
+	ALIAS:
+		CFITSIO::fits_update_key = 1
+		fitsfilePtr::update_key = 2
 	CODE:
-		RETVAL=fits_update_key(fptr,datatype,keyname,pack1D(value,datatype),comm,&status);
+		RETVAL=ffuky(fptr,datatype,keyname,pack1D(value,datatype),comm,&status);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_update_key_null(fptr,keyname,comment,status)
+ffukyu(fptr,keyname,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_null = 1
+		fitsfilePtr::update_key_null = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_str(fptr,keyname,value,comment,status)
+ffukys(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_str = 1
+		fitsfilePtr::update_key_str = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_log(fptr,keyname,value,comment,status)
+ffukyl(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	int value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_log = 1
+		fitsfilePtr::update_key_log = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_lng(fptr,keyname,value,comment,status)
+ffukyj(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_lng = 1
+		fitsfilePtr::update_key_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_flt(fptr,keyname,value,decimals,comment,status)
+ffukye(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_flt = 1
+		fitsfilePtr::update_key_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_dbl(fptr,keyname,value,decimals,comment,status)
+ffukyd(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_dbl = 1
+		fitsfilePtr::update_key_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_fixflt(fptr,keyname,value,decimals,comment,status)
+ffukyf(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_fixflt = 1
+		fitsfilePtr::update_key_fixflt = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_fixdbl(fptr,keyname,value,decimals,comment,status)
+ffukyg(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_fixdbl = 1
+		fitsfilePtr::update_key_fixdbl = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_cmp(fptr,keyname,value,decimals,comment,status)
+ffukyc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_cmp = 1
+		fitsfilePtr::update_key_cmp = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_dblcmp(fptr,keyname,value,decimals,comment,status)
+ffukym(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_dblcmp = 1
+		fitsfilePtr::update_key_dblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_fixcmp(fptr,keyname,value,decimals,comment,status)
+ffukfc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_fixcmp = 1
+		fitsfilePtr::update_key_fixcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_update_key_fixdblcmp(fptr,keyname,value,decimals,comment,status)
+ffukfm(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_update_key_fixdblcmp = 1
+		fitsfilePtr::update_key_fixdblcmp = 2
 	OUTPUT:
 		status
 
 void
-fits_uppercase(string)
+ffupch(string)
 	char * string
+	ALIAS:
+		CFITSIO::fits_uppercase = 1
 	OUTPUT:
 		string
 
 int
-fits_verify_chksum(fptr,dataok,hduok,status)
+ffvcks(fptr,dataok,hduok,status)
 	fitsfile * fptr
 	int &dataok
 	int &hduok
 	int &status
+	ALIAS:
+		CFITSIO::fits_verify_chksum = 1
+		fitsfilePtr::verify_chksum = 2
 	OUTPUT:
 		dataok
 		hduok
 		status
 
 int
-fits_verify_group(gfptr,firstfailed,status)
+ffgtvf(gfptr,firstfailed,status)
 	fitsfile * gfptr
 	long &firstfailed
 	int &status
+	ALIAS:
+		CFITSIO::fits_verify_group = 1
+		fitsfilePtr::verify_group = 2
 	OUTPUT:
 		firstfailed
 		status
 
 int
-fits_world_to_pix(xpos,ypos,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,xpix,ypix,status)
+ffxypx(xpos,ypos,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordtype,xpix,ypix,status)
 	double xpos
 	double ypos
 	double xrefval
@@ -5487,13 +6347,15 @@ fits_world_to_pix(xpos,ypos,xrefval,yrefval,xrefpix,yrefpix,xinc,yinc,rot,coordt
 	double &xpix
 	double &ypix
 	int &status
+	ALIAS:
+		CFITSIO::fits_world_to_pix = 1
 	OUTPUT:
 		xpix
 		ypix
 		status
 
 int
-fits_write_2d_byt(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2db(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5501,11 +6363,14 @@ fits_write_2d_byt(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	byte * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_byt = 1
+		fitsfilePtr::write_2d_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_sht(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2di(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5513,11 +6378,14 @@ fits_write_2d_sht(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_sht = 1
+		fitsfilePtr::write_2d_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_usht(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2dui(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5525,11 +6393,14 @@ fits_write_2d_usht(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	unsigned short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_usht = 1
+		fitsfilePtr::write_2d_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_int(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2dk(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5537,11 +6408,14 @@ fits_write_2d_int(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_int = 1
+		fitsfilePtr::write_2d_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_uint(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2duk(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5549,11 +6423,14 @@ fits_write_2d_uint(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	unsigned int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_uint = 1
+		fitsfilePtr::write_2d_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_lng(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2dj(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5561,11 +6438,14 @@ fits_write_2d_lng(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_lng = 1
+		fitsfilePtr::write_2d_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_ulng(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2duj(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5573,11 +6453,14 @@ fits_write_2d_ulng(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	unsigned long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_ulng = 1
+		fitsfilePtr::write_2d_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_flt(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2de(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5585,11 +6468,14 @@ fits_write_2d_flt(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_flt = 1
+		fitsfilePtr::write_2d_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_2d_dbl(fptr,group,dim1,naxis1,naxis2,array,status)
+ffp2dd(fptr,group,dim1,naxis1,naxis2,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5597,11 +6483,14 @@ fits_write_2d_dbl(fptr,group,dim1,naxis1,naxis2,array,status)
 	long naxis2
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_2d_dbl = 1
+		fitsfilePtr::write_2d_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_byt(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3db(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5611,11 +6500,14 @@ fits_write_3d_byt(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	byte * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_byt = 1
+		fitsfilePtr::write_3d_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_sht(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3di(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5625,11 +6517,14 @@ fits_write_3d_sht(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_sht = 1
+		fitsfilePtr::write_3d_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_usht(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3dui(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5639,11 +6534,14 @@ fits_write_3d_usht(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	unsigned short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_usht = 1
+		fitsfilePtr::write_3d_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_int(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3dk(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5653,11 +6551,14 @@ fits_write_3d_int(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_int = 1
+		fitsfilePtr::write_3d_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_uint(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3duk(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5667,11 +6568,14 @@ fits_write_3d_uint(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	unsigned int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_uint = 1
+		fitsfilePtr::write_3d_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_lng(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3dj(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5681,11 +6585,14 @@ fits_write_3d_lng(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_lng = 1
+		fitsfilePtr::write_3d_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_ulng(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3duj(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5695,11 +6602,14 @@ fits_write_3d_ulng(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	unsigned long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_ulng = 1
+		fitsfilePtr::write_3d_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_flt(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3de(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5709,11 +6619,14 @@ fits_write_3d_flt(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_flt = 1
+		fitsfilePtr::write_3d_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_3d_dbl(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
+ffp3dd(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	fitsfile * fptr
 	long group
 	long dim1
@@ -5723,11 +6636,14 @@ fits_write_3d_dbl(fptr,group,dim1,dim2,naxis1,naxis2,naxis3,array,status)
 	long naxis3
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_3d_dbl = 1
+		fitsfilePtr::write_3d_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_atblhdr(fptr,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
+ffphtb(fptr,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
 	fitsfile * fptr
 	long rowlen
 	long nrows
@@ -5738,11 +6654,14 @@ fits_write_atblhdr(fptr,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,sta
 	char ** tunit
 	char * extname
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_atblhdr = 1
+		fitsfilePtr::write_atblhdr = 2
 	OUTPUT:
 		status
 
 int
-fits_write_btblhdr(fptr,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
+ffphbn(fptr,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
 	fitsfile * fptr
 	long nrows
 	int tfields
@@ -5752,29 +6671,38 @@ fits_write_btblhdr(fptr,nrows,tfields,ttype,tform,tunit,extname,pcount,status)
 	char * extname
 	long pcount
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_btblhdr = 1
+		fitsfilePtr::write_btblhdr = 2
 	OUTPUT:
 		status
 
 int
-fits_write_chksum(fptr,status)
+ffpcks(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_chksum = 1
+		fitsfilePtr::write_chksum = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_null(fptr,colnum,frow,felem,nelem,status)
+ffpclu(fptr,colnum,frow,felem,nelem,status)
 	fitsfile * fptr
 	int colnum
 	long frow
 	long felem
 	long nelem
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_null = 1
+		fitsfilePtr::write_col_null = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col(fptr,datatype,colnum,frow,felem,nelem,array,status)
+ffpcl(fptr,datatype,colnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int datatype
 	int colnum
@@ -5783,14 +6711,17 @@ fits_write_col(fptr,datatype,colnum,frow,felem,nelem,array,status)
 	long nelem
 	SV * array
 	int status
+	ALIAS:
+		CFITSIO::fits_write_col = 1
+		fitsfilePtr::write_col = 2
 	CODE:
-		RETVAL=fits_write_col(fptr,datatype,colnum,frow,felem,nelem,packND(array,datatype),&status);
+		RETVAL=ffpcl(fptr,datatype,colnum,frow,felem,nelem,packND(array,datatype),&status);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_write_col_bit(fptr,cnum,frow,fbit,nbits,larray,status)
+ffpclx(fptr,cnum,frow,fbit,nbits,larray,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5798,11 +6729,14 @@ fits_write_col_bit(fptr,cnum,frow,fbit,nbits,larray,status)
 	long nbits
 	logical * larray
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_bit = 1
+		fitsfilePtr::write_col_bit = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_str(fptr,cnum,frow,felem,nelem,array,status)
+ffpcls(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5810,11 +6744,14 @@ fits_write_col_str(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	char ** array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_str = 1
+		fitsfilePtr::write_col_str = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_log(fptr,cnum,frow,felem,nelem,array,status)
+ffpcll(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5822,11 +6759,14 @@ fits_write_col_log(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	logical * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_log = 1
+		fitsfilePtr::write_col_log = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_byt(fptr,cnum,frow,felem,nelem,array,status)
+ffpclb(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5834,11 +6774,14 @@ fits_write_col_byt(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	byte * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_byt = 1
+		fitsfilePtr::write_col_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_usht(fptr,cnum,frow,felem,nelem,array,status)
+ffpclui(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5846,11 +6789,14 @@ fits_write_col_usht(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	unsigned short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_usht = 1
+		fitsfilePtr::write_col_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_sht(fptr,cnum,frow,felem,nelem,array,status)
+ffpcli(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5858,11 +6804,14 @@ fits_write_col_sht(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_sht = 1
+		fitsfilePtr::write_col_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_uint(fptr,cnum,frow,felem,nelem,array,status)
+ffpcluk(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5870,11 +6819,14 @@ fits_write_col_uint(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	unsigned int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_uint = 1
+		fitsfilePtr::write_col_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_int(fptr,cnum,frow,felem,nelem,array,status)
+ffpclk(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5882,11 +6834,14 @@ fits_write_col_int(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_int = 1
+		fitsfilePtr::write_col_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_ulng(fptr,cnum,frow,felem,nelem,array,status)
+ffpcluj(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5894,11 +6849,14 @@ fits_write_col_ulng(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	unsigned long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_ulng = 1
+		fitsfilePtr::write_col_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_lng(fptr,cnum,frow,felem,nelem,array,status)
+ffpclj(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5906,11 +6864,14 @@ fits_write_col_lng(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_lng = 1
+		fitsfilePtr::write_col_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_flt(fptr,cnum,frow,felem,nelem,array,status)
+ffpcle(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5918,11 +6879,14 @@ fits_write_col_flt(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_flt = 1
+		fitsfilePtr::write_col_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_dbl(fptr,cnum,frow,felem,nelem,array,status)
+ffpcld(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5930,11 +6894,14 @@ fits_write_col_dbl(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_dbl = 1
+		fitsfilePtr::write_col_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_cmp(fptr,cnum,frow,felem,nelem,array,status)
+ffpclc(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5942,11 +6909,14 @@ fits_write_col_cmp(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_cmp = 1
+		fitsfilePtr::write_col_cmp = 2
 	OUTPUT:
 		status
 
 int
-fits_write_col_dblcmp(fptr,cnum,frow,felem,nelem,array,status)
+ffpclm(fptr,cnum,frow,felem,nelem,array,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5954,11 +6924,14 @@ fits_write_col_dblcmp(fptr,cnum,frow,felem,nelem,array,status)
 	long nelem
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_col_dblcmp = 1
+		fitsfilePtr::write_col_dblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_str(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcns(fptr,cnum,frow,felem,nelem,array,nulstr,status)
 	fitsfile * fptr
 	int cnum
 	long frow
@@ -5967,158 +6940,215 @@ fits_write_colnull_str(fptr,cnum,frow,felem,nelem,array,nulstr,status)
 	char ** array
 	char * nulstr
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_str = 1
+		fitsfilePtr::write_colnull_str = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_log(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnl(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	logical * array
-	logical nulstr
+	logical nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_log = 1
+		fitsfilePtr::write_colnull_log = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_byt(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnb(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	byte * array
-	byte nulstr
+	byte nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_byt = 1
+		fitsfilePtr::write_colnull_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_usht(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnui(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	unsigned short * array
-	unsigned short nulstr
+	unsigned short nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_usht = 1
+		fitsfilePtr::write_colnull_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_sht(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcni(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	short * array
-	short nulstr
+	short nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_sht = 1
+		fitsfilePtr::write_colnull_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_uint(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnuk(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	unsigned int * array
-	unsigned int nulstr
+	unsigned int nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_uint = 1
+		fitsfilePtr::write_colnull_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_int(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnk(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	int * array
-	int nulstr
+	int nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_int = 1
+		fitsfilePtr::write_colnull_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_ulng(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnuj(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	unsigned long * array
-	unsigned long nulstr
+	unsigned long nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_ulng = 1
+		fitsfilePtr::write_colnull_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_flt(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnj(fptr,cnum,frow,felem,nelem,array,nulval,status)
+	fitsfile * fptr
+	int cnum
+	long frow
+	long felem
+	long nelem
+	long * array
+	long nulval
+	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_lng = 1
+		fitsfilePtr::write_colnull_lng = 2
+	OUTPUT:
+		status
+
+int
+ffpcne(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	float * array
-	float nulstr
+	float nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_flt = 1
+		fitsfilePtr::write_colnull_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_colnull_dbl(fptr,cnum,frow,felem,nelem,array,nulstr,status)
+ffpcnd(fptr,cnum,frow,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int cnum
 	long frow
 	long felem
 	long nelem
 	double * array
-	double nulstr
+	double nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_colnull_dbl = 1
+		fitsfilePtr::write_colnull_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_comment(fptr,comment,status)
+ffpcom(fptr,comment,status)
 	fitsfile * fptr
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_comment = 1
+		fitsfilePtr::write_comment = 2
 	OUTPUT:
 		status
 
 int
-fits_write_date(fptr,status)
+ffpdat(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_date = 1
+		fitsfilePtr::write_date = 2
 	OUTPUT:
 		status
 
 int
-fits_write_descript(fptr,colnum,rownum,repeat,offset,status)
+ffpdes(fptr,colnum,rownum,repeat,offset,status)
 	fitsfile * fptr
 	int colnum
 	long rownum
 	long repeat
 	long offset
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_descript = 1
+		fitsfilePtr::write_descript = 2
 	OUTPUT:
 		status
 
 void
-fits_write_errmsg(err_msg)
+ffpmsg(err_msg)
 	char * err_msg
+	ALIAS:
+		CFITSIO::fits_write_errmsg = 1
 
 int
-fits_write_grphdr(fptr,simple,bitpix,naxis,naxes,pcount,gcount,extend,status)
+ffphpr(fptr,simple,bitpix,naxis,naxes,pcount,gcount,extend,status)
 	fitsfile * fptr
 	int simple
 	int bitpix
@@ -6128,250 +7158,320 @@ fits_write_grphdr(fptr,simple,bitpix,naxis,naxes,pcount,gcount,extend,status)
 	long gcount
 	int extend
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grphdr = 1
+		fitsfilePtr::write_grphdr = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_byt(fptr,group,felem,nelem,array,status)
+ffpgpb(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	byte * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_byt = 1
+		fitsfilePtr::write_grppar_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_usht(fptr,group,felem,nelem,array,status)
+ffpgpui(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	unsigned short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_usht = 1
+		fitsfilePtr::write_grppar_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_sht(fptr,group,felem,nelem,array,status)
+ffpgpi(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_sht = 1
+		fitsfilePtr::write_grppar_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_uint(fptr,group,felem,nelem,array,status)
+ffpgpuk(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	unsigned int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_uint = 1
+		fitsfilePtr::write_grppar_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_int(fptr,group,felem,nelem,array,status)
+ffpgpk(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_int = 1
+		fitsfilePtr::write_grppar_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_ulng(fptr,group,felem,nelem,array,status)
+ffpgpuj(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	unsigned long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_ulng = 1
+		fitsfilePtr::write_grppar_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_lng(fptr,group,felem,nelem,array,status)
+ffpgpj(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_lng = 1
+		fitsfilePtr::write_grppar_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_flt(fptr,group,felem,nelem,array,status)
+ffpgpe(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_flt = 1
+		fitsfilePtr::write_grppar_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_grppar_dbl(fptr,group,felem,nelem,array,status)
+ffpgpd(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_grppar_dbl = 1
+		fitsfilePtr::write_grppar_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_history(fptr,history,status)
+ffphis(fptr,history,status)
 	fitsfile * fptr
 	char * history
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_history = 1
+		fitsfilePtr::write_history = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img(fptr,datatype,firstelem,nelem,array,status)
+ffppr(fptr,datatype,firstelem,nelem,array,status)
 	fitsfile * fptr
 	int datatype
 	long firstelem
 	long nelem
 	SV * array
 	int status
+	ALIAS:
+		CFITSIO::fits_write_img = 1
+		fitsfilePtr::write_img = 2
 	CODE:
-		fits_write_img(fptr,datatype,firstelem,nelem,packND(array,datatype),&status);
+		RETVAL=ffppr(fptr,datatype,firstelem,nelem,packND(array,datatype),&status);
 	OUTPUT:
 		status
+		RETVAL
 
 int
-fits_write_img_null(fptr,group,felem,nelem,status)
+ffppru(fptr,group,felem,nelem,status)
 	fitsfile * fptr
 	long group
 	long felem
 	long nelem
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_null = 1
+		fitsfilePtr::write_img_null = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_byt(fptr,group,felem,nelem,array,status)
+ffpprb(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	byte * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_byt = 1
+		fitsfilePtr::write_img_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_usht(fptr,group,felem,nelem,array,status)
+ffpprui(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	unsigned short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_usht = 1
+		fitsfilePtr::write_img_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_sht(fptr,group,felem,nelem,array,status)
+ffppri(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_sht = 1
+		fitsfilePtr::write_img_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_uint(fptr,group,felem,nelem,array,status)
+ffppruk(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	unsigned int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_uint = 1
+		fitsfilePtr::write_img_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_int(fptr,group,felem,nelem,array,status)
+ffpprk(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_int = 1
+		fitsfilePtr::write_img_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_ulng(fptr,group,felem,nelem,array,status)
+ffppruj(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	unsigned long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_ulng = 1
+		fitsfilePtr::write_img_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_lng(fptr,group,felem,nelem,array,status)
+ffpprj(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_lng = 1
+		fitsfilePtr::write_img_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_flt(fptr,group,felem,nelem,array,status)
+ffppre(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_flt = 1
+		fitsfilePtr::write_img_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_img_dbl(fptr,group,felem,nelem,array,status)
+ffpprd(fptr,group,felem,nelem,array,status)
 	fitsfile * fptr
 	long group
 	long nelem
 	long felem
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_img_dbl = 1
+		fitsfilePtr::write_img_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imghdr(fptr,bitpix,naxis,naxes,status)
+ffphps(fptr,bitpix,naxis,naxes,status)
 	fitsfile * fptr
 	int bitpix
 	int naxis
 	long * naxes
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imghdr = 1
+		fitsfilePtr::write_imghdr = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull(fptr,datatype,felem,nelem,array,nulval,status)
+ffppn(fptr,datatype,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	int datatype
 	long felem
@@ -6379,14 +7479,17 @@ fits_write_imgnull(fptr,datatype,felem,nelem,array,nulval,status)
 	SV * array
 	SV * nulval
 	int status
+	ALIAS:
+		CFITSIO::fits_write_imgnull = 1
+		fitsfilePtr::write_imgnull = 2
 	CODE:
-		RETVAL=fits_write_imgnull(fptr,datatype,felem,nelem,packND(array,datatype),pack1D(nulval,datatype),&status);
+		RETVAL=ffppn(fptr,datatype,felem,nelem,packND(array,datatype),pack1D(nulval,datatype),&status);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_write_imgnull_byt(fptr,group,felem,nelem,array,nulval,status)
+ffppnb(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6394,11 +7497,14 @@ fits_write_imgnull_byt(fptr,group,felem,nelem,array,nulval,status)
 	byte * array
 	byte nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_byt = 1
+		fitsfilePtr::write_imgnull_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_usht(fptr,group,felem,nelem,array,nulval,status)
+ffppnui(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6406,11 +7512,14 @@ fits_write_imgnull_usht(fptr,group,felem,nelem,array,nulval,status)
 	unsigned short * array
 	unsigned short nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_usht = 1
+		fitsfilePtr::write_imgnull_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_sht(fptr,group,felem,nelem,array,nulval,status)
+ffppni(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6418,11 +7527,14 @@ fits_write_imgnull_sht(fptr,group,felem,nelem,array,nulval,status)
 	short * array
 	short nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_sht = 1
+		fitsfilePtr::write_imgnull_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_uint(fptr,group,felem,nelem,array,nulval,status)
+ffppnuk(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6430,11 +7542,14 @@ fits_write_imgnull_uint(fptr,group,felem,nelem,array,nulval,status)
 	unsigned int * array
 	unsigned int nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_uint = 1
+		fitsfilePtr::write_imgnull_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_int(fptr,group,felem,nelem,array,nulval,status)
+ffppnk(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6442,11 +7557,14 @@ fits_write_imgnull_int(fptr,group,felem,nelem,array,nulval,status)
 	int * array
 	int nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_int = 1
+		fitsfilePtr::write_imgnull_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_ulng(fptr,group,felem,nelem,array,nulval,status)
+ffppnuj(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6454,11 +7572,14 @@ fits_write_imgnull_ulng(fptr,group,felem,nelem,array,nulval,status)
 	unsigned long * array
 	unsigned long nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_ulng = 1
+		fitsfilePtr::write_imgnull_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_lng(fptr,group,felem,nelem,array,nulval,status)
+ffppnj(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6466,11 +7587,14 @@ fits_write_imgnull_lng(fptr,group,felem,nelem,array,nulval,status)
 	long * array
 	long nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_lng = 1
+		fitsfilePtr::write_imgnull_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_flt(fptr,group,felem,nelem,array,nulval,status)
+ffppne(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6478,11 +7602,14 @@ fits_write_imgnull_flt(fptr,group,felem,nelem,array,nulval,status)
 	float * array
 	float nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_flt = 1
+		fitsfilePtr::write_imgnull_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_imgnull_dbl(fptr,group,felem,nelem,array,nulval,status)
+ffppnd(fptr,group,felem,nelem,array,nulval,status)
 	fitsfile * fptr
 	long group
 	long felem
@@ -6490,17 +7617,23 @@ fits_write_imgnull_dbl(fptr,group,felem,nelem,array,nulval,status)
 	double * array
 	double nulval
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_imgnull_dbl = 1
+		fitsfilePtr::write_imgnull_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key(fptr,datatype,keyname,value,comment,status)
+ffpky(fptr,datatype,keyname,value,comment,status)
 	fitsfile * fptr
 	int datatype
 	char * keyname
 	SV * value
 	char * comment
 	int status
+	ALIAS:
+		CFITSIO::fits_write_key = 1
+		fitsfilePtr::write_key = 2
 	PREINIT:
 		void * send;
 	CODE:
@@ -6508,185 +7641,236 @@ fits_write_key(fptr,datatype,keyname,value,comment,status)
 			send = pack1D(value,TINT);
 		else
 			send = pack1D(value,datatype);
-		RETVAL=fits_write_key(fptr,datatype,keyname,send,comment,&status);
+		RETVAL=ffpky(fptr,datatype,keyname,send,comment,&status);
 	OUTPUT:
 		status
 		RETVAL
 
 int
-fits_write_key_longstr(fptr,keyname,longstr,comment,status)
+ffpkls(fptr,keyname,longstr,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * longstr
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_longstr = 1
+		fitsfilePtr::write_key_longstr = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_longwarn(fptr,status)
+ffplsw(fptr,status)
 	fitsfile * fptr
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_longwarn = 1
+		fitsfilePtr::write_key_longwarn = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_null(fptr,keyname,comment,status)
+ffpkyu(fptr,keyname,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_null = 1
+		fitsfilePtr::write_key_null = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_template(fptr,filename,status)
+ffpktp(fptr,filename,status)
 	fitsfile * fptr
 	char * filename
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_template = 1
+		fitsfilePtr::write_key_template = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_triple(fptr,keyname,intval,frac,comment,status)
+ffpkyt(fptr,keyname,intval,frac,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long intval
 	double frac
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_triple = 1
+		fitsfilePtr::write_key_triple = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_unit(fptr,keyname,unit,status)
+ffpunt(fptr,keyname,unit,status)
 	fitsfile * fptr
 	char * keyname
 	char * unit
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_unit = 1
+		fitsfilePtr::write_key_unit = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_str(fptr,keyname,value,comment,status)
+ffpkys(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	char * value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_str = 1
+		fitsfilePtr::write_key_str = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_log(fptr,keyname,value,comment,status)
+ffpkyl(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	int value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_log = 1
+		fitsfilePtr::write_key_log = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_lng(fptr,keyname,value,comment,status)
+ffpkyj(fptr,keyname,value,comment,status)
 	fitsfile * fptr
 	char * keyname
 	long value
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_lng = 1
+		fitsfilePtr::write_key_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_flt(fptr,keyname,value,decimals,comment,status)
+ffpkye(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_flt = 1
+		fitsfilePtr::write_key_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_fixflt(fptr,keyname,value,decimals,comment,status)
+ffpkyf(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_fixflt = 1
+		fitsfilePtr::write_key_fixflt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_dbl(fptr,keyname,value,decimals,comment,status)
+ffpkyd(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_dbl = 1
+		fitsfilePtr::write_key_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_fixdbl(fptr,keyname,value,decimals,comment,status)
+ffpkyg(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_fixdbl = 1
+		fitsfilePtr::write_key_fixdbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_cmp(fptr,keyname,value,decimals,comment,status)
+ffpkyc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_cmp = 1
+		fitsfilePtr::write_key_cmp = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_fixcmp(fptr,keyname,value,decimals,comment,status)
+ffpkfc(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	float * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_fixcmp = 1
+		fitsfilePtr::write_key_fixcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_dblcmp(fptr,keyname,value,decimals,comment,status)
+ffpkym(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_dblcmp = 1
+		fitsfilePtr::write_key_dblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_write_key_fixdblcmp(fptr,keyname,value,decimals,comment,status)
+ffpkfm(fptr,keyname,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyname
 	double * value
 	int decimals
 	char * comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_key_fixdblcmp = 1
+		fitsfilePtr::write_key_fixdblcmp = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_str(fptr,keyroot,nstart,nkeys,value,comment,status)
+ffpkns(fptr,keyroot,nstart,nkeys,value,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6694,11 +7878,14 @@ fits_write_keys_str(fptr,keyroot,nstart,nkeys,value,comment,status)
 	char ** value
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_str = 1
+		fitsfilePtr::write_keys_str = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_log(fptr,keyroot,nstart,nkeys,value,comment,status)
+ffpknl(fptr,keyroot,nstart,nkeys,value,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6706,11 +7893,14 @@ fits_write_keys_log(fptr,keyroot,nstart,nkeys,value,comment,status)
 	int * value
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_log = 1
+		fitsfilePtr::write_keys_log = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_lng(fptr,keyroot,nstart,nkeys,value,comment,status)
+ffpknj(fptr,keyroot,nstart,nkeys,value,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6718,11 +7908,14 @@ fits_write_keys_lng(fptr,keyroot,nstart,nkeys,value,comment,status)
 	long * value
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_lng = 1
+		fitsfilePtr::write_keys_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_flt(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
+ffpkne(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6731,11 +7924,14 @@ fits_write_keys_flt(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	int decimals
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_flt = 1
+		fitsfilePtr::write_keys_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_fixflt(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
+ffpknf(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6744,11 +7940,14 @@ fits_write_keys_fixflt(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	int decimals
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_fixflt = 1
+		fitsfilePtr::write_keys_fixflt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_dbl(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
+ffpknd(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6757,11 +7956,14 @@ fits_write_keys_dbl(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	int decimals
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_dbl = 1
+		fitsfilePtr::write_keys_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_keys_fixdbl(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
+ffpkng(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	fitsfile * fptr
 	char * keyroot
 	int nstart
@@ -6770,28 +7972,37 @@ fits_write_keys_fixdbl(fptr,keyroot,nstart,nkeys,value,decimals,comment,status)
 	int decimals
 	char ** comment
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_keys_fixdbl = 1
+		fitsfilePtr::write_keys_fixdbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_null_img(fptr,felem,nelem,status)
+ffpprn(fptr,felem,nelem,status)
 	fitsfile * fptr
 	long felem
 	long nelem
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_null_img = 1
+		fitsfilePtr::write_null_img = 2
 	OUTPUT:
 		status
 
 int
-fits_write_record(fptr,card,status)
+ffprec(fptr,card,status)
 	fitsfile * fptr
 	char * card
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_record = 1
+		fitsfilePtr::write_record = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_byt(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssb(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6800,11 +8011,14 @@ fits_write_subset_byt(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	byte * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_byt = 1
+		fitsfilePtr::write_subset_byt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_usht(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssui(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6813,11 +8027,14 @@ fits_write_subset_usht(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	unsigned short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_usht = 1
+		fitsfilePtr::write_subset_usht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_sht(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssi(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6826,11 +8043,14 @@ fits_write_subset_sht(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	short * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_sht = 1
+		fitsfilePtr::write_subset_sht = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_uint(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssuk(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6839,11 +8059,14 @@ fits_write_subset_uint(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	unsigned int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_uint = 1
+		fitsfilePtr::write_subset_uint = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_int(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssk(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6852,11 +8075,14 @@ fits_write_subset_int(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	int * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_int = 1
+		fitsfilePtr::write_subset_int = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_ulng(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssuj(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6865,11 +8091,14 @@ fits_write_subset_ulng(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	unsigned long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_ulng = 1
+		fitsfilePtr::write_subset_ulng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_lng(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssj(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6878,11 +8107,14 @@ fits_write_subset_lng(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	long * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_lng = 1
+		fitsfilePtr::write_subset_lng = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_flt(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpsse(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6891,11 +8123,14 @@ fits_write_subset_flt(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	float * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_flt = 1
+		fitsfilePtr::write_subset_flt = 2
 	OUTPUT:
 		status
 
 int
-fits_write_subset_dbl(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
+ffpssd(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	fitsfile * fptr
 	long group
 	long naxis
@@ -6904,34 +8139,46 @@ fits_write_subset_dbl(fptr,group,naxis,naxes,fpixel,lpixel,array,status)
 	long * lpixel
 	double * array
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_subset_dbl = 1
+		fitsfilePtr::write_subset_dbl = 2
 	OUTPUT:
 		status
 
 int
-fits_write_tblbytes(fptr,frow,fchar,nchars,values,status)
+ffptbb(fptr,frow,fchar,nchars,values,status)
 	fitsfile * fptr
 	long frow
 	long fchar
 	long nchars
 	byte * values;
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_tblbytes = 1
+		fitsfilePtr::write_tblbytes = 2
 	OUTPUT:
 		status
 
 int
-fits_write_tdim(fptr,colnum,naxis,naxes,status)
+ffptdm(fptr,colnum,naxis,naxes,status)
 	fitsfile * fptr
 	int colnum
 	int naxis
 	long * naxes
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_tdim = 1
+		fitsfilePtr::write_tdim = 2
 	OUTPUT:
 		status
 
 int
-fits_write_theap(fptr,theap,status)
+ffpthp(fptr,theap,status)
 	fitsfile * fptr
 	long theap
 	int &status
+	ALIAS:
+		CFITSIO::fits_write_theap = 1
+		fitsfilePtr::write_theap = 2
 	OUTPUT:
 		status
