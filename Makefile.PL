@@ -4,8 +4,9 @@ use ExtUtils::MakeMaker;
 WriteMakefile(
     'NAME'	=> 'CFITSIO',
     'VERSION_FROM' => 'CFITSIO.pm', # finds $VERSION
-    'LIBS'	=> ['-L/home/rpete/cfitsio -lcfitsio -lm'],
-    'INC'	=> '-I/home/rpete/cfitsio',
+    'LIBS'	=> ['-L/home/rpete/local/cfitsio -lcfitsio -lm'],
+    'INC'	=> '-I/home/rpete/local/cfitsio',
     'DEFINE'	=> '',
-	'clean' => { FILES => "testprog/testprog.{fit,lis}" },
+	'OBJECT' => 'CFITSIO.o util.o',
+	'clean' => { FILES => "testprog.fit testprog/testprog.fit testprog/testprog.lis" },
 );

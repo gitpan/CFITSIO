@@ -3,29 +3,28 @@
 use strict;
 use blib;
 
-my ($file,$fptr,$status,$naxis1,$naxis2,$array,$anynul,$pdl,$bitpix);
-
 #
 # Read FITS image, unpacking data into scalar. Make a piddle and
 # display the image.
 #
 
-use CFITSIO qw( :DEFAULT :constants );
+use CFITSIO qw( READONLY TSTRING TLONG );
 use PDL;
 
 CFITSIO::PerlyUnpacking(0);
-$status = 0;
+my $status = 0;
 
 #
 # open file
 #
-$file = @ARGV ? shift : 'm51.fits';
-$fptr = CFITSIO::open_file($file, READONLY, $status);
+my $file = @ARGV ? shift : 'm51.fits';
+my $fptr = CFITSIO::open_file($file, READONLY, $status);
 check_status($status);
 
 #
 # read dimensions of image and data storage type
 #
+my ($naxis1, $naxis2, $bitpix);
 $fptr->read_key(TSTRING,'NAXIS1',$naxis1,undef,$status);
 	check_status($status);
 $fptr->read_key(TSTRING,'NAXIS2',$naxis2,undef,$status);
@@ -34,46 +33,34 @@ $fptr->read_key(TLONG,'BITPIX',$bitpix,undef,$status);
 	check_status($status);
 
 #
-# read image, output goes into $pdl's data scalar, close file
+# This does not take into account BSCALE and BZERO
 #
+my %funcs = (
+	'8' => { 'pdl' => \&byte, 'cfitsio' => \&CFITSIO::read_2d_byt },
+	'16' => { 'pdl' => \&short , 'cfitsio' => \&CFITSIO::fits_read_2d_sht },
+	'32' => { 'pdl' => \&long, 'cfitsio' => \&CFITSIO::read_2d_lng },
+	'-32' => { 'pdl' => \&float , 'cfitsio' => \&CFITSIO::read_2d_flt },
+	'64' => { 'pdl' => \&double , 'cfitsio' => \&CFITSIO::read_2d_dbl },
+);
 
-print "Reading ${naxis2}x${naxis1} image...";
-for ($bitpix) {
-	(8 == $_) and do {
-		$pdl = zeroes($naxis2,$naxis1)->byte;
-		$fptr->read_2d_byt(1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
-		last;
-	};
-	(16 == $_) and do {
-		$pdl = zeroes($naxis2,$naxis1)->short;
-		$fptr->read_2d_sht(1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
-		last;
-	};
-	(32 == $_) and do {
-		$pdl = zeroes($naxis2,$naxis1)->long;
-		$fptr->read_2d_lng(1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
-		last;
-	};
-	(-32 == $_) and do {
-		$pdl = zeroes($naxis2,$naxis1)->float;
-		$fptr->read_2d_flt(1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
-		last;
-	};
-	(-64 == $_) and do {
-		$pdl = zeroes($naxis2,$naxis1)->double;
-		$fptr->read_2d_dbl(1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
-		last;
-	};
+my ($pdl,$anynul);
+if (exists $funcs{$bitpix})
+{
+	print "Reading ${naxis2}x${naxis1} image...";
 
-	#
-	# shouldn't have made it here
-	#
+	$pdl = &{$funcs{$bitpix}{'pdl'}} (zeroes($naxis1,$naxis2));
+	&{$funcs{$bitpix}{'cfitsio'}}($fptr,1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
+
+	print "done\n";
+	$fptr->close_file($status);
+
+}
+else
+{
 	$fptr->close_file($status);
 	die "$0: invalid BITPIX keyword (= $bitpix) in image '$file'";
 }
-print "done\n";
-$fptr->close_file($status);
-check_status($status);
+
 
 #
 # have a look

@@ -1,43 +1,44 @@
 #!/usr/bin/perl
+
 use strict;
 use blib;
-
-my ($file,$fptr,$status,$naxis1,$naxis2,$array,$anynul);
 
 #
 # Read FITS image, unpacking data into Perl array.
 # Display image with PGPLOT
+#
 
-use CFITSIO qw( :constants );
+use CFITSIO qw( READONLY TSTRING TLONG );
 use PGPLOT;
 
-$status = 0;
-
-$file = @ARGV ? shift : 'm51.fits';
-
 #
-# open file
+# open FITS file
 #
-$fptr = CFITSIO::open_file($file,READONLY,$status);
+
+my $file = @ARGV ? shift : 'm51.fits';
+my $status = 0;
+my $fptr = CFITSIO::open_file($file,READONLY,$status);
 check_status($status);
 
 #
 # read dimensions of image
 #
+my ($naxis1,$naxis2);
 $fptr->read_key(TSTRING,'NAXIS1',$naxis1,undef,$status);
-check_status($status);
+	check_status($status);
 $fptr->read_key(TSTRING,'NAXIS2',$naxis2,undef,$status);
-check_status($status);
-print "Reading ${naxis2}x${naxis1} image...";
+	check_status($status);
 
 #
 # read image into $array, close file
 #
+print "Reading ${naxis2}x${naxis1} image...";
+my ($array,$anynul);
 $fptr->read_2d_lng(1,0,$naxis1,$naxis1,$naxis2,$array,$anynul,$status);
 print "done\n";
-check_status($status);
+	check_status($status);
 $fptr->close_file($status);
-check_status($status);
+	check_status($status);
 
 #
 # have a look

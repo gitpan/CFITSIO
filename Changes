@@ -1,5 +1,44 @@
 Revision history for Perl extension CFITSIO.
 
+0.90  Mon Dec 07 1998
+    - Released
+
+    - Haven't really been updating this thing for the last week, since
+      so many changes are taking place. Did a complete audit of CFITSIO.xs,
+      comparing it's implementation to the CFITSIO documentation and
+      source code. This lead to wholesale behavioural changes and loads
+      upon loads of bug fixes. Whoa be unto those who still use v0.50
+      after this thing is released! Also made running, cmping and diffing
+      of testprog/testprog*.pl much easier with testprog/runtests.
+      Everything is in CVS now, making my dual development at home and
+      work much easier. Oh yeah, did I mention the 137 new tests in test.pl?
+      Finally, decided the next version will be 0.90
+
+      Wed Dec 02 1998
+    - More bug fixes, again mostly related to special cases of null pointers
+      as input to CFITSIO routines.
+    - Began work on test.pl. This is painful, especially given the four
+      versions of testprog*.pl that alread exist...sigh.
+    - Tried to split up CFITSIO.xs since recompiles were taking far
+      too long. Unfortunately, xsubpp wants to make a bootstrap() for
+      each of them.
+
+      Mon Nov 30 1998
+    - A bunch of (possible) bug fixes, too many to list individually.
+      Mostly related to treatment of null pointers as input to CFITSIO
+      routines.
+
+      Thu Nov 26 1998
+    - Finished testprog_pdl.pl, discovered that PDL uses the same
+      array storage format as FORTRAN (row order).
+
+      Tue Nov 24 1998
+    - Incorporated Tim Jenness' fits_read_header()
+    - Grammatical fixes in pod
+
+0.50  Tue Nov 24 1998
+    - Released
+
       Mon Nov 23 1998
     - Added OO support:
       * changed fitsfile* typemap to T_PTROBJ

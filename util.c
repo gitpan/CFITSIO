@@ -7,8 +7,11 @@
 #include "fitsio.h"
 #include "util.h"
 
-static int perly_unpacking = 1;
+static int perly_unpacking = 1; /* state variable */
 
+/*
+ * Get the width of a string column in an ASCII or binary table
+ */
 long column_width(fitsfile * fptr, int colnum) {
 	int hdutype, status=0, typecode, tfields;
 	long repeat,width,size;
@@ -72,6 +75,10 @@ long column_width(fitsfile * fptr, int colnum) {
 	return size;
 }
 
+/*
+ * croaks() if the argument is non-zero, useful for checking on CFITSIO
+ * routines.
+ */
 void check_status(int status) {
 	if (status != 0) {
 		fits_report_error(stderr,status);
@@ -79,12 +86,13 @@ void check_status(int status) {
 	}
 }
 
-int is_scalar_ref (SV* arg) { /* Utility to determine if ref to scalar */
-	SV* foo;
+/*
+ * Is argument a Perl reference? To a scalar?
+ */
+int is_scalar_ref (SV* arg) {
 	if (!SvROK(arg))
 		return 0;
-	foo = SvRV(arg);
-	if (SvPOK(foo)) 
+	if (SvPOK(SvRV(arg)))
 		return 1;
 	else 
 		return 0;
@@ -93,7 +101,7 @@ int is_scalar_ref (SV* arg) { /* Utility to determine if ref to scalar */
 /*
  * Swap values in a long array inplace.
  */
-void swapDims(int ndims, long * dims) {
+void swap_dims(int ndims, long * dims) {
 	int i;
 	long tmp;
 
@@ -104,12 +112,19 @@ void swapDims(int ndims, long * dims) {
 	}
 }
 
+/*
+ * Returns the current value of perly_unpacking, if argument is non-negative
+ * the perly_unpacking is set to that value, as well.
+ */
 int PerlyUnpacking( int value ) {
-	if (value >=0)
+	if (value >= 0)
 		perly_unpacking=value;
 	return perly_unpacking;
 }
 
+/*
+ * Packs a Perl array reference into the appropriate C datatype
+ */
 void* pack1D ( SV* arg, int datatype ) {
 	int size;
 	char * stringscalar;
@@ -123,6 +138,8 @@ void* pack1D ( SV* arg, int datatype ) {
 	long lscalar;
 	float fscalar;
 	double dscalar;
+	float cmpval[2];
+	double dblcmpval[2];
 	AV* array;
 	I32 i,n;
 	SV* work;
@@ -144,53 +161,62 @@ void* pack1D ( SV* arg, int datatype ) {
 
 	if (!SvROK(arg) && SvTYPE(arg)!=SVt_PVGV) {
 		switch (datatype) {
-			case TCOMPLEX:
-			case TDBLCOMPLEX:
-				croak("How the hell are you gonna get a complex value into a scalar?");
 			case TSTRING:
 				return (void *) SvPV(arg,na);
 			case TLOGICAL:
-				logscalar = (logical) SvIV(arg);
+				logscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &logscalar, size);
 				break;
 			case TBYTE:
-				bscalar = (byte) SvIV(arg);
+				bscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &bscalar, size);
 				break;
 			case TUSHORT:
-				usscalar = (unsigned short) SvIV(arg);
+				usscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &usscalar, size);
 				break;
 			case TSHORT:
-				sscalar = (short) SvNV(arg);
+				sscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &sscalar, size);
 				break;
 			case TUINT:
-				uiscalar = (unsigned int) SvNV(arg);
+				uiscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &uiscalar, size);
 				break;
 			case TINT:
-				iscalar = (int) SvIV(arg);
+				iscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &iscalar, size);
 				break;
 			case TULONG:
-				ulscalar = (unsigned long) SvNV(arg);
+				ulscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &ulscalar, size);
 				break;
 			case TLONG:
-				lscalar = (long) SvIV(arg);
+				lscalar = SvIV(arg);
 				sv_setpvn(work, (char *) &lscalar, size);
 				break;
 			case TFLOAT:
-				fscalar = (float) SvNV(arg);
+				fscalar = SvNV(arg);
 				sv_setpvn(work, (char *) &fscalar, size);
 				break;
 			case TDOUBLE:
-				dscalar = (double) SvNV(arg);
+				dscalar = SvNV(arg);
 				sv_setpvn(work, (char *) &dscalar, size);
 				break;
+			case TCOMPLEX:
+				warn("pack1D - packing scalar into TCOMPLEX...setting imaginary component to zero");
+				cmpval[0] = SvNV(arg);
+				cmpval[1] = 0.0;
+				sv_setpvn(work, (char *) cmpval, size);
+				break;
+			case TDBLCOMPLEX:
+				warn("pack1D - packing scalar into TDBLCOMPLEX...setting imaginary component to zero");
+				dblcmpval[0] = SvNV(arg);
+				dblcmpval[1] = 0.0;
+				sv_setpvn(work, (char *) dblcmpval, size);
+				break;
 			default:
-				croak("Hmmm...I seem to have left a case out of the pack1D scalar code");
+				croak("pack1D() scalar code: unrecognized datatype (%d) was passed",datatype);
 		}
 		return (void *) SvPV(work,na);
 	}
@@ -204,12 +230,12 @@ void* pack1D ( SV* arg, int datatype ) {
 		else
 			array = (AV *) SvRV(arg);   /* reference */
 
-		n = av_len(array);
+		n = av_len(array) + 1;
 
 		switch (datatype) {
 			case TSTRING:
-				SvGROW(work, sizeof(char *) * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						stringscalar = "";
 					else {
@@ -217,12 +243,12 @@ void* pack1D ( SV* arg, int datatype ) {
 							goto errexit;
 						stringscalar = SvPV(*work2,na);
 					}
-					sv_catpvn(work, (char *) &stringscalar, sizeof(char *));
+					sv_catpvn(work, (char *) &stringscalar, size);
 				}
 				break;
 			case TLOGICAL:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						logscalar = 0;
 					else {
@@ -234,8 +260,8 @@ void* pack1D ( SV* arg, int datatype ) {
 				}
 				break;
 			case TBYTE:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						bscalar = 0;
 					else {
@@ -247,133 +273,133 @@ void* pack1D ( SV* arg, int datatype ) {
 				}
 				break;
 			case TUSHORT:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						usscalar = 0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						usscalar = (unsigned short) SvIV(*work2);
+						usscalar = SvIV(*work2);
 					}
 					sv_catpvn(work, (char *) &usscalar, size);
 				}
 				break;
 			case TSHORT:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						sscalar = 0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						sscalar = (short) SvIV(*work2);
+						sscalar = SvIV(*work2);
 					}
 					sv_catpvn(work, (char *) &sscalar, size);
 				}
 				break;
 			case TUINT:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						uiscalar = 0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						uiscalar = (unsigned int) SvNV(*work2);
+						uiscalar = SvIV(*work2);
 					}
 					sv_catpvn(work, (char *) &uiscalar, size);
 				}
 				break;
 			case TINT:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						iscalar = 0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						iscalar = (int) SvIV(*work2);
+						iscalar = SvIV(*work2);
 					}
 					sv_catpvn(work, (char *) &iscalar, size);
 				}
 				break;
 			case TULONG:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						ulscalar = 0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						ulscalar = (unsigned long) SvNV(*work2);
+						ulscalar = SvIV(*work2);
 					}
 					sv_catpvn(work, (char *) &ulscalar, size);
 				}
 				break;
 			case TLONG:
-				SvGROW(work, size * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						lscalar = 0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						lscalar = (long) SvNV(*work2);
+						lscalar = SvIV(*work2);
 					}
 					sv_catpvn(work, (char *) &lscalar, size);
 				}
 				break;
 			case TCOMPLEX:
+				size /= 2;
 			case TFLOAT:
-				SvGROW(work, sizeof(float) * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size * n);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						fscalar = 0.0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						fscalar = (float) SvNV(*work2);
+						fscalar = SvNV(*work2);
 					}
-					sv_catpvn(work, (char *) &fscalar, sizeof(float));
+					sv_catpvn(work, (char *) &fscalar, size);
 				}
 				break;
 			case TDBLCOMPLEX:
+				size /= 2;
 			case TDOUBLE:
-				SvGROW(work, sizeof(double) * (n+1));
-				for (i=0; i<=n; i++) {
+				SvGROW(work, size);
+				for (i=0; i<n; i++) {
 					if ((work2=av_fetch(array,i,0)) == NULL)
 						dscalar = 0.0;
 					else {
 						if (SvROK(*work2))
 							goto errexit;
-						dscalar = (double) SvNV(*work2);
+						dscalar = SvNV(*work2);
 					}
-					sv_catpvn(work, (char *) &dscalar, sizeof(double));
+					sv_catpvn(work, (char *) &dscalar, size);
 				}
 				break;
 			default:
-				croak("Hmmm...I seem to have left a case out of the pack1D glob/array code");
+				croak("pack1D() array code: unrecognized datatype (%d) was passed",datatype);
 		}
-		/* Return a pointer to the byte array */
 
 		return (void *) SvPV(work, na);
 	}
 
 	errexit:
-	croak("Routine can only handle scalar values or refs to 1D arrays of scalars");
+	croak("pack1D() - can only handle scalar values or refs to 1D arrays of scalars");
 }
 
 void* packND ( SV* arg, int datatype ) {
 
 	SV* work;
-	STRLEN len;
 
 	if (arg == &sv_undef)
 		return (void *) NULL;
 
-	if (is_scalar_ref(arg))                 /* Scalar ref */
-		return (void*) SvPV(SvRV(arg), len);
+	if (is_scalar_ref(arg))
+		return (void*) SvPV(SvRV(arg), na);
 
 	work = sv_2mortal(newSVpv("", 0));
 	pack_element(work, &arg, datatype);
@@ -397,9 +423,12 @@ void pack_element(SV* work, SV** arg, int datatype) {
 	float fscalar;
 	double dscalar;
 
+	int size;
 	I32 i,n;
 	AV* array;
 	double nval;
+
+	size = sizeof_datatype(datatype);
 
 	/* Pack element arg onto work recursively */
 
@@ -408,98 +437,55 @@ void pack_element(SV* work, SV** arg, int datatype) {
 	if (arg==NULL || (!SvROK(*arg) && SvTYPE(*arg)!=SVt_PVGV)) {
 		switch (datatype) {
 			case TSTRING:
-				if (arg == NULL)
-					stringscalar = "";
-				else
-					stringscalar = SvPV(*arg,na);
-				sv_catpvn(work, (char *) &stringscalar, sizeof(char *));
+				stringscalar = arg ? SvPV(*arg,na) : "";
+				sv_catpvn(work, (char *) &stringscalar, size);
 				break;
 			case TLOGICAL:
-				if (arg == NULL)
-					logscalar = 0;
-				else
-					logscalar = (logical) SvIV(*arg);
-				sv_catpvn(work, (char *) &logscalar, sizeof_datatype(datatype));
+				logscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &logscalar, size);
 				break;
 			case TBYTE:
-				if (arg == NULL)
-					bscalar = 0;
-				else
-					bscalar = (byte) SvIV(*arg);
-				sv_catpvn(work, (char *) &bscalar, sizeof_datatype(datatype));
+				bscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &bscalar, size);
 				break;
 			case TUSHORT:
-				if (arg == NULL)
-					usscalar = 0;
-				else
-					usscalar = (unsigned short) SvNV(*arg);
-				sv_catpvn(work, (char *) &usscalar, sizeof_datatype(datatype));
+				usscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &usscalar, size);
 				break;
 			case TSHORT:
-				if (arg == NULL)
-					sscalar = 0;
-				else
-					sscalar = (short) SvIV(*arg);
-				sv_catpvn(work, (char *) &sscalar, sizeof_datatype(datatype));
+				sscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &sscalar, size);
 				break;
 			case TUINT:
-				if (arg == NULL)
-					uiscalar = 0;
-				else
-					uiscalar = (unsigned int) SvNV(*arg);
-				sv_catpvn(work, (char *) &uiscalar, sizeof_datatype(datatype));
+				uiscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &uiscalar, size);
 				break;
 			case TINT:
-				if (arg == NULL)
-					iscalar = 0;
-				else
-					iscalar = (int) SvIV(*arg);
-				sv_catpvn(work, (char *) &iscalar, sizeof_datatype(datatype));
+				iscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &iscalar,size);
 				break;
 			case TULONG:
-				if (arg == NULL)
-					ulscalar = 0;
-				else
-					ulscalar = (unsigned long) SvNV(*arg);
-				sv_catpvn(work, (char *) &ulscalar, sizeof_datatype(datatype));
+				ulscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &ulscalar, size);
 				break;
 			case TLONG:
-				if (arg == NULL)
-					lscalar = 0;
-				else
-					lscalar = (long) SvNV(*arg);
-				sv_catpvn(work, (char *) &lscalar, sizeof_datatype(datatype));
-				break;
-			case TFLOAT:
-				if (arg == NULL)
-					fscalar = 0.0;
-				else
-					fscalar = (float) SvNV(*arg);
-				sv_catpvn(work, (char *) &fscalar, sizeof_datatype(datatype));
+				lscalar = arg ? SvIV(*arg) : 0;
+				sv_catpvn(work, (char *) &lscalar, size);
 				break;
 			case TCOMPLEX:
-				if (arg == NULL)
-					fscalar = 0.0;
-				else
-					fscalar = (float) SvNV(*arg);
-				sv_catpvn(work, (char *) &fscalar, sizeof_datatype(datatype)/2);
-				break;
-			case TDOUBLE:
-				if (arg == NULL)
-					dscalar = 0.0;
-				else
-					dscalar = (double) SvNV(*arg);
-				sv_catpvn(work, (char *) &dscalar, sizeof_datatype(datatype));
+				size /= 2;
+			case TFLOAT:
+				fscalar = arg ? SvNV(*arg) : 0.0;
+				sv_catpvn(work, (char *) &fscalar, size);
 				break;
 			case TDBLCOMPLEX:
-				if (arg == NULL)
-					dscalar = 0.0;
-				else
-					dscalar = (double) SvNV(*arg);
-				sv_catpvn(work, (char *) &dscalar, sizeof_datatype(datatype)/2);
+				size /= 2;
+			case TDOUBLE:
+				dscalar = arg ? SvNV(*arg) : 0.0;
+				sv_catpvn(work, (char *) &dscalar, size);
 				break;
 			default:
-				croak("Hmmm...I seem to have left a case out of the pack_element scalar code");
+				croak("pack_element() - unrecognized datatype (%d) was passed",datatype);
 		}
 		return;
 	}
@@ -517,8 +503,8 @@ void pack_element(SV* work, SV** arg, int datatype) {
 
 		/* Pack each array element */
 
-		n = av_len(array); 
-		for (i=0; i<=n; i++) {
+		n = av_len(array) + 1; 
+		for (i=0; i<n; i++) {
 
 			/* To curse is human, to recurse divine */
 			pack_element(work, av_fetch(array, i, 0), datatype );
@@ -527,7 +513,7 @@ void pack_element(SV* work, SV** arg, int datatype) {
 	}
 
 	errexit:
-	croak("Routine can only handle scalars or refs to N-D arrays of scalars");
+	croak("pack_element() - can only handle scalars or refs to N-D arrays of scalars");
 }
 
 void unpack2D( SV * arg, void * var, long *dims, int datatype) {
@@ -535,7 +521,7 @@ void unpack2D( SV * arg, void * var, long *dims, int datatype) {
 	AV *array;
 	char * tmp_var = (char *)var;
 
-	if (!PerlyUnpacking(-1)) {
+	if (!PerlyUnpacking(-1) && datatype != TSTRING) {
 		unpack2scalar(arg,var,dims[0]*dims[1],datatype);
 		return;
 	}
@@ -556,7 +542,7 @@ void unpack3D( SV * arg, void * var, long *dims, int datatype) {
 	SV *tmp_sv;
 	char *tmp_var = (char *)var;
 
-	if (!PerlyUnpacking(-1)) {
+	if (!PerlyUnpacking(-1) && datatype != TSTRING) {
 		unpack2scalar(arg,var,dims[0]*dims[1]*dims[2],datatype);
 		return;
 	}
@@ -576,6 +562,9 @@ void unpack3D( SV * arg, void * var, long *dims, int datatype) {
 	}
 }
 
+/*
+ * This routine was causing problems, but it isn't used anywhere now
+ */
 void unpackND ( SV * arg, void * var, int ndims, long *dims, int datatype ) {
 	int i;
 	long *places, skip, ndata, nbytes, written;
@@ -587,7 +576,7 @@ void unpackND ( SV * arg, void * var, int ndims, long *dims, int datatype ) {
 		ndata *= dims[i];
 	nbytes = ndata * sizeof_datatype(datatype);
 
-	if (!PerlyUnpacking(-1)) {
+	if (!PerlyUnpacking(-1) && datatype != TSTRING) {
 		unpack2scalar(arg,var,ndata,datatype);
 		return;
 	}
@@ -625,21 +614,27 @@ void unpackND ( SV * arg, void * var, int ndims, long *dims, int datatype ) {
 	free(avs);
 }
 
-/* set argument's value to (copied) data */
+/*
+ * Set argument's value to (copied) data.
+ */
 void unpack2scalar ( SV * arg, void * var, long n, int datatype ) {
-	SV* tmp;
+	long data_length;
 
-	sv_setpvn(arg,(char *)var,n*sizeof_datatype(datatype));
+	if (datatype == TSTRING)
+		croak("unpack2scalar() - how did you manage to call me with a TSTRING datatype?!");
 
-	/* this sets the value of the scalar to the data address
-	tmp = newSVpvn((char *)var,n*sizeof_datatype(datatype));
-	sv_setpvn(arg, (char *)&var,sizeof(void *));
-	*/
+	data_length = n * sizeof_datatype(datatype);
+
+	/*sv_setpvn(arg, (char *)var, data_length);*/  /* TBYTEs were screwy */
+
+	SvGROW(arg, data_length);
+	memcpy(SvPV(arg,na), var, data_length);
 
 	return;
 }
 
-/* Takes a pointer to a single value of any given type, puts
+/*
+ * Takes a pointer to a single value of any given type, puts
  * that value into the passed Perl scalar
  *
  * Note that type TSTRING does _not_ imply a (char **) was passed,
@@ -660,17 +655,17 @@ void unpackScalar(SV * arg, void * var, int datatype) {
 		case TBYTE:
 			sv_setiv(arg,(IV)(*(byte *)var)); break;
 		case TUSHORT:
-			sv_setnv(arg,(double)(*(unsigned short *)var)); break;
+			sv_setiv(arg,(IV)(*(unsigned short *)var)); break;
 		case TSHORT:
 			sv_setiv(arg,(IV)(*(short *)var)); break;
 		case TUINT:
-			sv_setnv(arg,(double)(*(unsigned int *)var)); break;
+			sv_setiv(arg,(IV)(*(unsigned int *)var)); break;
 		case TINT:
 			sv_setiv(arg,(IV)(*(int *)var)); break;
 		case TULONG:
-			sv_setnv(arg,(double)(*(unsigned long *)var)); break;
+			sv_setiv(arg,(IV)(*(unsigned long *)var)); break;
 		case TLONG:
-			sv_setnv(arg,(double)(*(long *)var)); break;
+			sv_setiv(arg,(IV)(*(long *)var)); break;
 		case TFLOAT:
 			sv_setnv(arg,(double)(*(float *)var)); break;
 		case TDOUBLE:
@@ -720,8 +715,11 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
 	m=n;
 	array = coerce1D( arg, m );
 
-	if (m==0) 
+	/* This could screw up routines like fits_read_imghdr */
+	/*
+	if (m==0)
 		m = av_len(array)+1;  
+ 	*/
 
 	switch (datatype) {
 		case TSTRING:                      /* array of strings, I suppose */
@@ -742,7 +740,7 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
 		case TUSHORT:
 			usvar = (unsigned short *) var;
 			for(i=0; i<m; i++)
-				av_store(array, i, newSVnv( (double)usvar[i] ));
+				av_store(array, i, newSViv( (IV)usvar[i] ));
 			break;
 		case TSHORT:
 			svar = (short *) var;
@@ -752,7 +750,7 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
 		case TUINT:
 			uivar = (unsigned int *) var;
 			for(i=0; i<m; i++)
-				av_store(array, i, newSVnv( (double)uivar[i] ));
+				av_store(array, i, newSViv( (IV)uivar[i] ));
 			break;
 		case TINT:
 			ivar = (int *) var;
@@ -762,12 +760,12 @@ void unpack1D ( SV * arg, void * var, long n, int datatype ) {
 		case TULONG:
 			ulvar = (unsigned long *) var;
 			for(i=0; i<m; i++)
-				av_store(array, i, newSVnv( (double)ulvar[i] ));
+				av_store(array, i, newSViv( (IV)ulvar[i] ));
 			break;
 		case TLONG:
 			lvar = (long *) var;
 			for(i=0; i<m; i++)
-				av_store(array, i, newSVnv( (double)lvar[i] ));
+				av_store(array, i, newSViv( (IV)lvar[i] ));
 			break;
 		case TFLOAT:
 			fvar = (float *) var;
@@ -838,12 +836,34 @@ AV* coerceND (SV *arg, int ndims, long *dims) {
 	return array;
 }
 
+/*
+ * A way of getting temporary memory without having to free() it
+ * by making a mortal Perl variable of the appropriate size.
+ */
 void* get_mortalspace( long n, int datatype ) {
-	SV* work = sv_2mortal(newSVpv("", 0));;
-	SvGROW(work,sizeof_datatype(datatype)*n);
+	long datalen;
+	SV *work;
+
+	work = sv_2mortal(newSVpv("", 0));
+	datalen = sizeof_datatype(datatype) * n;
+	SvGROW(work,datalen);
+
+	/*
+	 * One could imagine allocating some space with this routine,
+	 * passing the pointer off to CFITSIO, ending up with an error
+	 * and then having xsubpp set the output SV to the contents
+	 * of memory pointed to by this said pointer, which may or
+	 * may not have a NUL in its random contents.
+	 */
+	if (datalen)
+		*((char *)SvPV(work,na)) = '\0';
+
 	return (void *) SvPV(work, na);
 }
 
+/*
+ * Return the number of bytes required for a datum of the given type.
+ */
 int sizeof_datatype(int datatype) {
 	switch (datatype) {
 		case TSTRING:

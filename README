@@ -1,0 +1,28 @@
+                            CFITSIO.pm
+
+What is it?
+-----------
+   CFITSIO.pm is a Perl interface to William Pence's CFITSIO subroutine library.
+   For more information on CFITSIO, see http://heasarc.gsfc.nasa.gov/fitsio
+
+Where can (did) I get it?
+-------------------------
+   http://hea-www.harvard.edu/~rpete/cfitsio
+   http://www.perl.com/CPAN/authors/id/P/PR/PRATZLAFF
+
+Installation
+------------
+   For installation instructions, see the 'INSTALL' file in the base
+   distribution directory. Essentially, it just tells you to tidy up
+   the INC and LIBS keys in Makefile.PL and then do
+
+     $ perl Makefile.PL
+     $ make
+     $ make test
+     $ make install
+
+Acknowledgement
+---------------
+   m51.fits is included as a demonstration by kind permission of the IRAF
+   group at the National Optical and Astronomical Observatories, in particular
+   Pat Seitzer, who retain ownership.

@@ -1,6 +1,10 @@
 #ifndef _H_UTIL_CFITSIO_PERL
 #define _H_UTIL_CFITSIO_PERL
 
+#include "fitsio.h"
+
+#define FIXME(s)
+
 typedef char logical;
 typedef unsigned char byte;
 typedef float cmp;
@@ -19,7 +23,7 @@ void unpack3D ( SV* arg, void * var, long *dims, int datatype );
 void unpackND ( SV* arg, void * var, int ndims, long *dims, int datatype );
 void unpack2scalar ( SV* arg, void * var, long n, int datatype );
 void unpackScalar( SV* arg, void *var, int datatype );
-void swapDims(int ndims, long *dims);
+void swap_dims(int ndims, long *dims);
 int PerlyUnpacking(int value);
 int sizeof_datatype(int datatype);
 long column_width(fitsfile * fptr, int colnum);

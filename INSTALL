@@ -1,8 +1,15 @@
-1. Edit Makefile.PL, point LIBS and INC to the location of your cfitsio
+
+1. Edit Makefile.PL, point LIBS and INC to the location of your CFITSIO
    library and include files.
 
-2. perl Makefile.PL && make
+2. perl Makefile.PL
 
-3. If you want, compare the output of testprog.pl to cfitsio's 'testprog'.
+3. make
 
-4. make install
+4. make test
+
+5. If you want, compare the output of the testprog/testprog*.pl scripts
+   to CFITSIO's testprog.c. There is a small shell script (heresy!) -
+   runtests - included to make this easier.
+
+6. make install

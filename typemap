@@ -1,6 +1,3 @@
-#
-# int_tbm = "integer to be modified"
-#            The 'status' variable is a good example of this
 
 TYPEMAP
 cmp *            T_COMPLEXP

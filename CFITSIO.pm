@@ -1,5 +1,5 @@
 package CFITSIO;
-$VERSION = '0.50';
+$VERSION = '0.90';
 
 use strict;
 use Carp;
@@ -36,6 +36,7 @@ my @__shortnames = qw(
 	fftplt
 	ffdt2s
 	ffdsum
+	ffdtdm
 	ffdcol
 	ffdelt
 	ffdhdu
@@ -408,7 +409,7 @@ my @__shortnames = qw(
 	ffptbb
 	ffptdm
 	ffpthp
-);  ### @__shornames
+);  ### @__shortnames
 
 my @__longnames = qw(
 	fits_add_group_member
@@ -435,6 +436,7 @@ my @__longnames = qw(
 	fits_create_template
 	fits_date2str
 	fits_decode_chksum
+	fits_decode_tdim
 	fits_delete_col
 	fits_delete_file
 	fits_delete_hdu
@@ -807,6 +809,7 @@ my @__longnames = qw(
 	fits_write_tblbytes
 	fits_write_tdim
 	fits_write_theap
+	fits_read_header
 );  ### @__longnames
 
 my @__constants = qw(
@@ -1028,8 +1031,8 @@ sub AUTOLOAD {
 		croak "Your vendor has not defined CFITSIO macro $constname";
 	}
     }
-    #*$AUTOLOAD = sub { $val };
-	eval "sub $AUTOLOAD { $val }";
+    *$AUTOLOAD = sub { $val };
+	#eval "sub $AUTOLOAD { $val }";
     goto &$AUTOLOAD;
 }
 
@@ -1037,9 +1040,97 @@ bootstrap CFITSIO $VERSION;
 
 # Preloaded methods go here.
 
+# Compound routines -- useful routines that combine lower level
+# CFITSIO commands
+# This routine takes an argument (either a fitsfilePtr object
+# or a string containing a FITS file name) and returns the header
+# into a hash along with the exit status of the routine.
+# If it is called in a scalar context then only the hash reference
+# is returned
+
+#  $hashref = fits_read_header("test.fits");
+#  ($hashref, $status) = $fitsfile->read_header;
+
+# The comments are stored in a hash in $hashref->{COMMENTS}.
+
+sub fits_read_header {
+
+  croak 'Usage: fits_read_header(file|fitsfilePtr)'
+    unless @_;
+
+  my ($fitsfile, $status);
+  my ($n, $left, %header, $key, $value, $comment);
+
+  # Read the argument
+  my $file = shift;
+
+  # Check to see whether we have a reference (eg a fitsfilePtr)
+  # or a simple string. Maybe should do an explicit check for
+  # a fitsfilePtr object rather than simply a reference
+
+  if (ref($file)) {
+    $fitsfile = $file;
+    $status = 0;  # assume good status if we have a reference
+  } else {
+    # Open the file.
+    fits_open_file($fitsfile, $file, READONLY(), $status) 
+  }
+
+  # Now we have an open file -- check that status is good before
+  # proceeding
+  unless ($status) {
+
+    # Get the number of fits keywords in primary header
+    $fitsfile->get_hdrspace($n, $left, $status);
+
+    # Loop over the keys
+    for my $i (1..$n) {
+      last unless $status == 0;
+
+      $fitsfile->read_keyn($i, $key, $value, $comment, $status);
+
+      # Store the key/value in a hash
+      $header{$key} = $value;
+
+      # Store the comments
+      $header{COMMENTS}{$key} = $comment;
+
+    }
+
+    # Close the file
+    $fitsfile->close_file($status);
+  }
+
+  # Report an error - may not always want to write to STDERR...
+  fits_report_error(*STDERR, $status);
+
+
+  if (wantarray()) {
+    return (\%header, $status);
+  } else {
+    return \%header;
+  }
+
+}
+
+# This section provides perl aliases for the OO interface
+# This is a bit of a kluge since the actual command is in the
+# CFITSIO namespace. Did not open a new namespace with the package
+# command since AUTOSPLIT gets confused
+
+sub fitsfilePtr::read_header {
+  my $self = shift;
+  my ($href, $status) = CFITSIO::fits_read_header($self);
+  return ($href, $status) if wantarray;
+  return $href;
+}
+
+
+  
 # Autoload methods go after =cut, and are processed by the autosplit program.
 
 1;
+
 __END__
 
 =head1 NAME
@@ -1060,16 +1151,16 @@ information on CFITSIO, see
 http://heasarc.gsfc.nasa.gov/fitsio.
 
 This module attempts to provide a wrapper for nearly every CFITSIO routine,
-although you probably won't need that much funtionality. One should also
+while retaining as much CFITSIO behaviour as possible. As such, one should
 be aware that it is still somewhat low-level, in the sense that handing an
-array which is not the correct size to a routine like I<fits_write_img>
+array which is not the correct size to a routine like C<fits_write_img()>
 may cause SEGVs.
 
 My goal is to eventually use these routines to build a more Perl-like
 interface to many common tasks such as reading and writing of images and
 ASCII and binary tables.
 
-=head1 CFITSIO API Mapping
+=head1 CFITSIO API MAPPING
 
 CFITSIO.pm allows one to use either the long or short name forms of the
 CFITSIO routines. These work by using the exact same form of arguments
@@ -1077,63 +1168,66 @@ as one would find in an equivalent C program.
 
 There is also an object-oriented API which uses the same function names
 as the long-name API, but with the leading "fits_" stripped. To get
-a CFITSIO "object" one would call I<open_file>, I<create_file> or
-I<create_template>:
+a CFITSIO "object" one would call C<open_file()>, C<create_file()> or
+C<create_template()>:
 
-C<my $status = 0;>
+    my $status = 0;
+    my $fptr = CFITSIO::open_file($filename,CFITSIO::READONLY(),$status);
 
-C<my $fptr = CFITSIO::open_file($filename,CFITSIO::READONLY(),$status);>
-
-C<my $naxis1;>
-
-C<$fptr-E<gt>read_key_str('NAXIS1',$naxis1,undef,$status);>;
+    $fptr->read_key_str('NAXIS1',$naxis1,undef,$status);
 
 Note that the object-oriented forms of function names are only available for
-those CFITSIO routines which demand a C<fitsfile *> datatype as the first
+those CFITSIO routines which demand a C<fitsfile*> datatype as the first
 argument.
 
-=head1 Namespace
+=head1 NAMESPACE
 
-All CFITSIO routines, with the exception of I<fits_iterate_data> and
-I<fits_open_memfile>, are available in both long and short name
-forms (e.g., I<fits_read_key> E<lt>=E<gt> I<ffgky>), as well as all
+All CFITSIO routines, with the exception of C<fits_iterate_data()> and
+C<fits_open_memfile()>, are available in both long and short name
+forms (e.g., C<fits_read_key> E<lt>=E<gt> C<ffgky>), as well as all
 constants defined in the F<fitsio.h> header file. This raises the
-possibility of your namespace being invaded by nearly 1000 funtion
+possibility of your namespace being invaded by nearly 1000 function
 and constant names.
 
-To deal with this situation, I<CFITIO.pm> makes use of the Exporter
-class support for %EXPORT_TAGS. You can import the long-named functions
+To deal with this situation, F<CFITSIO.pm> makes use of the Exporter
+package support for C<%EXPORT_TAGS>. You can import the long-named functions
 with
 
-C<use CFITSIO qw( :longnames );>
+    use CFITSIO qw( :longnames );
 
 and the short-named routines with
 
-C<use CFITSIO qw( :shortnames );>
+    use CFITSIO qw( :shortnames );
 
-Constants are actually implemented as AUTOLOADed functions, so I<TSTRING>, for
+Constants are actually implemented as AUTOLOADed functions, so C<TSTRING>, for
 instance, would be accessed via C<CFITSIO::TSTRING()>. Alternatively
 you can
 
-C<use CFITSIO qw( :constants );>
+    use CFITSIO qw( :constants );
 
 which would allow you to simply say C<TSTRING>.
 
-=head1 Data Storage Details
+=head1 DATA STORAGE DETAILS
 
 =head2 Input Variables
 
 If a routine expects an N-dimensional array as input, and you hand it a
-reference to a scalar, then CFITSIO.pm simply uses the data in the scalar.
-Otherwise it unpacks the array into a format that the C routine can understand.
+reference to a scalar, then C<CFITSIO.pm> simply uses the data in the scalar
+which the argument is referencing.
+Otherwise it expects the argument to be a Perl array reference whose total
+number of elements satisfies the input demands of the corresponding
+C routine. C<CFITSIO.pm> then unpacks the array reference into a format that
+the C routine can understand. If your input array does not hold enough
+data for the C routine then a segfault is likely to occur.
 
-CFITSIO functions which take an optional NULL pointer, indicating no output
-in that place is desired can instead be given an I<undef>. In other words,
-the following C and Perl statements would be roughly equivalent:
+CFITSIO functions which take an optional NULL pointer - indicating no output
+in that place is desired - can instead be given an C<undef>. In other words,
+the following C and Perl statements which read a keyword but ignore the
+comment would be roughly equivalent:
 
-C<fits_read_col_int(fptr,key,value,NULL,&status)>
+    fits_read_col_int(fptr,key,&value,NULL,&status);
 
-C<fits_read_col_int($fptr,$key,$value,undef,$status)>
+    fits_read_col_int($fptr,$key,$value,undef,$status);
 
 =head2 Output Variables
 
@@ -1141,29 +1235,29 @@ Calling CFITSIO routines which read data from FITS files causes the output
 variable to be transformed into a Perl array of the appropriate dimensions.
 The exception to this is if one wants the output to be in the machine-native
 format (e.g., for use with PDL). In this case you can use the routine
-I<PerlyUnpacking(0)>.  Then all output variables will become scalars
+C<PerlyUnpacking(0)>.  Then all output variables will become scalars
 containing the appropriate data. The exception here is with routines which
-read arrays of strings (e.g., I<fits_read_col_str>).
+read arrays of strings (e.g., C<fits_read_col_str()>).
 In this case the output is again a Perl array reference.
 
-=head1 Examples
+=head1 EXAMPLES
 
-Take a look at the F<testprog/testprog.pl> under the distribution directory. It
+Take a look at F<testprog/testprog.pl> under the distribution directory. It
 should
-produce output identical to the F<testprog.c> which comes with the CFITSIO
-library. Actually, that's not quite true - there will be a difference
-in line 5 of the output, but it is inconsequential. Additionally, the
-versions named F<testprog_longnames.pl> and F<testprog_OO.pl> 
-test the long-name and object-oriented APIs, respectively.
+produce output identical to F<testprog.c> which comes with the CFITSIO
+library. Additionally, the
+versions named F<testprog_longnames.pl>, F<testprog_OO.pl>  and
+F<testprog_pdl.pl> test the long-name and object-oriented APIs,
+and machine-native upacking with PDL.
 
-There is also an F<examples/> directories with scripts which  do
+There is also an F<examples/> directory with scripts which do
 the following:
 
 =over 4
 
 =item F<image_read.pl>
 
-reads an image of M51 (attributed to whom???) and displays it using PGPLOT
+reads a FITS primary image and displays it using PGPLOT
 
 =item F<image_read_pdl.pl>
 
@@ -1171,7 +1265,82 @@ same as above, but uses machine-native unpacking with PDL
 
 =item F<bintable_read_pdl.pl>
 
-reads binary table column into PDL object, makes histogram and plots
+reads binary table column into PDL object, makes histogram and plots it
+
+=back
+
+=head1 CONSIDERATIONS
+
+=over 4
+
+=item Ensure your input arrays contain enough data
+
+The caller is responsible for ensuring that the input arrays given
+to CFITSIO routines are large enough to satisfy the access demands
+of said routines. For example, if you tell C<fits_write_col()> to write
+a data column containing 100 elements, your Perl array should contain
+at least 100 elements. Segfaults abound, so beware!
+
+=item C<maxdim> semantics
+
+Some CFITSIO routines take a parameter named something like 'C<maxdim>',
+indicating that no more than that many elements should be placed into
+the output data area. An example of this would be C<fits_read_tdim()>.
+In these cases CFITSIO.pm will automatically determine how much storage
+space is needed for the full amount of output possible and the caller's
+input value for that argument will essentially be ignored. This is for
+convenience, and should be considered a feature. Currently the routines
+for which this is done are C<fits_read_atblhdr>, C<fits_read_btblhdr>,
+C<fits_read_imghdr>, C<fits_decode_tdim>, C<fits_read_tdim>
+and C<fits_test_expr>.
+
+=item Ouput arrays remain as undisturbed as possible
+
+For routines like C<fits_read_col()>, CFITSIO unpacks the output into
+a Perl array reference (unless C<PerlyUnpacking(0)> has been called, of
+course). Prior to doing this, it ensures the scalar passed is a reference
+to an array large enough to hold the data. If the argument is an
+array reference which is too small, it expands the array pointed to
+appropriately. B<But>, if the array is large enough already, the data
+are just unpacked into the array. The upshot: If you call
+C<fits_read_col()>, telling it to read 100 data elements, and the array
+you are placing the data into already has 200 elements, then after
+C<fits_read_col()> returns your array will still have 200 elements, only
+the first 100 of which actually correspond to the data read by the routine.
+
+In more succinct language:
+
+    @output = (0..199);
+    fits_read_col_lng($fptr,2,1,1,100,0,\@output,$anynul,$status);
+
+    # @output still has 200 elements, only first 100 are from FITS
+    # file
+
+=back
+
+=head1 EXTRA COMMANDS
+
+Some extra commands that use sets of CFITSIO routines are supplied to
+simplify some standard tasks:
+
+=over 4
+
+=item fits_read_header(filename)
+
+This command reads in a primary fits header from the specified filename
+and returns the header as a hash reference and a status (when called
+in an array context) or simply a hash reference (when called in a scalar
+context):
+
+  ($hash_ref, $status) = fits_read_header ($file);
+  $hash_ref = fits_read_header($file);
+
+An object-oriented interface is also provided for reading headers from
+FITS files that have already been opened.
+
+  $fitsfile = CFITSIO::open_file($file);
+  $hash_ref = $fitsfile->read_header;
+  ($hash_ref, $status) = $fitsfile->read_header;
 
 =back
 
@@ -1181,24 +1350,23 @@ reads binary table column into PDL object, makes histogram and plots
 
 =item
 
-F<testprog.pl> segfaults at various places on different architectures.
-Search for 'PROBLEM' in the script to see my comments on Linux and Solaris.
-Certainly there is still work to be done.
-
-=item
-
-Have not tested the PDL-compatible unpacking stuff much. Performed a
-read and imag() of m51.fits successfully though. See examples/image_read_pdl.pl.
+FIXME
 
 =back
 
 =head1 AUTHOR
 
-Pete Ratzlaff <pratzlaff@cfa.harvard.edu>, with a great deal of code taken
+Pete Ratzlaff <pratzlaff@cfa.harvard.edu>, with a great deal of code lifted
 from Karl Glazebrook's PGPLOT module.
 
-=head1 SEE ALSO
+Contributors include:
 
-perl(1).
+=over 4
+
+=item Tim Jenness <t.jenness@jach.hawaii.edu>
+
+convenience routines
+
+=back
 
 =cut
