@@ -1,8 +1,12 @@
+NOTE: gcc takes a very long time to compile CFITSIO.c (created from
+      CFITSIO.xs) with -O2 optimization on ix86. With -O, it takes
+      about one tenth the time. This is the explanation for the optimization
+      flag below. Use whatever flag you want, of course...
 
 1. Edit Makefile.PL, point LIBS and INC to the location of your CFITSIO
    library and include files.
 
-2. perl Makefile.PL
+2. perl Makefile.PL OPTIMIZE=-O
 
 3. make
 

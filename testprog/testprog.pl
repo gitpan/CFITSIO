@@ -383,7 +383,7 @@ $pcount = -99;
 $gcount = -99;
 $extend = -99;
 print "\nRead back keywords:\n";
-ffghpr($fptr,0,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
+ffghpr($fptr,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
 print "simple = $simple, bitpix = $bitpix, naxis = $naxis, naxes = ($naxes->[0], $naxes->[1])\n";
 print "  pcount = $pcount, gcount = $gcount, extend = $extend\n";
 
@@ -690,7 +690,7 @@ $naxes=[1,2,8];
 ffptdm($fptr,3,$naxis,$naxes,$status);
 $naxis=0;
 $naxes=undef;
-ffgtdm($fptr,3,0,$naxis,$naxes,$status);
+ffgtdm($fptr,3,$naxis,$naxes,$status);
 ffgkys($fptr,'TDIM3',$iskey,$comment,$status);
 print "TDIM3 = $iskey, $naxis, $naxes->[0], $naxes->[1], $naxes->[2]\n";
 
@@ -845,7 +845,7 @@ print "ffpcl_ status = $status\n";
 #  read data from ASCII table  #
 ################################
 
-ffghtb($fptr,0,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
+ffghtb($fptr,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
 
 print "\nASCII table: rowlen, nrows, tfields, extname: $rowlen $nrows $tfields $tblname\n";
 for ($ii=0;$ii<$tfields;$ii++) {
@@ -1028,7 +1028,7 @@ print "HDU number = ${\(ffghdn($fptr,$hdunum))}\n";
 ffghsp($fptr,$existkeys,$morekeys,$status);
 print "header contains $existkeys keywords with room for $morekeys more\n";
 
-ffghbn($fptr,0,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
+ffghbn($fptr,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
 print "\nBinary table: nrows, tfields, extname, pcount: $nrows $tfields $binname $pcount\n";
 
 for ($ii=0;$ii<$tfields;$ii++) {

@@ -1,5 +1,5 @@
 package CFITSIO;
-$VERSION = '0.93';
+$VERSION = '0.94';
 
 use strict;
 use Carp;
@@ -164,6 +164,7 @@ my @__shortnames = qw(
 	ffgcvd
 	ffgcvc
 	ffgcvm
+        ffgcf
 	ffgcfs
 	ffgcfb
 	ffgcfl
@@ -204,6 +205,7 @@ my @__shortnames = qw(
 	ffgpve
 	ffgpvd
 	ffghpr
+        ffgpf
 	ffgpfb
 	ffgpfui
 	ffgpfi
@@ -419,6 +421,11 @@ my @__shortnames = qw(
 	ffpthp
 	ffgiwcs
 	ffgtwcs
+        ffmkls
+	ffikls
+        ffukls
+        ffgipr
+        ffgkcl
 );  ### @__shortnames
 
 my @__longnames = qw(
@@ -577,6 +584,7 @@ my @__longnames = qw(
 	fits_read_col_dbl
 	fits_read_col_cmp
 	fits_read_col_dblcmp
+        fits_read_colnull
 	fits_read_colnull_str
 	fits_read_colnull_byt
 	fits_read_colnull_log
@@ -614,6 +622,7 @@ my @__longnames = qw(
 	fits_read_img_flt
 	fits_read_img_dbl
 	fits_read_imghdr
+        fits_read_imgnull
 	fits_read_imgnull_byt
 	fits_read_imgnull_usht
 	fits_read_imgnull_sht
@@ -830,6 +839,12 @@ my @__longnames = qw(
 	fits_read_header
 	fits_get_image_wcs_keys
 	fits_get_table_wcs_keys
+        fits_update_key_longstr
+        fits_insert_key_longstr
+        fits_modify_key_longstr
+        fits_get_img_par
+        fits_get_keyclass
+	sizeof_datatype
 );  ### @__longnames
 
 my @__constants = qw(
@@ -1014,6 +1029,21 @@ my @__constants = qw(
 	WCS_ERROR
 	WRITE_ERROR
 	ZERO_SCALE
+	TYP_STRUC_KEY
+	TYP_CMPRS_KEY
+	TYP_SCAL_KEY
+	TYP_NULL_KEY
+	TYP_DIM_KEY
+	TYP_RANG_KEY
+	TYP_UNIT_KEY
+	TYP_DISP_KEY
+	TYP_HDUID_KEY
+	TYP_CKSUM_KEY
+	TYP_WCS_KEY
+	TYP_REFSYS_KEY
+	TYP_COMM_KEY
+	TYP_CONT_KEY
+	TYP_USER_KEY
 ); ### @__constants
 
 @EXPORT = qw( );
@@ -1111,8 +1141,17 @@ sub fits_read_header {
       # Store the key/value in a hash
       $header{$key} = $value;
 
-      # Store the comments
-      $header{COMMENTS}{$key} = $comment;
+      # Store the comments.
+      if (! exists $header{COMMENTS}{$key}) {
+	  $header{COMMENTS}{$key} = $comment;
+      }
+      # HISTORY keywords, for instance, can be numerous
+      else {
+	  if (! ref $header{COMMENTS}{$key}) {
+	      $header{COMMENTS}{$key} = [ $header{COMMENTS}{$key} ];
+	  }
+	  push @{$header{COMMENTS}{$key}}, $comment;
+      }
 
     }
 
@@ -1208,7 +1247,7 @@ constants defined in the F<fitsio.h> header file. This raises the
 possibility of your name space being invaded by nearly 1000 function
 and constant names.
 
-To deal with this situation, F<CFITSIO.pm> makes use of the Exporter
+To deal with this situation, CFITSIO.pm makes use of the Exporter
 package support for C<%EXPORT_TAGS>. You can import the long-named functions
 with
 
@@ -1231,11 +1270,11 @@ which would allow you to simply say C<TSTRING>.
 =head2 Input Variables
 
 If a routine expects an N-dimensional array as input, and you hand it a
-reference to a scalar, then C<CFITSIO.pm> simply uses the data in the scalar
+reference to a scalar, then CFITSIO.pm simply uses the data in the scalar
 which the argument is referencing.
 Otherwise it expects the argument to be a Perl array reference whose total
 number of elements satisfies the input demands of the corresponding
-C routine. C<CFITSIO.pm> then unpacks the array reference into a format that
+C routine. CFITSIO.pm then unpacks the array reference into a format that
 the C routine can understand. If your input array does not hold enough
 data for the C routine then a segfault is likely to occur.
 
@@ -1300,22 +1339,25 @@ of said routines. For example, if you tell C<fits_write_col()> to write
 a data column containing 100 elements, your Perl array should contain
 at least 100 elements. Segfaults abound, so beware!
 
-=item C<maxdim> semantics
+=item maxdim semantics
 
 Some CFITSIO routines take a parameter named something like 'C<maxdim>',
 indicating that no more than that many elements should be placed into
 the output data area. An example of this would be C<fits_read_tdim()>.
 In these cases CFITSIO.pm will automatically determine how much storage
-space is needed for the full amount of output possible and the caller's
-input value for that argument will essentially be ignored. This is for
-convenience, and should be considered a feature. Currently the routines
-for which this is done are C<fits_read_atblhdr>, C<fits_read_btblhdr>,
-C<fits_read_imghdr>, C<fits_decode_tdim>, C<fits_read_tdim>
-and C<fits_test_expr>.
+space is needed for the full amount of output possible. As a result,
+the arguments expected in CFITSIO.pm are slightly different than
+one would use in a C program, in that the 'C<maxdim>' argument
+is unnecessary.
+
+Currently the routines
+for which this is the case are C<fits_read_atblhdr()>, C<fits_read_btblhdr()>,
+C<fits_read_imghdr()>, C<fits_decode_tdim()>, C<fits_read_tdim()>
+C<fits_test_expr()> and C<fits_get_img_parm()>.
 
 =item Output arrays remain as undisturbed as possible
 
-For routines like C<fits_read_col()>, CFITSIO unpacks the output into
+For routines like C<fits_read_col()>, CFITSIO.pm unpacks the output into
 a Perl array reference (unless C<PerlyUnpacking(0)> has been called, of
 course). Prior to doing this, it ensures the scalar passed is a reference
 to an array large enough to hold the data. If the argument is an
@@ -1361,17 +1403,15 @@ FITS files that have already been opened.
   $hash_ref = $fitsfile->read_header;
   ($hash_ref, $status) = $fitsfile->read_header;
 
+=item sizeof_datatype(datatype)
+
+Returns the size of the given CFITSIO datatype constant (e.g., CFITSIO::TSHORT()).
+
 =back
 
 =head1 BUGS
 
-=over 4
-
-=item
-
 FIXME
-
-=back
 
 =head1 AUTHOR
 

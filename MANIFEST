@@ -17,6 +17,8 @@ examples/bintable_read.pl
 examples/image_read.pl
 examples/image_read_pdl.pl
 examples/m51.fits.gz
+examples/check_status.pl
+examples/match_datatype.pl
 testprog/testprog.pl
 testprog/testprog.tpt
 testprog/testprog_OO.pl

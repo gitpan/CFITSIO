@@ -1,3 +1,57 @@
+2000-02-25  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* $VERSION = '0.94';
+
+	* Minor pod changes.
+
+2000-02-23  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Reformat of util.c, minor cleanups in example scripts.
+
+2000-02-22  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Updated examples.
+
+	* Added cfitsio2036 routines fits_read_imgnull(), fits_read_colnull().
+
+	* Removed maxdim argument from fits_read_atblhdr(),
+	fits_read_btblhdr(), fits_read_imghdr(), fits_decode_tdim(),
+	fits_read_tdim(), fits_test_expr(), fits_get_img_parm().
+	Updated calls to these routines in testprogs and test.pl.
+
+	* Added cfitsio2035 routines fits_update_key_longstr(),
+	fits_insert_key_longstr(), fits_modify_key_longstr(),
+	fits_get_img_par() and fits_get_keyclass(). Added cfitsio2035
+	constants TYP_x_KEY.
+
+2000-01-10  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* fits_read_header() makes an array of comments if there is
+	more than one for a given header keyword (e.g., HISTORY keywords,
+	because they end up in the COMMENTS portion of the output hash).
+
+1999-12-11  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Disabled prototypes.
+
+1999-12-11  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Added examples/check_status.pl and examples/match_datatype.pl
+	to MANIFEST.
+
+1999-12-11  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Attempt at making example scripts portable
+	to 64-bit architectures, in a generalized manner.
+
+1999-12-09  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Allow undef for timeref argument in fits_get_system_date().
+
+1999-12-08  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* Added sizeof_datatype().
+
 1999-12-02  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
 
 	* $VERSION = '0.93';

@@ -394,7 +394,7 @@ $pcount = -99;
 $gcount = -99;
 $extend = -99;
 print "\nRead back keywords:\n";
-$fptr->read_imghdr(0,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
+$fptr->read_imghdr($simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
 print "simple = $simple, bitpix = $bitpix, naxis = $naxis, naxes = ($naxes->[0], $naxes->[1])\n";
 print "  pcount = $pcount, gcount = $gcount, extend = $extend\n";
 
@@ -701,7 +701,7 @@ $naxes=[1,2,8];
 $fptr->write_tdim(3,$naxis,$naxes,$status);
 $naxis=0;
 $naxes=undef;
-$fptr->read_tdim(3,0,$naxis,$naxes,$status);
+$fptr->read_tdim(3,$naxis,$naxes,$status);
 $fptr->read_key_str('TDIM3',$iskey,$comment,$status);
 print "TDIM3 = $iskey, $naxis, $naxes->[0], $naxes->[1], $naxes->[2]\n";
 
@@ -856,7 +856,7 @@ print "ffpcl_ status = $status\n";
 #  read data from ASCII table  #
 ################################
 
-$fptr->read_atblhdr(0,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
+$fptr->read_atblhdr($rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
 
 print "\nASCII table: rowlen, nrows, tfields, extname: $rowlen $nrows $tfields $tblname\n";
 for ($ii=0;$ii<$tfields;$ii++) {
@@ -1039,7 +1039,7 @@ print "HDU number = ${\($fptr->get_hdu_num($hdunum))}\n";
 $fptr->get_hdrspace($existkeys,$morekeys,$status);
 print "header contains $existkeys keywords with room for $morekeys more\n";
 
-$fptr->read_btblhdr(0,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
+$fptr->read_btblhdr($nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
 print "\nBinary table: nrows, tfields, extname, pcount: $nrows $tfields $binname $pcount\n";
 
 for ($ii=0;$ii<$tfields;$ii++) {

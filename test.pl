@@ -419,7 +419,7 @@ $gcount = -99;
 $extend = -99;
 
 pre_test('ffghpr');
-ffghpr($fptr,0,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
+ffghpr($fptr,$simple,$bitpix,$naxis,$naxes,$pcount,$gcount,$extend,$status);
 post_test(
 	$status == 0 and
 	$simple == 1 and
@@ -849,7 +849,7 @@ $naxes=[1,2,8];
 ffptdm($fptr,3,$naxis,$naxes,$status);
 $naxis=0;
 $naxes=undef;
-ffgtdm($fptr,3,0,$naxis,$naxes,$status);
+ffgtdm($fptr,3,$naxis,$naxes,$status);
 ffgkys($fptr,'TDIM3',$iskey,$comment,$status);
 post_test(
 	$iskey eq '(1,2,8)' and
@@ -1029,7 +1029,7 @@ post_test($status == 0);
 
 pre_test('ffghtb');
 my $extname;
-ffghtb($fptr,0,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
+ffghtb($fptr,$rowlen,$nrows,$tfields,$ttype,$tbcol,$tform,$tunit,$tblname,$status);
 post_test(
 	$rowlen == 76 and $nrows == 11 and $tfields == 5 and $tblname eq 'Test-ASCII' and
 	cmp_str_arrays($ttype,[qw( Name Ivalue Fvalue Evalue Dvalue )]) and
@@ -1247,7 +1247,7 @@ post_test($existkeys == 38 and $morekeys == 69);
 
 pre_test('ffghbn');
 $tfields = $ttype = $tform = $tunit = $binname = undef;
-ffghbn($fptr,0,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
+ffghbn($fptr,$nrows,$tfields,$ttype,$tform,$tunit,$binname,$pcount,$status);
 post_test(
 	$nrows == 21 and $tfields == 10 and $binname eq 'Test-BINTABLE' and $pcount == 0 and
 	cmp_str_arrays($ttype,[qw( Avalue Lvalue Xvalue Bvalue Ivalue Jvalue Evalue Dvalue Cvalue Mvalue )]) and

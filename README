@@ -12,7 +12,7 @@ Where can (did) I get it?
 
 What version of CFITSIO does this module need?
 ----------------------------------------------
-  CFITSIO.pm version 0.93 requires CFITSIO v2.034. Earlier versions will
+  CFITSIO.pm version 0.94 requires CFITSIO v2.036. Earlier versions will
   not work due to recent changes in the API.
 
 Installation
@@ -21,7 +21,7 @@ Installation
    distribution directory. Essentially, it just tells you to tidy up
    the INC and LIBS keys in Makefile.PL and then do
 
-     $ perl Makefile.PL
+     $ perl Makefile.PL OPTIMIZE=-O
      $ make
      $ make test
      $ make install

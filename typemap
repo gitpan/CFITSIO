@@ -54,10 +54,10 @@ T_FLOAT
 	$var = ($type)SvNV($arg)
 T_STRING
 	{
-		if ($arg == &sv_undef)
+		if ($arg == &PL_sv_undef)
 			$var = ($type)NULL;
 		else
-			$var = ($type)SvPV($arg,na);
+			$var = ($type)SvPV($arg,PL_na);
 	}
 
 OUTPUT
