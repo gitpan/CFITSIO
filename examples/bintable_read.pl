@@ -5,6 +5,7 @@ use blib;
 
 use CFITSIO qw( :constants );
 use PDL;
+use Carp;
 
 CFITSIO::PerlyUnpacking(0);
 
@@ -21,18 +22,17 @@ $fptr->movnam_hdu(ANY_HDU,'EVENTS',0,$status);
 	check_status($status);
 
 #
-# get number of rows in table, this needs to be fixed so we can give it
-# undef's instead of creating a bunch of unwanted variables
+# get number of rows in table
 #
-#$fptr->read_btblhdr(0,$nrows,$tfields,$ttype,$tform,$tunit,$extname,$pcount,$status);
-$fptr->read_btblhdr(0,$nrows,undef,undef,undef,undef,undef,undef,$status);
+$fptr->get_num_rows($nrows,$status);
 	check_status($status);
 
 #
 # find out which column the Y event coordinates are stored in
 #
 $fptr->get_colnum(0,'Y',$ycol,$status);
-($status == COL_NOT_FOUND) and "$0: could not find TTYPE 'Y' in binary table";
+($status == COL_NOT_FOUND) and
+    die "$0: could not find TTYPE 'Y' in binary table";
 
 #
 # make piddle, read data
@@ -40,6 +40,7 @@ $fptr->get_colnum(0,'Y',$ycol,$status);
 $pdl = zeroes($nrows)->long;
 $fptr->read_col_lng($ycol,1,1,$nrows,0,${$pdl->get_dataref},$anynul,$status);
 	check_status($status);
+$pdl->upd_data;
 
 #
 # create Y position histogram, plot data
@@ -49,16 +50,12 @@ my $y = $hist->sequence + $pdl->min;
 line $y, $hist;
 
 sub check_status {
-	my $status = shift;
-	my $errtxt;
-	if ($status) {
-		CFITSIO::fits_get_errstatus($status,$errtxt);
-		print STDERR <<EOP;
-$0 - CFITSIO error detected (see below), aborting
+    my $status = shift;
+    my $errtxt;
+    if ($status) {
+      CFITSIO::fits_get_errstatus($status,$errtxt);
+	croak "$0: CFITSIO error, aborting...$errtxt";
+    }
 
-   $errtxt
-
-EOP
-		exit 1;
-	}
+    return 1;
 }

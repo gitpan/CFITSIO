@@ -5,7 +5,6 @@ Unimplemented:
 
 Documented, but unavailable:
     * fits_calc_col
-    * fits_url_type
 
 Undocumented, but implemented:
     * fits_write_col_null

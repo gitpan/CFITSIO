@@ -10,6 +10,7 @@ use blib;
 
 use CFITSIO qw( READONLY TSTRING TLONG );
 use PDL;
+use Carp;
 
 CFITSIO::PerlyUnpacking(0);
 my $status = 0;
@@ -46,19 +47,20 @@ my %funcs = (
 my ($pdl,$anynul);
 if (exists $funcs{$bitpix})
 {
-	print "Reading ${naxis2}x${naxis1} image...";
+    print "Reading ${naxis2}x${naxis1} image...";
 
-	$pdl = &{$funcs{$bitpix}{'pdl'}} (zeroes($naxis1,$naxis2));
-	&{$funcs{$bitpix}{'cfitsio'}}($fptr,1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
+    $pdl = &{$funcs{$bitpix}{'pdl'}} (zeroes($naxis1,$naxis2));
+    &{$funcs{$bitpix}{'cfitsio'}}($fptr,1,0,$naxis1,$naxis1,$naxis2,${$pdl->get_dataref},$anynul,$status);
 
-	print "done\n";
-	$fptr->close_file($status);
+    print "done\n";
+    $pdl->upd_data;
+    $fptr->close_file($status);
 
 }
 else
 {
-	$fptr->close_file($status);
-	die "$0: invalid BITPIX keyword (= $bitpix) in image '$file'";
+    $fptr->close_file($status);
+    die "$0: invalid BITPIX keyword (= $bitpix) in image '$file'";
 }
 
 
@@ -68,16 +70,11 @@ else
 imag $pdl;
 
 sub check_status {
-	my $status = shift;
+    my $status = shift;
+    if ($status) {
 	my $errtxt;
-	if ($status) {
-		CFITSIO::fits_get_errstatus($status,$errtxt);
-		print STDERR <<EOP;
-$0 - CFITSIO error detected (see below), aborting
-
-   $errtxt
-
-EOP
-		exit 1;
-	}
+      CFITSIO::fits_get_errstatus($status,$errtxt);
+	croak("$0: CFITSIO error detected, aborting...$errtxt");
+    }
+    return 1;
 }

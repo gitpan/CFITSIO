@@ -1718,16 +1718,22 @@ fffrow(fptr,expr,firstrow,nrows,n_good_rows,row_status,status)
 	long firstrow
 	long nrows
 	long n_good_rows = NO_INIT
-	char * row_status = NO_INIT
+	logical * row_status = NO_INIT
 	int status
 	ALIAS:
 		CFITSIO::fits_find_rows = 1
 		fitsfilePtr::find_rows = 2
 	CODE:
-		row_status = get_mortalspace(nrows,TLOGICAL);
-		RETVAL=fffrow(fptr,expr,firstrow,nrows,&n_good_rows,row_status,&status);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nrows*sizeof_datatype(TLOGICAL));
+			RETVAL=fffrow(fptr,expr,firstrow,nrows,&n_good_rows,(logical*)(SvPV(ST(5),na)),&status);
+		}
+		else {
+			row_status = get_mortalspace(nrows,TLOGICAL);
+			RETVAL=fffrow(fptr,expr,firstrow,nrows,&n_good_rows,row_status,&status);
+			unpack1D(ST(5),row_status,nrows,TLOGICAL);
+		}
 		if (ST(4) != &sv_undef) sv_setiv(ST(4), n_good_rows); /* value-added */
-		unpack1D(ST(5),row_status,nrows,TLOGICAL);
 	OUTPUT:
 		status
 		RETVAL
@@ -1853,14 +1859,17 @@ ffgcno(fptr,casesen,templt,colnum,status)
 	fitsfile * fptr
 	int casesen
 	char * templt
-	int &colnum = NO_INIT
-	int &status
+	int colnum = NO_INIT
+	int status
 	ALIAS:
 		CFITSIO::fits_get_colnum = 1
 		fitsfilePtr::get_colnum = 2
+	CODE:
+		RETVAL = fits_get_colnum(fptr,casesen,templt,&colnum,&status);
+		if (ST(3) != &sv_undef) sv_setiv(ST(3),colnum);
 	OUTPUT:
-		colnum
 		status
+		RETVAL
 
 int
 ffgtcl(fptr,colnum,typecode,repeat,width,status)
@@ -2693,6 +2702,8 @@ open_file(filename,iomode,status)
 	PREINIT:
 		fitsfile * fptr;
 	CODE:
+		if (!filename) /* undef passed */
+			filename = "";
 		ffopen(&fptr,filename,iomode,&status);
 		ST(0) = sv_newmortal();
 		if (status > 0)
@@ -2711,6 +2722,8 @@ ffopen(fptr,filename,iomode,status)
 	ALIAS:
 		CFITSIO::fits_open_file = 1
 	CODE:
+		if (!filename) /* undef passed */
+			filename = "";
 		RETVAL = ffopen(&fptr,filename,iomode,&status);
 		if (status > 0)
 			ST(0) = &sv_undef;
@@ -2891,10 +2904,16 @@ ffg2db(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TBYTE);
-		RETVAL=ffg2db(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TBYTE));
+			RETVAL=ffg2db(fptr,group,nulval,dim1,naxis1,naxis2,(byte*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TBYTE);
+			RETVAL=ffg2db(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TBYTE);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -2917,10 +2936,16 @@ ffg2dui(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TUSHORT);
-		RETVAL=ffg2dui(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TUSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TUSHORT));
+			RETVAL=ffg2dui(fptr,group,nulval,dim1,naxis1,naxis2,(unsigned short*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TUSHORT);
+			RETVAL=ffg2dui(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TUSHORT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -2943,10 +2968,16 @@ ffg2di(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TSHORT);
-		RETVAL=ffg2di(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TSHORT));
+			RETVAL=ffg2di(fptr,group,nulval,dim1,naxis1,naxis2,(short*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TSHORT);
+			RETVAL=ffg2di(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TSHORT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -2969,10 +3000,16 @@ ffg2duk(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TUINT);
-		RETVAL=ffg2duk(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TUINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TUINT));
+			RETVAL=ffg2duk(fptr,group,nulval,dim1,naxis1,naxis2,(unsigned int*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TUINT);
+			RETVAL=ffg2duk(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TUINT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -2995,10 +3032,16 @@ ffg2dk(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TINT);
-		RETVAL=ffg2dk(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TINT));
+			RETVAL=ffg2dk(fptr,group,nulval,dim1,naxis1,naxis2,(int*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TINT);
+			RETVAL=ffg2dk(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TINT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3021,10 +3064,16 @@ ffg2duj(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TULONG);
-		RETVAL=ffg2duj(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TULONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TULONG));
+			RETVAL=ffg2duj(fptr,group,nulval,dim1,naxis1,naxis2,(unsigned long*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TULONG);
+			RETVAL=ffg2duj(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TULONG);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3047,10 +3096,16 @@ ffg2dj(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TLONG);
-		RETVAL=ffg2dj(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TLONG));
+			RETVAL=ffg2dj(fptr,group,nulval,dim1,naxis1,naxis2,(long*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TLONG);
+			RETVAL=ffg2dj(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TLONG);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3073,10 +3128,16 @@ ffg2de(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TFLOAT);
-		RETVAL=ffg2de(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TFLOAT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TFLOAT));
+			RETVAL=ffg2de(fptr,group,nulval,dim1,naxis1,naxis2,(float*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TFLOAT);
+			RETVAL=ffg2de(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TFLOAT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3099,10 +3160,16 @@ ffg2dd(fptr,group,nulval,dim1,naxis1,naxis2,array,anynul,status)
 	PREINIT:
 		long dims[2];
 	CODE:
-		dims[0]=naxis2; dims[1] = dim1;
-		array = get_mortalspace(naxis2*dim1,TDOUBLE);
-		RETVAL=ffg2dd(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
-		unpack2D(ST(6),array,dims,TDOUBLE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),naxis2*dim1*sizeof_datatype(TDOUBLE));
+			RETVAL=ffg2dd(fptr,group,nulval,dim1,naxis1,naxis2,(double*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis2; dims[1] = dim1;
+			array = get_mortalspace(naxis2*dim1,TDOUBLE);
+			RETVAL=ffg2dd(fptr,group,nulval,dim1,naxis1,naxis2,array,&anynul,&status);
+			unpack2D(ST(6),array,dims,TDOUBLE);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3127,10 +3194,16 @@ ffg3db(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TBYTE);
-		RETVAL=ffg3db(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TBYTE));
+			RETVAL=ffg3db(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(byte*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TBYTE);
+			RETVAL=ffg3db(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TBYTE);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3155,10 +3228,16 @@ ffg3dui(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TUSHORT);
-		RETVAL=ffg3dui(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TUSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TUSHORT));
+			RETVAL=ffg3dui(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(unsigned short*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TUSHORT);
+			RETVAL=ffg3dui(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TUSHORT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3183,10 +3262,16 @@ ffg3di(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TSHORT);
-		RETVAL=ffg3di(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TSHORT));
+			RETVAL=ffg3di(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(short*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TSHORT);
+			RETVAL=ffg3di(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TSHORT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3211,10 +3296,16 @@ ffg3duk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TUINT);
-		RETVAL=ffg3duk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TUINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TUINT));
+			RETVAL=ffg3duk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(unsigned int*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TUINT);
+			RETVAL=ffg3duk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TUINT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3239,10 +3330,16 @@ ffg3dk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TINT);
-		RETVAL=ffg3dk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TINT));
+			RETVAL=ffg3dk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(int*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TINT);
+			RETVAL=ffg3dk(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TINT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3267,10 +3364,16 @@ ffg3duj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TULONG);
-		RETVAL=ffg3duj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TULONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TULONG));
+			RETVAL=ffg3duj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(unsigned long*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TULONG);
+			RETVAL=ffg3duj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TULONG);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3295,10 +3398,16 @@ ffg3dj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TLONG);
-		RETVAL=ffg3dj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TLONG));
+			RETVAL=ffg3dj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(long*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TLONG);
+			RETVAL=ffg3dj(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TLONG);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3323,10 +3432,16 @@ ffg3de(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TFLOAT);
-		RETVAL=ffg3de(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TFLOAT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TFLOAT));
+			RETVAL=ffg3de(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(float*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TFLOAT);
+			RETVAL=ffg3de(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TFLOAT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -3351,14 +3466,33 @@ ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,anynul,status)
 	PREINIT:
 		long dims[3];
 	CODE:
-		dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
-		array = get_mortalspace(dim1*dim2*naxis3,TDOUBLE);
-		RETVAL=ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
-		unpack3D(ST(8),array,dims,TDOUBLE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),naxis3*dim2*dim1*sizeof_datatype(TDOUBLE));
+			RETVAL=ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,(double*)(SvPV(ST(8),na)),&anynul,&status);
+		}
+		else {
+			dims[0]=naxis3; dims[1] = dim2; dims[2] = dim1;
+			array = get_mortalspace(dim1*dim2*naxis3,TDOUBLE);
+			RETVAL=ffg3dd(fptr,group,nulval,dim1,dim2,naxis1,naxis2,naxis3,array,&anynul,&status);
+			unpack3D(ST(8),array,dims,TDOUBLE);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
 		RETVAL
+
+int
+ffgcdw(fptr, colnum, dispwidth, status)
+	fitsfile *fptr
+	int colnum
+	int &dispwidth = NO_INIT
+	int &status
+	ALIAS:
+		CFITSIO::fits_get_col_display_width = 1
+		fitsfilePtr::get_col_display_width = 2
+	OUTPUT:
+		dispwidth
+		status
 
 int
 ffghtb(fptr,maxdim,rowlen,nrows,tfields,ttype,tbcol,tform,tunit,extname,status)
@@ -3495,14 +3629,20 @@ ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,nulval,array,anynul,stat
 	PREINIT:
 		long col_width, i;
 	CODE:
-		array = get_mortalspace(nelements,datatype);
-		if (datatype == TSTRING) {
-			col_width = column_width(fptr,colnum);
-			for (i=0;i<nelements;i++)
-				*((char**)array+i)=(char *)get_mortalspace(col_width+1,TBYTE);
+		if (!PerlyUnpacking(-1) && datatype != TSTRING) {
+			SvGROW(ST(7),nelements*sizeof_datatype(datatype));
+			RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),(void*)(SvPV(ST(7),na)),&anynul,&status);
 		}
-		RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),array,&anynul,&status);
-		unpack1D(ST(7),array,nelements,datatype);
+		else {
+			array = get_mortalspace(nelements,datatype);
+			if (datatype == TSTRING) {
+				col_width = column_width(fptr,colnum);
+				for (i=0;i<nelements;i++)
+					*((char**)array+i)=(char *)get_mortalspace(col_width+1,TBYTE);
+			}
+			RETVAL=ffgcv(fptr,datatype,colnum,firstrow,firstelem,nelements,pack1D(nulval,datatype),array,&anynul,&status);
+			unpack1D(ST(7),array,nelements,datatype);
+		}
 		if (ST(8) != &sv_undef) sv_setiv(ST(8),anynul);
 	OUTPUT:
 		status
@@ -3521,12 +3661,72 @@ ffgcx(fptr,colnum,frow,fbit,nbit,larray,status)
 		CFITSIO::fits_read_col_bit = 1
 		fitsfilePtr::read_col_bit = 2
 	CODE:
-		larray = get_mortalspace(nbit,TLOGICAL);
-		RETVAL=ffgcx(fptr,colnum,frow,fbit,nbit,larray,&status);
-		unpack1D(ST(5),larray,nbit,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nbit*sizeof_datatype(TLOGICAL));
+			RETVAL = ffgcx(fptr,colnum,frow,fbit,nbit,(logical*)(SvPV(ST(5),na)),&status);
+		}
+		else {
+			larray = get_mortalspace(nbit,TLOGICAL);
+			RETVAL=ffgcx(fptr,colnum,frow,fbit,nbit,larray,&status);
+			unpack1D(ST(5),larray,nbit,TLOGICAL);
+		}
 	OUTPUT:
 		status
 		RETVAL
+
+int
+ffgcxui(fptr,colnum,frow,nrows,fbit,nbits,array,status)
+	fitsfile *fptr
+	int colnum
+	long frow
+	long nrows
+	long fbit
+	long nbits
+	unsigned short *array = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_read_col_bit_usht = 1
+		fitsfilePtr::read_col_bit_usht = 2
+	CODE:
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nrows*sizeof_datatype(TUSHORT));
+			RETVAL = ffgcxui(fptr,colnum,frow,nrows,fbit,nbits,(unsigned short*)(SvPV(ST(6),na)),&status);
+		}
+		else {
+			array = get_mortalspace(nrows,TUSHORT);
+			RETVAL = ffgcxui(fptr,colnum,frow,nrows,fbit,nbits,array,&status);
+			unpack1D((SV*)ST(6),array,nrows,TUSHORT);
+		}
+	OUTPUT:
+		RETVAL
+		status
+
+int
+ffgcxuk(fptr,colnum,frow,nrows,fbit,nbits,array,status)
+	fitsfile *fptr
+	int colnum
+	long frow
+	long nrows
+	long fbit
+	long nbits
+	unsigned int *array = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_read_col_bit_uint = 1
+		fitsfilePtr::read_col_bit_uint = 2
+	CODE:
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nrows*sizeof_datatype(TUINT));
+			RETVAL = ffgcxuk(fptr,colnum,frow,nrows,fbit,nbits,(unsigned int*)(SvPV(ST(6),na)),&status);
+		}
+		else {
+			array = get_mortalspace(nrows,TUINT);
+			RETVAL = ffgcxuk(fptr,colnum,frow,nrows,fbit,nbits,array,&status);
+			unpack1D((SV*)ST(6),array,nrows,TUINT);
+		}
+	OUTPUT:
+		RETVAL
+		status
 
 int
 ffgcvs(fptr,colnum,firstrow,firstelem,nelements,nulstr,array,anynul,status)
@@ -3572,9 +3772,15 @@ ffgcvl(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_log = 1
 		fitsfilePtr::read_col_log = 2
 	CODE:
-		array = (logical *)get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcvl(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+			RETVAL=ffgcvl(fptr,cnum,frow,felem,nelem,nulval,(logical*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (logical *)get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcvl(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3595,9 +3801,15 @@ ffgcvb(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_byt = 1
 		fitsfilePtr::read_col_byt = 2
 	CODE:
-		array = (byte *)get_mortalspace(nelem,TBYTE);
-		RETVAL=ffgcvb(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TBYTE));
+			RETVAL=ffgcvb(fptr,cnum,frow,felem,nelem,nulval,(byte*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (byte *)get_mortalspace(nelem,TBYTE);
+			RETVAL=ffgcvb(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TBYTE);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3618,9 +3830,15 @@ ffgcvui(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_usht = 1
 		fitsfilePtr::read_col_usht = 2
 	CODE:
-		array = (unsigned short *)get_mortalspace(nelem,TUSHORT);
-		RETVAL=ffgcvui(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TUSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TUSHORT));
+			RETVAL=ffgcvui(fptr,cnum,frow,felem,nelem,nulval,(unsigned short*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (unsigned short *)get_mortalspace(nelem,TUSHORT);
+			RETVAL=ffgcvui(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TUSHORT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3641,9 +3859,15 @@ ffgcvi(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_sht = 1
 		fitsfilePtr::read_col_sht = 2
 	CODE:
-		array = (short *)get_mortalspace(nelem,TSHORT);
-		RETVAL=ffgcvi(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TSHORT));
+			RETVAL=ffgcvi(fptr,cnum,frow,felem,nelem,nulval,(short*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (short *)get_mortalspace(nelem,TSHORT);
+			RETVAL=ffgcvi(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TSHORT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3664,9 +3888,15 @@ ffgcvuk(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_uint = 1
 		fitsfilePtr::read_col_uint = 2
 	CODE:
-		array = (unsigned int *)get_mortalspace(nelem,TUINT);
-		RETVAL=ffgcvuk(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TUINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TUINT));
+			RETVAL=ffgcvuk(fptr,cnum,frow,felem,nelem,nulval,(unsigned int*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (unsigned int *)get_mortalspace(nelem,TUINT);
+			RETVAL=ffgcvuk(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TUINT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3687,9 +3917,15 @@ ffgcvk(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_int = 1
 		fitsfilePtr::read_col_int = 2
 	CODE:
-		array = (int *)get_mortalspace(nelem,TINT);
-		RETVAL=ffgcvk(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TINT));
+			RETVAL=ffgcvk(fptr,cnum,frow,felem,nelem,nulval,(int*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (int *)get_mortalspace(nelem,TINT);
+			RETVAL=ffgcvk(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TINT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3710,9 +3946,15 @@ ffgcvuj(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_ulng = 1
 		fitsfilePtr::read_col_ulng = 2
 	CODE:
-		array = (unsigned long *)get_mortalspace(nelem,TULONG);
-		RETVAL=ffgcvuj(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TULONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TULONG));
+			RETVAL=ffgcvuj(fptr,cnum,frow,felem,nelem,nulval,(unsigned long*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (unsigned long *)get_mortalspace(nelem,TULONG);
+			RETVAL=ffgcvuj(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TULONG);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3733,9 +3975,15 @@ ffgcvj(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_lng = 1
 		fitsfilePtr::read_col_lng = 2
 	CODE:
-		array = (long *)get_mortalspace(nelem,TLONG);
-		RETVAL=ffgcvj(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TLONG));
+			RETVAL=ffgcvj(fptr,cnum,frow,felem,nelem,nulval,(long*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (long *)get_mortalspace(nelem,TLONG);
+			RETVAL=ffgcvj(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TLONG);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3756,9 +4004,15 @@ ffgcve(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_flt = 1
 		fitsfilePtr::read_col_flt = 2
 	CODE:
-		array = (float *)get_mortalspace(nelem,TFLOAT);
-		RETVAL=ffgcve(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D((SV*)ST(6),(void*)array,nelem,TFLOAT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TFLOAT));
+			RETVAL=ffgcve(fptr,cnum,frow,felem,nelem,nulval,(float*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = (float *)get_mortalspace(nelem,TFLOAT);
+			RETVAL=ffgcve(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D((SV*)ST(6),(void*)array,nelem,TFLOAT);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3779,9 +4033,15 @@ ffgcvd(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_dbl = 1
 		fitsfilePtr::read_col_dbl = 2
 	CODE:
-		array = get_mortalspace(nelem,TDOUBLE);
-		RETVAL=ffgcvd(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(6),array,nelem,TDOUBLE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TDOUBLE));
+			RETVAL=ffgcvd(fptr,cnum,frow,felem,nelem,nulval,(double*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDOUBLE);
+			RETVAL=ffgcvd(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(6),array,nelem,TDOUBLE);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3802,9 +4062,15 @@ ffgcvc(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_cmp = 1
 		fitsfilePtr::read_col_cmp = 2
 	CODE:
-		array = get_mortalspace(nelem,TCOMPLEX);
-		RETVAL=ffgcvc(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(6),array,nelem,TCOMPLEX);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TCOMPLEX));
+			RETVAL=ffgcvc(fptr,cnum,frow,felem,nelem,nulval,(float*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TCOMPLEX);
+			RETVAL=ffgcvc(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(6),array,nelem,TCOMPLEX);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3825,9 +4091,15 @@ ffgcvm(fptr,cnum,frow,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_col_dblcmp = 1
 		fitsfilePtr::read_col_dblcmp = 2
 	CODE:
-		array = get_mortalspace(nelem,TDBLCOMPLEX);
-		RETVAL=ffgcvm(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(6),array,nelem,TDBLCOMPLEX);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(6),nelem*sizeof_datatype(TDBLCOMPLEX));
+			RETVAL=ffgcvm(fptr,cnum,frow,felem,nelem,nulval,(double*)(SvPV(ST(6),na)),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDBLCOMPLEX);
+			RETVAL=ffgcvm(fptr,cnum,frow,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(6),array,nelem,TDBLCOMPLEX);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3854,10 +4126,22 @@ ffgcfs(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		array = get_mortalspace(nelem,TSTRING);
 		for (i=0;i<nelem;i++)
 			array[i] = (char *)get_mortalspace(col_size+1,TBYTE);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfs(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = SvPV(ST(6),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+
+			RETVAL=ffgcfs(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfs(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TSTRING);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3878,11 +4162,28 @@ ffgcfl(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_log = 1
 		fitsfilePtr::read_colnull_log = 2
 	CODE:
-		array = get_mortalspace(nelem,TLOGICAL);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfl(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TLOGICAL);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				array = (logical*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TLOGICAL);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfl(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TLOGICAL);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfl(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TLOGICAL);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3903,11 +4204,28 @@ ffgcfb(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_byt = 1
 		fitsfilePtr::read_colnull_byt = 2
 	CODE:
-		array = get_mortalspace(nelem,TBYTE);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfb(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TBYTE);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TBYTE));
+				array = (byte*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TBYTE);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfb(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TBYTE);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfb(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TBYTE);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3928,11 +4246,28 @@ ffgcfui(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_usht = 1
 		fitsfilePtr::read_colnull_usht = 2
 	CODE:
-		array = get_mortalspace(nelem,TUSHORT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfui(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TUSHORT);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TUSHORT));
+				array = (unsigned short*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TUSHORT);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfui(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUSHORT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfui(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TUSHORT);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3953,11 +4288,28 @@ ffgcfi(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_sht = 1
 		fitsfilePtr::read_colnull_sht = 2
 	CODE:
-		array = get_mortalspace(nelem,TSHORT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfi(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TSHORT);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TSHORT));
+				array = (short*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TSHORT);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfi(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TSHORT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfi(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TSHORT);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -3978,11 +4330,28 @@ ffgcfk(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_int = 1
 		fitsfilePtr::read_colnull_int = 2
 	CODE:
-		array = get_mortalspace(nelem,TINT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TINT);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TINT));
+				array = (int*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TINT);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TINT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TINT);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4003,11 +4372,28 @@ ffgcfuk(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_uint = 1
 		fitsfilePtr::read_colnull_uint = 2
 	CODE:
-		array = get_mortalspace(nelem,TUINT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfuk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TUINT);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TUINT));
+				array = (unsigned int*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TUINT);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfuk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUINT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfuk(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TUINT);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4028,11 +4414,28 @@ ffgcfj(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_lng = 1
 		fitsfilePtr::read_colnull_lng = 2
 	CODE:
-		array = get_mortalspace(nelem,TLONG);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TLONG);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLONG));
+				array = (long*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TLONG);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TLONG);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TLONG);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4053,11 +4456,28 @@ ffgcfuj(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_ulng = 1
 		fitsfilePtr::read_colnull_ulng = 2
 	CODE:
-		array = get_mortalspace(nelem,TULONG);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfuj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TULONG);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TULONG));
+				array = (unsigned long*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TULONG);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfuj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TULONG);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfuj(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TULONG);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4078,11 +4498,28 @@ ffgcfe(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_flt = 1
 		fitsfilePtr::read_colnull_flt = 2
 	CODE:
-		array = get_mortalspace(nelem,TFLOAT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfe(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TFLOAT);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TFLOAT));
+				array = (float*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TFLOAT);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfe(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TFLOAT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfe(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TFLOAT);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4103,11 +4540,28 @@ ffgcfd(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_dbl = 1
 		fitsfilePtr::read_colnull_dbl = 2
 	CODE:
-		array = get_mortalspace(nelem,TDOUBLE);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfd(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TDOUBLE);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TDOUBLE));
+				array = (double*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TDOUBLE);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfd(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDOUBLE);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgcfd(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TDOUBLE);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4128,11 +4582,28 @@ ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_cmp = 1
 		fitsfilePtr::read_colnull_cmp = 2
 	CODE:
-		array = get_mortalspace(nelem,TCOMPLEX);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TCOMPLEX);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TCOMPLEX));
+				array = (float*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TCOMPLEX);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),2*nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(2*nelem,TLOGICAL);
+			RETVAL=ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TCOMPLEX);
+			nularray = get_mortalspace(nelem*2,TLOGICAL);
+			RETVAL=ffgcfc(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TCOMPLEX);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem*2,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4153,11 +4624,28 @@ ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_colnull_dblcmp = 1
 		fitsfilePtr::read_colnull_dblcmp = 2
 	CODE:
-		array = get_mortalspace(nelem,TDBLCOMPLEX);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TDBLCOMPLEX);
-		if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TDBLCOMPLEX));
+				array = (double*)(SvPV(ST(5),na));
+			}
+			else
+				array = get_mortalspace(nelem,TDBLCOMPLEX);
+			if (ST(6) != &sv_undef) {
+				SvGROW(ST(6),2*nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)(SvPV(ST(6),na));
+			}
+			else
+				nularray = get_mortalspace(2*nelem,TLOGICAL);
+			RETVAL=ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDBLCOMPLEX);
+			nularray = get_mortalspace(nelem*2,TLOGICAL);
+			RETVAL=ffgcfm(fptr,colnum,frow,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),array,nelem,TDBLCOMPLEX);
+			if (ST(6) != &sv_undef) unpack1D(ST(6),nularray,nelem*2,TLOGICAL);
+		}
 		if (ST(7) != &sv_undef) sv_setiv(ST(7),anynul);
 	OUTPUT:
 		status
@@ -4195,11 +4683,29 @@ ffgdess(fptr,colnum,frow,nrows,repeat,offset,status)
 		CFITSIO::fits_read_descripts = 1
 		fitsfilePtr::read_descripts = 2
 	CODE:
-		repeat = get_mortalspace(nrows,TLONG);
-		offset = get_mortalspace(nrows,TLONG);
-		RETVAL=ffgdess(fptr,colnum,frow,nrows,repeat,offset,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),repeat,nrows,TLONG);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),offset,nrows,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nrows*sizeof_datatype(TLONG));
+				repeat = (long*)SvPV(ST(4),na);
+			}
+			else
+				repeat = get_mortalspace(nrows,TLONG);
+
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nrows*sizeof_datatype(TLONG));
+				offset = (long*)SvPV(ST(5),na);
+			}
+			else
+				offset = get_mortalspace(nrows,TLONG);
+			RETVAL=ffgdess(fptr,colnum,frow,nrows,repeat,offset,&status);
+		}
+		else {
+			repeat = get_mortalspace(nrows,TLONG);
+			offset = get_mortalspace(nrows,TLONG);
+			RETVAL=ffgdess(fptr,colnum,frow,nrows,repeat,offset,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),repeat,nrows,TLONG);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),offset,nrows,TLONG);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4228,9 +4734,15 @@ ffggpb(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_byt = 1
 		fitsfilePtr::read_grppar_byt = 2
 	CODE:
-		array = get_mortalspace(nelem,TBYTE);
-		RETVAL=ffggpb(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TBYTE));
+			RETVAL=ffggpb(fptr,group,felem,nelem,(byte*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TBYTE);
+			RETVAL=ffggpb(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TBYTE);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4247,9 +4759,15 @@ ffggpi(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_sht = 1
 		fitsfilePtr::read_grppar_sht = 2
 	CODE:
-		array = get_mortalspace(nelem,TSHORT);
-		RETVAL=ffggpi(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TSHORT));
+			RETVAL=ffggpi(fptr,group,felem,nelem,(short*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TSHORT);
+			RETVAL=ffggpi(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TSHORT);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4266,9 +4784,15 @@ ffggpui(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_usht = 1
 		fitsfilePtr::read_grppar_usht = 2
 	CODE:
-		array = get_mortalspace(nelem,TUSHORT);
-		RETVAL=ffggpui(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TUSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TUSHORT));
+			RETVAL=ffggpui(fptr,group,felem,nelem,(unsigned short*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUSHORT);
+			RETVAL=ffggpui(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TUSHORT);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4285,9 +4809,15 @@ ffggpk(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_int = 1
 		fitsfilePtr::read_grppar_int = 2
 	CODE:
-		array = get_mortalspace(nelem,TINT);
-		RETVAL=ffggpk(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TINT));
+			RETVAL=ffggpk(fptr,group,felem,nelem,(int*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TINT);
+			RETVAL=ffggpk(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TINT);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4304,9 +4834,15 @@ ffggpuk(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_uint = 1
 		fitsfilePtr::read_grppar_uint = 2
 	CODE:
-		array = get_mortalspace(nelem,TUINT);
-		RETVAL=ffggpuk(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TUINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TUINT));
+			RETVAL=ffggpuk(fptr,group,felem,nelem,(unsigned int*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUINT);
+			RETVAL=ffggpuk(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TUINT);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4323,9 +4859,15 @@ ffggpj(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_lng = 1
 		fitsfilePtr::read_grppar_lng = 2
 	CODE:
-		array = get_mortalspace(nelem,TLONG);
-		RETVAL=ffggpj(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TLONG));
+			RETVAL=ffggpj(fptr,group,felem,nelem,(long*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TLONG);
+			RETVAL=ffggpj(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TLONG);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4342,9 +4884,15 @@ ffggpuj(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_ulng = 1
 		fitsfilePtr::read_grppar_ulng = 2
 	CODE:
-		array = get_mortalspace(nelem,TULONG);
-		RETVAL=ffggpuj(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TULONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TULONG));
+			RETVAL=ffggpuj(fptr,group,felem,nelem,(unsigned long*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TULONG);
+			RETVAL=ffggpuj(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TULONG);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4361,9 +4909,15 @@ ffggpe(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_flt = 1
 		fitsfilePtr::read_grppar_flt = 2
 	CODE:
-		array = get_mortalspace(nelem,TFLOAT);
-		RETVAL=ffggpe(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TFLOAT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TFLOAT));
+			RETVAL=ffggpe(fptr,group,felem,nelem,(float*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TFLOAT);
+			RETVAL=ffggpe(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TFLOAT);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4380,9 +4934,15 @@ ffggpd(fptr,group,felem,nelem,array,status)
 		CFITSIO::fits_read_grppar_dbl = 1
 		fitsfilePtr::read_grppar_dbl = 2
 	CODE:
-		array = get_mortalspace(nelem,TDOUBLE);
-		RETVAL=ffggpd(fptr,group,felem,nelem,array,&status);
-		unpack1D(ST(4),array,nelem,TDOUBLE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nelem*sizeof_datatype(TDOUBLE));
+			RETVAL=ffggpd(fptr,group,felem,nelem,(double*)SvPV(ST(4),na),&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDOUBLE);
+			RETVAL=ffggpd(fptr,group,felem,nelem,array,&status);
+			unpack1D(ST(4),array,nelem,TDOUBLE);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -4401,9 +4961,15 @@ ffgpv(fptr,datatype,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img = 1
 		fitsfilePtr::read_img = 2
 	CODE:
-		array = get_mortalspace(nelem,datatype);
-		RETVAL=ffgpv(fptr,datatype,felem,nelem,pack1D(nulval,datatype),array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,datatype);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(datatype));
+			RETVAL=ffgpv(fptr,datatype,felem,nelem,pack1D(nulval,datatype),(void*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,datatype);
+			RETVAL=ffgpv(fptr,datatype,felem,nelem,pack1D(nulval,datatype),array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,datatype);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4453,9 +5019,15 @@ ffgpvb(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_byt = 1
 		fitsfilePtr::read_img_byt = 2
 	CODE:
-		array = get_mortalspace(nelem,TBYTE);
-		RETVAL=ffgpvb(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TBYTE));
+			RETVAL=ffgpvb(fptr,group,felem,nelem,nulval,(byte*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TBYTE);
+			RETVAL=ffgpvb(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TBYTE);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4475,9 +5047,15 @@ ffgpvi(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_sht = 1
 		fitsfilePtr::read_img_sht = 2
 	CODE:
-		array = get_mortalspace(nelem,TSHORT);
-		RETVAL=ffgpvi(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TSHORT));
+			RETVAL=ffgpvi(fptr,group,felem,nelem,nulval,(short*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TSHORT);
+			RETVAL=ffgpvi(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TSHORT);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4497,9 +5075,15 @@ ffgpvui(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_usht = 1
 		fitsfilePtr::read_img_usht = 2
 	CODE:
-		array = get_mortalspace(nelem,TUSHORT);
-		RETVAL=ffgpvui(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TUSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TUSHORT));
+			RETVAL=ffgpvui(fptr,group,felem,nelem,nulval,(unsigned short*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUSHORT);
+			RETVAL=ffgpvui(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TUSHORT);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4519,9 +5103,15 @@ ffgpvk(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_int = 1
 		fitsfilePtr::read_img_int = 2
 	CODE:
-		array = get_mortalspace(nelem,TINT);
-		RETVAL=ffgpvk(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TINT));
+			RETVAL=ffgpvk(fptr,group,felem,nelem,nulval,(int*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TINT);
+			RETVAL=ffgpvk(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TINT);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4541,9 +5131,15 @@ ffgpvuk(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_uint = 1
 		fitsfilePtr::read_img_uint = 2
 	CODE:
-		array = get_mortalspace(nelem,TUINT);
-		RETVAL=ffgpvuk(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TUINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TUINT));
+			RETVAL=ffgpvuk(fptr,group,felem,nelem,nulval,(unsigned int*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUINT);
+			RETVAL=ffgpvuk(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TUINT);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4563,9 +5159,15 @@ ffgpvj(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_lng = 1
 		fitsfilePtr::read_img_lng = 2
 	CODE:
-		array = get_mortalspace(nelem,TLONG);
-		RETVAL=ffgpvj(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TLONG));
+			RETVAL=ffgpvj(fptr,group,felem,nelem,nulval,(long*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TLONG);
+			RETVAL=ffgpvj(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TLONG);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4585,9 +5187,15 @@ ffgpvuj(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_ulng = 1
 		fitsfilePtr::read_img_ulng = 2
 	CODE:
-		array = get_mortalspace(nelem,TULONG);
-		RETVAL=ffgpvuj(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TULONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TULONG));
+			RETVAL=ffgpvuj(fptr,group,felem,nelem,nulval,(unsigned long*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TULONG);
+			RETVAL=ffgpvuj(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TULONG);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4607,9 +5215,15 @@ ffgpve(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_flt = 1
 		fitsfilePtr::read_img_flt = 2
 	CODE:
-		array = get_mortalspace(nelem,TFLOAT);
-		RETVAL=ffgpve(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TFLOAT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TFLOAT));
+			RETVAL=ffgpve(fptr,group,felem,nelem,nulval,(float*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TFLOAT);
+			RETVAL=ffgpve(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TFLOAT);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4629,9 +5243,15 @@ ffgpvd(fptr,group,felem,nelem,nulval,array,anynul,status)
 		CFITSIO::fits_read_img_dbl = 1
 		fitsfilePtr::read_img_dbl = 2
 	CODE:
-		array = get_mortalspace(nelem,TDOUBLE);
-		RETVAL=ffgpvd(fptr,group,felem,nelem,nulval,array,&anynul,&status);
-		unpack1D(ST(5),array,nelem,TDOUBLE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(5),nelem*sizeof_datatype(TDOUBLE));
+			RETVAL=ffgpvd(fptr,group,felem,nelem,nulval,(double*)SvPV(ST(5),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDOUBLE);
+			RETVAL=ffgpvd(fptr,group,felem,nelem,nulval,array,&anynul,&status);
+			unpack1D(ST(5),array,nelem,TDOUBLE);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4688,11 +5308,28 @@ ffgpfb(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_byt = 1
 		fitsfilePtr::read_imgnull_byt = 2
 	CODE:
-		array = get_mortalspace(nelem,TBYTE);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfb(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TBYTE);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TBYTE));
+				array = (byte*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TBYTE);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfb(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TBYTE);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfb(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TBYTE);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4712,11 +5349,28 @@ ffgpfi(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_sht = 1
 		fitsfilePtr::read_imgnull_sht = 2
 	CODE:
-		array = get_mortalspace(nelem,TSHORT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfi(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TSHORT);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TSHORT));
+				array = (short*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TSHORT);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfi(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TSHORT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfi(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TSHORT);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4736,11 +5390,28 @@ ffgpfui(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_usht = 1
 		fitsfilePtr::read_imgnull_usht = 2
 	CODE:
-		array = get_mortalspace(nelem,TUSHORT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfui(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TUSHORT);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TUSHORT));
+				array = (unsigned short*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TUSHORT);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfui(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUSHORT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfui(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TUSHORT);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4760,11 +5431,28 @@ ffgpfk(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_int = 1
 		fitsfilePtr::read_imgnull_int = 2
 	CODE:
-		array = get_mortalspace(nelem,TINT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TINT);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TINT));
+				array = (int*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TINT);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TINT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TINT);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4784,11 +5472,28 @@ ffgpfuk(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_uint = 1
 		fitsfilePtr::read_imgnull_uint = 2
 	CODE:
-		array = get_mortalspace(nelem,TUINT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfuk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TUINT);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TUINT));
+				array = (unsigned int*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TUINT);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfuk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TUINT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfuk(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TUINT);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4808,11 +5513,28 @@ ffgpfj(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_lng = 1
 		fitsfilePtr::read_imgnull_lng = 2
 	CODE:
-		array = get_mortalspace(nelem,TLONG);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TLONG);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TLONG));
+				array = (long*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TLONG);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TLONG);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TLONG);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4832,11 +5554,28 @@ ffgpfuj(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_ulng = 1
 		fitsfilePtr::read_imgnull_ulng = 2
 	CODE:
-		array = get_mortalspace(nelem,TULONG);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfuj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TBYTE);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TULONG));
+				array = (unsigned long*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TULONG);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfuj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TULONG);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfuj(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TBYTE);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4856,11 +5595,28 @@ ffgpfe(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_flt = 1
 		fitsfilePtr::read_imgnull_flt = 2
 	CODE:
-		array = get_mortalspace(nelem,TFLOAT);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfe(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TFLOAT);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TFLOAT));
+				array = (float*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TFLOAT);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfe(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TFLOAT);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfe(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TFLOAT);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -4880,11 +5636,28 @@ ffgpfd(fptr,group,felem,nelem,array,nularray,anynul,status)
 		CFITSIO::fits_read_imgnull_dbl = 1
 		fitsfilePtr::read_imgnull_dbl = 2
 	CODE:
-		array = get_mortalspace(nelem,TDOUBLE);
-		nularray = get_mortalspace(nelem,TLOGICAL);
-		RETVAL=ffgpfd(fptr,group,felem,nelem,array,nularray,&anynul,&status);
-		if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TDOUBLE);
-		if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(4) != &sv_undef) {
+				SvGROW(ST(4),nelem*sizeof_datatype(TDOUBLE));
+				array = (double*)SvPV(ST(4),na);
+			}
+			else
+				array = get_mortalspace(nelem,TDOUBLE);
+			if (ST(5) != &sv_undef) {
+				SvGROW(ST(5),nelem*sizeof_datatype(TLOGICAL));
+				nularray = (logical*)SvPV(ST(5),na);
+			}
+			else
+				nularray = get_mortalspace(nelem,TLOGICAL);
+			RETVAL=ffgpfd(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(nelem,TDOUBLE);
+			nularray = get_mortalspace(nelem,TLOGICAL);
+				RETVAL=ffgpfd(fptr,group,felem,nelem,array,nularray,&anynul,&status);
+			if (ST(4) != &sv_undef) unpack1D(ST(4),array,nelem,TDOUBLE);
+			if (ST(5) != &sv_undef) unpack1D(ST(5),nularray,nelem,TLOGICAL);
+		}
 		if (ST(6) != &sv_undef) sv_setiv(ST(6),anynul);
 	OUTPUT:
 		status
@@ -5315,9 +6088,15 @@ ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TBYTE);
-		RETVAL=ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TBYTE));
+			RETVAL=ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(byte*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TBYTE);
+			RETVAL=ffgsvb(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TBYTE);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5347,9 +6126,15 @@ ffgsvi(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TSHORT);
-		RETVAL=ffgsvi(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TSHORT));
+			RETVAL=ffgsvi(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(short*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TSHORT);
+			RETVAL=ffgsvi(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TSHORT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5379,9 +6164,15 @@ ffgsvui(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TUSHORT);
-		RETVAL=ffgsvui(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TUSHORT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TUSHORT));
+			RETVAL=ffgsvui(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(unsigned short*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TUSHORT);
+			RETVAL=ffgsvui(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TUSHORT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5411,9 +6202,15 @@ ffgsvk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TINT);
-		RETVAL=ffgsvk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TINT));
+			RETVAL=ffgsvk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(int*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TINT);
+			RETVAL=ffgsvk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TINT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5443,9 +6240,15 @@ ffgsvuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TUINT);
-		RETVAL=ffgsvuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TUINT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TUINT));
+			RETVAL=ffgsvuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(unsigned int*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TUINT);
+			RETVAL=ffgsvuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TUINT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5475,9 +6278,15 @@ ffgsvj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TLONG);
-		RETVAL=ffgsvj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TLONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TLONG));
+			RETVAL=ffgsvj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(long*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TLONG);
+			RETVAL=ffgsvj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TLONG);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5507,9 +6316,15 @@ ffgsvuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TULONG);
-		RETVAL=ffgsvuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TULONG);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TULONG));
+			RETVAL=ffgsvuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(unsigned long*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TULONG);
+			RETVAL=ffgsvuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TULONG);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5539,9 +6354,15 @@ ffgsve(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TFLOAT);
-		RETVAL=ffgsve(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TFLOAT);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TFLOAT));
+			RETVAL=ffgsve(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(float*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TFLOAT);
+			RETVAL=ffgsve(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TFLOAT);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5571,9 +6392,15 @@ ffgsvd(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TDOUBLE);
-		RETVAL=ffgsvd(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
-		unpack1D(ST(8),array,ndata,TDOUBLE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(8),ndata*sizeof_datatype(TDOUBLE));
+			RETVAL=ffgsvd(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,(double*)SvPV(ST(8),na),&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TDOUBLE);
+			RETVAL=ffgsvd(fptr,group,naxis,naxes,fpixels,lpixels,inc,nulval,array,&anynul,&status);
+			unpack1D(ST(8),array,ndata,TDOUBLE);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5603,11 +6430,28 @@ ffgsfb(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TBYTE);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfb(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TBYTE);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TBYTE));
+				array = (byte*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TBYTE);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfb(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TBYTE);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfb(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TBYTE);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5637,11 +6481,28 @@ ffgsfi(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TSHORT);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfi(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TSHORT);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TSHORT));
+				array = (short*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TSHORT);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfi(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TSHORT);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfi(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TSHORT);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5671,11 +6532,28 @@ ffgsfui(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TUSHORT);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfui(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TUSHORT);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TUSHORT));
+				array = (unsigned short*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TUSHORT);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfui(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TUSHORT);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfui(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TUSHORT);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5705,11 +6583,28 @@ ffgsfk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TINT);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TINT);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TINT));
+				array = (int*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TINT);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TINT);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TINT);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5739,11 +6634,28 @@ ffgsfuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TUINT);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TUINT);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TUINT));
+				array = (unsigned int*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TUINT);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TUINT);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfuk(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TUINT);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5773,11 +6685,28 @@ ffgsfj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TLONG);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TLONG);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TLONG));
+				array = (long*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TLONG);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TLONG);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TLONG);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5807,11 +6736,28 @@ ffgsfuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TULONG);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TULONG);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TULONG));
+				array = (unsigned long*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TULONG);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TULONG);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfuj(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TULONG);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5841,11 +6787,28 @@ ffgsfe(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TFLOAT);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfe(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TFLOAT);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TFLOAT));
+				array = (float*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TFLOAT);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = (logical*)SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfe(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TFLOAT);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfe(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TFLOAT);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5875,11 +6838,28 @@ ffgsfd(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,anynul,status)
 		for (i=0; i<naxis; i++)
 			ndata *= (lpixels[i]-fpixels[i]+1)/inc[i] +
 				(((lpixels[i]-fpixels[i]+1) % inc[i]) ? 1 : 0);
-		array = get_mortalspace(ndata,TDOUBLE);
-		nularr = get_mortalspace(ndata,TLOGICAL);
-		RETVAL=ffgsfd(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
-		if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TDOUBLE);
-		if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		if (!PerlyUnpacking(-1)) {
+			if (ST(7) != &sv_undef) {
+				SvGROW(ST(7),ndata*sizeof_datatype(TDOUBLE));
+				array = (double*)SvPV(ST(7),na);
+			}
+			else
+				array = get_mortalspace(ndata,TDOUBLE);
+			if (ST(8) != &sv_undef) {
+				SvGROW(ST(8),ndata*sizeof_datatype(TLOGICAL));
+				nularr = SvPV(ST(8),na);
+			}
+			else
+				nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfd(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+		}
+		else {
+			array = get_mortalspace(ndata,TDOUBLE);
+			nularr = get_mortalspace(ndata,TLOGICAL);
+			RETVAL=ffgsfd(fptr,group,naxis,naxes,fpixels,lpixels,inc,array,nularr,&anynul,&status);
+			if (ST(7) != &sv_undef) unpack1D(ST(7),array,ndata,TDOUBLE);
+			if (ST(8) != &sv_undef) unpack1D(ST(8),nularr,ndata,TLOGICAL);
+		}
 		if (ST(9) != &sv_undef) sv_setiv(ST(9),anynul);
 	OUTPUT:
 		status
@@ -5929,9 +6909,15 @@ ffgtbb(fptr,frow,fchar,nchars,values,status)
 		CFITSIO::fits_read_tblbytes = 1
 		fitsfilePtr::read_tblbytes = 2
 	CODE:
-		values = get_mortalspace(nchars,TBYTE);
-		RETVAL=ffgtbb(fptr,frow,fchar,nchars,values,&status);
-		unpack1D(ST(4),values,nchars,TBYTE);
+		if (!PerlyUnpacking(-1)) {
+			SvGROW(ST(4),nchars*sizeof_datatype(TBYTE));
+			RETVAL=ffgtbb(fptr,frow,fchar,nchars,SvPV(ST(4),na),&status);
+		}
+		else {
+			values = get_mortalspace(nchars,TBYTE);
+			RETVAL=ffgtbb(fptr,frow,fchar,nchars,values,&status);
+			unpack1D(ST(4),values,nchars,TBYTE);
+		}
 	OUTPUT:
 		status
 		RETVAL
@@ -6456,6 +7442,23 @@ ffupch(string)
 	OUTPUT:
 		string
 
+int
+ffurlt(fptr,urlType,status)
+	fitsfile *fptr
+	char *urlType = NO_INIT
+	int status
+	ALIAS:
+		CFITSIO::fits_url_type = 1
+		fitsfilePtr::url_type = 2
+	CODE:
+		urlType = get_mortalspace(FLEN_FILENAME,TBYTE);
+		RETVAL = ffurlt(fptr,urlType,&status);
+	OUTPUT:
+		urlType
+		status
+		RETVAL
+		
+	
 int
 ffvcks(fptr,dataok,hduok,status)
 	fitsfile * fptr

@@ -1,0 +1,88 @@
+1999-09-14  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* $VERSION = '0.92';
+
+1999-09-13  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.xs: find_rows(), read_3d_TYP(), read_colnull_str(),
+	read_descripts(), read_grppar_TYP(), read_imgnull_TYP(),
+	read_subset_TYP(), read_subsetnull_TYP(), read_tblbytes():
+	Created fastpaths for case of PerlyUnpacking(0).
+
+1999-09-13  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.xs: read_2d_TYP(), read_img_TYP(), fastpaths for
+	PerlyUnpacking(0).
+
+1999-09-13  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.xs: read_colnull_TYP() fastpaths for PerlyUnpacking(0).
+
+1999-09-09  Pete Ratzlaff  <rpete@ascda3.harvard.edu>
+
+	* examples/: Updated examples somewhat. Nothing big, though.
+
+1999-08-31  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.xs: read_col_TYPE(), read_col_bit_TYPE(): Fast path created
+	for case of PerlyUnpacking(0). Was doing an extra allocation and memcpy,
+	no more. This needs to be done for a number of the other routines as
+	well.
+
+1999-08-30  Pete Ratzlaff  <pratzlaff@cfa.harvard.edu>
+
+	* examples/bintable_read.pl: Was not actually die()ing if get_colnum()
+	failed. Fixed.
+
+1999-08-24  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.pm: Fixed example function call in pod.
+
+1999-04-08  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.pm: $VERSION = '0.91';
+
+	* CFITSIO.pm: Removed duplicate 'my' declaration.
+
+	* CFITSIO.pm, CFITSIO.xs: Synched up with cfitsio2031. Added
+	fits_get_col_display/ffgcdw, fits_read_col_bit_{usht,uint}/ffgcxu{ik},
+	fits_url_type/ffurlt
+
+	* examples/bintable_read.pl: Use get_num_rows() to find number of rows
+	instead of read_btblhdr().
+
+	* CFITSIO.pm: fits_read_header() was griping with -w, $status now
+	predeclared.
+
+1999-03-23  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.xs: ffopen() was segfaulting if filename was undef, now
+	assumes empty string (which will fail, of course).
+
+	* CFITSIO.xs: fits_get_colnum() accepts undef for output variable now.
+
+1998-12-15  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.pm: fits_read_header() no longer calls fits_close_file() if
+	passed a fitsfilePtr.
+
+1998-12-08  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* CFITSIO.xs, testprog/*: Bug squashed...fits_read_colnull_{,dbl}cmp were
+	not allocating enough memory for null-flags array. Turns out you need
+	2*nelem elements.
+
+1998-12-07  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* Makefile.PL: Minor fix to clean testprog/testprog.{fit,lis}.
+
+	* testprog/runtests: First hack at auto testprogs
+
+1998-12-04  Pete Ratzlaff <pratzlaff@cfa.harvard.edu>
+
+	* test.pl: More tests added.
+
+	* CFITSIO.pm: Updated pod.
+
+	* CFITSIO.xs: More compatibility fixes and squashed bugs.
+

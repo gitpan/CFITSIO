@@ -1,5 +1,5 @@
 package CFITSIO;
-$VERSION = '0.90';
+$VERSION = '0.92';
 
 use strict;
 use Carp;
@@ -16,6 +16,7 @@ my @__shortnames = qw(
 	ffasfm
 	ffbnfm
 	ffcrow
+        ffgcdw
 	ffgtch
 	ffcmsg
 	ffclos
@@ -147,6 +148,8 @@ my @__shortnames = qw(
 	ffgcrd
 	ffgcv
 	ffgcx
+	ffgcxui
+	ffgcxuk
 	ffgcvs
 	ffgcvl
 	ffgcvb
@@ -282,6 +285,7 @@ my @__shortnames = qw(
 	ffukym
 	ffukfm
 	ffupch
+	ffurlt
 	ffvcks
 	ffgtvf
 	ffxypx
@@ -453,6 +457,7 @@ my @__longnames = qw(
 	fits_get_acolparms
 	fits_get_bcolparms
 	fits_get_chksum
+	fits_get_col_display_width
 	fits_get_colnum
 	fits_get_colname
 	fits_get_coltype
@@ -547,6 +552,8 @@ my @__longnames = qw(
 	fits_read_card
 	fits_read_col
 	fits_read_col_bit
+	fits_read_col_bit_usht
+	fits_read_col_bit_uint
 	fits_read_col_str
 	fits_read_col_log
 	fits_read_col_byt
@@ -682,6 +689,7 @@ my @__longnames = qw(
 	fits_update_key_dblcmp
 	fits_update_key_fixdblcmp
 	fits_uppercase
+	fits_url_type
 	fits_verify_chksum
 	fits_verify_group
 	fits_world_to_pix
@@ -1064,16 +1072,15 @@ sub fits_read_header {
   # Read the argument
   my $file = shift;
 
-  # Check to see whether we have a reference (eg a fitsfilePtr)
-  # or a simple string. Maybe should do an explicit check for
-  # a fitsfilePtr object rather than simply a reference
+  my $obj_passed = 0; # were we passed a fitsfilePtr?
 
-  if (ref($file)) {
+  $status = 0;
+  if (UNIVERSAL::isa($file,'fitsfilePtr')) {
     $fitsfile = $file;
-    $status = 0;  # assume good status if we have a reference
+    $obj_passed = 1;
   } else {
     # Open the file.
-    fits_open_file($fitsfile, $file, READONLY(), $status) 
+    fits_open_file($fitsfile, $file, READONLY(), $status);
   }
 
   # Now we have an open file -- check that status is good before
@@ -1097,8 +1104,8 @@ sub fits_read_header {
 
     }
 
-    # Close the file
-    $fitsfile->close_file($status);
+    # Close the file if we opened it
+    $fitsfile->close_file($status) unless $obj_passed;
   }
 
   # Report an error - may not always want to write to STDERR...
@@ -1151,7 +1158,7 @@ information on CFITSIO, see
 http://heasarc.gsfc.nasa.gov/fitsio.
 
 This module attempts to provide a wrapper for nearly every CFITSIO routine,
-while retaining as much CFITSIO behaviour as possible. As such, one should
+while retaining as much CFITSIO behavior as possible. As such, one should
 be aware that it is still somewhat low-level, in the sense that handing an
 array which is not the correct size to a routine like C<fits_write_img()>
 may cause SEGVs.
@@ -1177,16 +1184,16 @@ C<create_template()>:
     $fptr->read_key_str('NAXIS1',$naxis1,undef,$status);
 
 Note that the object-oriented forms of function names are only available for
-those CFITSIO routines which demand a C<fitsfile*> datatype as the first
+those CFITSIO routines which demand a C<fitsfile*> data-type as the first
 argument.
 
-=head1 NAMESPACE
+=head1 NAME SPACE
 
 All CFITSIO routines, with the exception of C<fits_iterate_data()> and
 C<fits_open_memfile()>, are available in both long and short name
 forms (e.g., C<fits_read_key> E<lt>=E<gt> C<ffgky>), as well as all
 constants defined in the F<fitsio.h> header file. This raises the
-possibility of your namespace being invaded by nearly 1000 function
+possibility of your name space being invaded by nearly 1000 function
 and constant names.
 
 To deal with this situation, F<CFITSIO.pm> makes use of the Exporter
@@ -1225,9 +1232,9 @@ in that place is desired - can instead be given an C<undef>. In other words,
 the following C and Perl statements which read a keyword but ignore the
 comment would be roughly equivalent:
 
-    fits_read_col_int(fptr,key,&value,NULL,&status);
+    fits_read_key_lng(fptr,key,&value,NULL,&status);
 
-    fits_read_col_int($fptr,$key,$value,undef,$status);
+    fits_read_key_lng($fptr,$key,$value,undef,$status);
 
 =head2 Output Variables
 
@@ -1248,7 +1255,7 @@ produce output identical to F<testprog.c> which comes with the CFITSIO
 library. Additionally, the
 versions named F<testprog_longnames.pl>, F<testprog_OO.pl>  and
 F<testprog_pdl.pl> test the long-name and object-oriented APIs,
-and machine-native upacking with PDL.
+and machine-native unpacking with PDL.
 
 There is also an F<examples/> directory with scripts which do
 the following:
@@ -1294,7 +1301,7 @@ for which this is done are C<fits_read_atblhdr>, C<fits_read_btblhdr>,
 C<fits_read_imghdr>, C<fits_decode_tdim>, C<fits_read_tdim>
 and C<fits_test_expr>.
 
-=item Ouput arrays remain as undisturbed as possible
+=item Output arrays remain as undisturbed as possible
 
 For routines like C<fits_read_col()>, CFITSIO unpacks the output into
 a Perl array reference (unless C<PerlyUnpacking(0)> has been called, of
@@ -1356,7 +1363,7 @@ FIXME
 
 =head1 AUTHOR
 
-Pete Ratzlaff <pratzlaff@cfa.harvard.edu>, with a great deal of code lifted
+Pete Ratzlaff <pratzlaff@cfa.harvard.edu>, with a great deal of code recycled
 from Karl Glazebrook's PGPLOT module.
 
 Contributors include:

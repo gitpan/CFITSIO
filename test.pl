@@ -34,7 +34,7 @@ END {
 	summarize_tests();
 	print <<EOP;
 
-This is alpha software, and the test suite is not yet complete.
+This is beta software, and the test suite is not yet complete.
 You may find the scripts in ./testprog and ./examples of interest,
 however.
 

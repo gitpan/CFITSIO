@@ -10,6 +10,7 @@ use blib;
 
 use CFITSIO qw( READONLY TSTRING TLONG );
 use PGPLOT;
+use Carp;
 
 #
 # open FITS file
@@ -51,16 +52,12 @@ pgend();
 exit;
 
 sub check_status {
-	my $status = shift;
+    my $status = shift;
+    if ($status) {
 	my $errtxt;
-	if ($status) {
-		CFITSIO::fits_get_errstatus($status,$errtxt);
-		print STDERR <<EOP;
-$0 - CFITSIO error detected (see below), aborting
+      CFITSIO::fits_get_errstatus($status,$errtxt);
+	croak("$0: CFITSIO error detected, aborting...$errtxt");
+    }
 
-   $errtxt
-
-EOP
-		exit 1;
-	}
+    return 1;
 }
